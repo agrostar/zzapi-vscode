@@ -9,11 +9,11 @@ import { runIndividualRequest, runAllRequests } from "./runRequests";
  * Used to register the command runRequest
  */
 export async function registerRunRequest(name: string) {
-    const activeEditor = window.activeTextEditor;
-    if (activeEditor) {
-        const text = activeEditor.document.getText();
-        await runIndividualRequest(text, name);
-    }
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor) {
+    const text = activeEditor.document.getText();
+    await runIndividualRequest(text, name);
+  }
 }
 
 /**
@@ -22,9 +22,9 @@ export async function registerRunRequest(name: string) {
  * Used to register the command runAllRequests.
  */
 export async function registerRunAllRequests() {
-    const activeEditor = window.activeTextEditor;
-    if (activeEditor) {
-        const text = activeEditor.document.getText();
-        await runAllRequests(text);
-    }
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor) {
+    const text = activeEditor.document.getText();
+    await runAllRequests(text);
+  }
 }

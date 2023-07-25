@@ -1,21 +1,18 @@
-import {
-    replaceVariablesInObject,
-    replaceVariablesInArray,
-} from "./variableReplacement";
+import { replaceVariablesInObject, replaceVariablesInArray } from "./variableReplacement";
 
 export function setLowerCaseHeaderKeys(headers: any): any {
-    if (headers === undefined) {
-        return undefined;
-    }
+  if (headers === undefined) {
+    return undefined;
+  }
 
-    let newObj: { [key: string]: any } = {};
-    for (const key in headers) {
-        if (headers.hasOwnProperty(key)) {
-            newObj[key.toLocaleLowerCase()] = headers[key];
-        }
+  let newObj: { [key: string]: any } = {};
+  for (const key in headers) {
+    if (headers.hasOwnProperty(key)) {
+      newObj[key.toLocaleLowerCase()] = headers[key];
     }
+  }
 
-    return newObj;
+  return newObj;
 }
 
 /**
@@ -28,11 +25,11 @@ export function setLowerCaseHeaderKeys(headers: any): any {
  *  If it is an object, we pass the stringified version.
  */
 export function getBody(body: any) {
-    if (body === undefined || !(typeof body === "object")) {
-        return body;
-    }
+  if (body === undefined || !(typeof body === "object")) {
+    return body;
+  }
 
-    return JSON.stringify(body);
+  return JSON.stringify(body);
 }
 
 /**
@@ -49,13 +46,13 @@ export function getBody(body: any) {
  *  simply return undefined, as before.
  */
 export function getHeadersAsJSON(objectSet: any) {
-    //If both common and request has headers then mergeData itself will make it JSON,
-    // so we can immediately return it, else we handle it ourselves
-    if (objectSet === undefined || !Array.isArray(objectSet)) {
-        return objectSet;
-    }
+  //If both common and request has headers then mergeData itself will make it JSON,
+  // so we can immediately return it, else we handle it ourselves
+  if (objectSet === undefined || !Array.isArray(objectSet)) {
+    return objectSet;
+  }
 
-    return getObjectSetAsJSON(objectSet);
+  return getObjectSetAsJSON(objectSet);
 }
 
 /**
@@ -63,19 +60,19 @@ export function getHeadersAsJSON(objectSet: any) {
  * @returns a JSON object of type {"name": "value"} for each element in the array
  */
 function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
-    let finalObject: { [key: string]: any } = {};
+  let finalObject: { [key: string]: any } = {};
 
-    const numElements = objectSet.length;
-    for (let i = 0; i < numElements; i++) {
-        const currObj: { name: string; value: any } = objectSet[i];
+  const numElements = objectSet.length;
+  for (let i = 0; i < numElements; i++) {
+    const currObj: { name: string; value: any } = objectSet[i];
 
-        const key = currObj.name;
-        const value = currObj.value;
+    const key = currObj.name;
+    const value = currObj.value;
 
-        finalObject[key] = value;
-    }
+    finalObject[key] = value;
+  }
 
-    return finalObject;
+  return finalObject;
 }
 
 /**
@@ -84,16 +81,10 @@ function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
  *
  * @returns the merged data except the parameters and the tests
  */
-export function getMergedDataExceptParamsAndTests(
-    commonData: any,
-    requestData: any
-): any {
-    delete commonData.params,
-        requestData.params,
-        commonData.tests,
-        requestData.tests;
+export function getMergedDataExceptParamsAndTests(commonData: any, requestData: any): any {
+  delete commonData.params, requestData.params, commonData.tests, requestData.tests;
 
-    return replaceVariablesInObject(getMergedData(commonData, requestData));
+  return replaceVariablesInObject(getMergedData(commonData, requestData));
 }
 
 /**
@@ -106,87 +97,81 @@ export function getMergedDataExceptParamsAndTests(
  * @returns the merged data, with requestData being given precedence.
  */
 export function getMergedData(commonData: any, requestData: any) {
-    let mergedData = Object.assign({}, commonData, requestData);
+  let mergedData = Object.assign({}, commonData, requestData);
 
-    for (const key in requestData) {
-        if (requestData.hasOwnProperty(key)) {
-            if (
-                commonData.hasOwnProperty(key) &&
-                Array.isArray(requestData[key])
-            ) {
-                let finalKeyData: { [key: string]: any } = {};
+  for (const key in requestData) {
+    if (requestData.hasOwnProperty(key)) {
+      if (commonData.hasOwnProperty(key) && Array.isArray(requestData[key])) {
+        let finalKeyData: { [key: string]: any } = {};
 
-                let currProp: any;
-                let numElements: number;
+        let currProp: any;
+        let numElements: number;
 
-                //idea: set value for each key for commonData, and then for requestData,
-                //  thus, if there is a common key, then the requestData value will overwrite
-                if (Array.isArray(commonData[key])) {
-                    currProp = commonData[key];
-                    numElements = currProp.length;
+        //idea: set value for each key for commonData, and then for requestData,
+        //  thus, if there is a common key, then the requestData value will overwrite
+        if (Array.isArray(commonData[key])) {
+          currProp = commonData[key];
+          numElements = currProp.length;
 
-                    for (let i = 0; i < numElements; i++) {
-                        const key = currProp[i].name;
-                        const value = currProp[i].value;
-                        finalKeyData[key] = value;
-                    }
-                }
-
-                currProp = requestData[key];
-                numElements = currProp.length;
-                for (let i = 0; i < numElements; i++) {
-                    const key = currProp[i].name;
-                    const value = currProp[i].value;
-                    finalKeyData[key] = value;
-                }
-
-                mergedData[key] = finalKeyData;
-            }
+          for (let i = 0; i < numElements; i++) {
+            const key = currProp[i].name;
+            const value = currProp[i].value;
+            finalKeyData[key] = value;
+          }
         }
-    }
 
-    return mergedData;
+        currProp = requestData[key];
+        numElements = currProp.length;
+        for (let i = 0; i < numElements; i++) {
+          const key = currProp[i].name;
+          const value = currProp[i].value;
+          finalKeyData[key] = value;
+        }
+
+        mergedData[key] = finalKeyData;
+      }
+    }
+  }
+
+  return mergedData;
 }
 
 //reason for distinction from getMergedData is because of non-array specification
 // of headers as well as non-usage of name:, value: words.
 export function getMergedTests(commonTests: any, requestTests: any) {
-    let mergedData = Object.assign({}, commonTests, requestTests);
+  let mergedData = Object.assign({}, commonTests, requestTests);
 
-    for (const test in requestTests) {
-        if (requestTests.hasOwnProperty(test)) {
-            if (
-                commonTests.hasOwnProperty(test) &&
-                typeof requestTests[test] === "object"
-            ) {
-                let finalKeyData: { [key: string]: any } = {};
+  for (const test in requestTests) {
+    if (requestTests.hasOwnProperty(test)) {
+      if (commonTests.hasOwnProperty(test) && typeof requestTests[test] === "object") {
+        let finalKeyData: { [key: string]: any } = {};
 
-                //idea: set value for each key for commonTests, and then for requestTests,
-                //  thus, if there is a common key, then the requestTests value will overwrite
-                if (typeof commonTests[test] === "object") {
-                    for (const cTest in commonTests[test]) {
-                        if (commonTests[test].hasOwnProperty(cTest)) {
-                            const key = cTest;
-                            const value = commonTests[test][cTest];
-                            finalKeyData[key] = value;
-                        }
-                    }
-                }
-
-                for (const rTest in requestTests[test]) {
-                    if (requestTests[test].hasOwnProperty(rTest)) {
-                        const key = rTest;
-                        const value = requestTests[test][rTest];
-                        finalKeyData[key] = value;
-                    }
-                }
-
-                mergedData[test] = finalKeyData;
+        //idea: set value for each key for commonTests, and then for requestTests,
+        //  thus, if there is a common key, then the requestTests value will overwrite
+        if (typeof commonTests[test] === "object") {
+          for (const cTest in commonTests[test]) {
+            if (commonTests[test].hasOwnProperty(cTest)) {
+              const key = cTest;
+              const value = commonTests[test][cTest];
+              finalKeyData[key] = value;
             }
+          }
         }
-    }
 
-    return mergedData;
+        for (const rTest in requestTests[test]) {
+          if (requestTests[test].hasOwnProperty(rTest)) {
+            const key = rTest;
+            const value = requestTests[test][rTest];
+            finalKeyData[key] = value;
+          }
+        }
+
+        mergedData[test] = finalKeyData;
+      }
+    }
+  }
+
+  return mergedData;
 }
 
 /**
@@ -195,41 +180,38 @@ export function getMergedTests(commonTests: any, requestTests: any) {
  *
  * @returns the string component representing the params to be appended to the URL
  */
-export function getParamsForUrl(
-    commonParams: Array<any>,
-    requestParams: Array<any>
-) {
-    let params: Array<any>;
+export function getParamsForUrl(commonParams: Array<any>, requestParams: Array<any>) {
+  let params: Array<any>;
 
-    if (commonParams === undefined || !Array.isArray(commonParams)) {
-        params = requestParams;
-    } else if (requestParams === undefined || !Array.isArray(requestParams)) {
-        params = commonParams;
+  if (commonParams === undefined || !Array.isArray(commonParams)) {
+    params = requestParams;
+  } else if (requestParams === undefined || !Array.isArray(requestParams)) {
+    params = commonParams;
+  } else {
+    params = commonParams.concat(requestParams);
+  }
+
+  if (params === undefined || !Array.isArray(params)) {
+    return "";
+  }
+
+  params = replaceVariablesInArray(params);
+  let paramString = "";
+  let paramArray: Array<string> = [];
+
+  const numParams = params.length;
+  for (let i = 0; i < numParams; i++) {
+    const param = params[i];
+
+    const key = param.name as string;
+    let value = param.value as string;
+    if (param.encode !== undefined && param.encode === false) {
+      paramArray.push(`${key}=${value}`);
     } else {
-        params = commonParams.concat(requestParams);
+      paramArray.push(`${key}=${encodeURIComponent(value)}`);
     }
+  }
 
-    if (params === undefined || !Array.isArray(params)) {
-        return "";
-    }
-
-    params = replaceVariablesInArray(params);
-    let paramString = "";
-    let paramArray: Array<string> = [];
-
-    const numParams = params.length;
-    for (let i = 0; i < numParams; i++) {
-        const param = params[i];
-
-        const key = param.name as string;
-        let value = param.value as string;
-        if (param.encode !== undefined && param.encode === false) {
-            paramArray.push(`${key}=${value}`);
-        } else {
-            paramArray.push(`${key}=${encodeURIComponent(value)}`);
-        }
-    }
-
-    paramString = paramArray.join("&");
-    return `?${paramString}`;
+  paramString = paramArray.join("&");
+  return `?${paramString}`;
 }

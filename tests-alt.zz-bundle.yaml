@@ -45,17 +45,21 @@ requests:
         "foo2": 42
       }
     tests:
-      json: { $.data.foo1: bar1,  $.data.foo2: { $type: number, $gt: 41, $lt: 43 } }
-      headers: { X-Custom-Header: Custom Value }
+      json: 
+        $.data.foo1: bar1,
+        $.data.foo2: { $type: number, $gt: 41, $lt: 43 }
+        $.headers.X-Custom-Header: Custom Value
 
   post-header-override:
     url: /post
     method: POST
     headers: 
       - { name: Content-Type, value: text/plain }
-    body: { foo: bar }
+    body: |-
+      { "foo": "bar" }
     tests:
-      json: { $.data: "{ foo bar }" }
+      # if server didn't parse this as a JSON, then, our content-type override is successful
+      json: { $.data: '{ "foo": "bar" }' }
 
   status-404:
     url: /notfound
@@ -228,10 +232,11 @@ requests:
         $.data.numbers: { $size: two } # invalid assertion value, expecting a number
         $.data.exists: { $exists: 4 } # invalid assertion value, expecitng a boolean
         $.data.numbers[?(.@)]: 4 # invalid path
-        
-  extra-test:
-    method: GOT
+
+  # This returns headers in capital case. Ensure we match it.
+  header-case-test:
+    method: GET
     url: https://test-farmerapp.agrostar.in/userservice/ping/
     tests: 
       headers:
-        Content-type: application/json
+        content-type: application/json

@@ -9,13 +9,9 @@ import { getIndividualResponse, getAllResponses } from "./executeRequest";
  *  if required.
  */
 export async function runIndividualRequest(text: string, name: string) {
-    const parsedData = YAML.parse(text);
+  const parsedData = YAML.parse(text);
 
-    await getIndividualResponse(
-        parsedData.common,
-        parsedData.requests[name],
-        name
-    );
+  await getIndividualResponse(parsedData.common, parsedData.requests[name], name);
 }
 
 /**
@@ -25,8 +21,8 @@ export async function runIndividualRequest(text: string, name: string) {
  *  if any.
  */
 export async function runAllRequests(text: string) {
-    const parsedData = YAML.parse(text);
+  const parsedData = YAML.parse(text);
 
-    let allReq = parsedData.requests;
-    await getAllResponses(parsedData.common, allReq);
+  let allReq = parsedData.requests;
+  await getAllResponses(parsedData.common, allReq);
 }

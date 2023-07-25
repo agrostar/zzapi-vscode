@@ -1,15 +1,15 @@
 import {
-    ExtensionContext,
-    languages,
-    commands,
-    window,
-    StatusBarAlignment,
-    StatusBarItem,
-    workspace,
-    Disposable,
-    ThemeColor,
-    TextEditor,
-    OutputChannel,
+  ExtensionContext,
+  languages,
+  commands,
+  window,
+  StatusBarAlignment,
+  StatusBarItem,
+  workspace,
+  Disposable,
+  ThemeColor,
+  TextEditor,
+  OutputChannel,
 } from "vscode";
 
 import { CodeLensProvider } from "./CodeLensProviders";
@@ -33,74 +33,66 @@ let allEnvironments: any = {};
  * @param context the vscode extension context where our disposables are subscribed
  */
 export function activate(context: ExtensionContext) {
-    const activeEditor = window.activeTextEditor;
-    if (
-        activeEditor &&
-        activeEditor.document.uri.fsPath.endsWith(requiredFileEnd)
-    ) {
-        setVarFileAndDirPath(activeEditor);
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor && activeEditor.document.uri.fsPath.endsWith(requiredFileEnd)) {
+    setVarFileAndDirPath(activeEditor);
+  }
+
+  const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
+  initialiseStatusBar(statusBar, context);
+
+  createEnvironmentSelector(statusBar, context);
+
+  /**
+   * Creates an environment listener to re-initialise the
+   * environments if the @file at @var varFilePath is altered
+   */
+  const envChangeListener = workspace.onDidChangeTextDocument((event) => {
+    if (event.document.uri.path === varFilePath) {
+      initialiseEnvironments(statusBar);
     }
+  });
+  context.subscriptions.push(envChangeListener);
+  disposables.push(envChangeListener);
 
-    const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
-    initialiseStatusBar(statusBar, context);
+  initialiseEnvironments(statusBar);
 
-    createEnvironmentSelector(statusBar, context);
+  /**
+   * Creates an environment listener to detect a change in the active text editor
+   * If we move to a new directory than before, then the environments must be reloaded
+   *  and the @var dirPath and @var varFilePath must be reset.
+   */
+  const editorChangeListener = window.onDidChangeActiveTextEditor((activeEditor) => {
+    if (activeEditor && activeEditor.document.uri.fsPath.endsWith(requiredFileEnd)) {
+      //if we are referring to a new bundle, then we have to reload environments
+      if (getDirWithBackslash(activeEditor) !== dirPath) {
+        setVarFileAndDirPath(activeEditor);
+        initialiseEnvironments(statusBar);
+      }
+    }
+  });
+  context.subscriptions.push(editorChangeListener);
+  disposables.push(editorChangeListener);
 
-    /**
-     * Creates an environment listener to re-initialise the
-     * environments if the @file at @var varFilePath is altered
-     */
-    const envChangeListener = workspace.onDidChangeTextDocument((event) => {
-        if (event.document.uri.path === varFilePath) {
-            initialiseEnvironments(statusBar);
-        }
-    });
-    context.subscriptions.push(envChangeListener);
-    disposables.push(envChangeListener);
+  /**
+   * Registers the codelens provider as well as the commands that are executed
+   *  if they are clicked.
+   */
+  languages.registerCodeLensProvider("*", new CodeLensProvider());
+  commands.registerCommand("extension.runRequest", async (name) => {
+    await registerRunRequest(name);
+  });
+  commands.registerCommand("extension.runAllRequests", async () => {
+    await registerRunAllRequests();
+  });
 
-    initialiseEnvironments(statusBar);
-
-    /**
-     * Creates an environment listener to detect a change in the active text editor
-     * If we move to a new directory than before, then the environments must be reloaded
-     *  and the @var dirPath and @var varFilePath must be reset.
-     */
-    const editorChangeListener = window.onDidChangeActiveTextEditor(
-        (activeEditor) => {
-            if (
-                activeEditor &&
-                activeEditor.document.uri.fsPath.endsWith(requiredFileEnd)
-            ) {
-                //if we are referring to a new bundle, then we have to reload environments
-                if (getDirWithBackslash(activeEditor) !== dirPath) {
-                    setVarFileAndDirPath(activeEditor);
-                    initialiseEnvironments(statusBar);
-                }
-            }
-        }
-    );
-    context.subscriptions.push(editorChangeListener);
-    disposables.push(editorChangeListener);
-
-    /**
-     * Registers the codelens provider as well as the commands that are executed
-     *  if they are clicked.
-     */
-    languages.registerCodeLensProvider("*", new CodeLensProvider());
-    commands.registerCommand("extension.runRequest", async (name) => {
-        await registerRunRequest(name);
-    });
-    commands.registerCommand("extension.runAllRequests", async () => {
-        await registerRunAllRequests();
-    });
-
-    outputChannel = window.createOutputChannel("zzAPI");
+  outputChannel = window.createOutputChannel("zzAPI");
 }
 
 let outputChannel: OutputChannel;
 
 export function getOutputChannel() {
-    return outputChannel;
+  return outputChannel;
 }
 
 /**
@@ -108,7 +100,7 @@ export function getOutputChannel() {
  *  including a terminating back-slash
  */
 export function getDirPath() {
-    return dirPath;
+  return dirPath;
 }
 
 /**
@@ -117,7 +109,7 @@ export function getDirPath() {
  *  in '@var varFile'.
  */
 export function getEnvDetails() {
-    return [currentEnvironment, allEnvironments];
+  return [currentEnvironment, allEnvironments];
 }
 
 /**
@@ -128,8 +120,8 @@ export function getEnvDetails() {
  *  of the file used to read environments from.
  */
 function setVarFileAndDirPath(activeEditor: TextEditor) {
-    dirPath = getDirWithBackslash(activeEditor);
-    varFilePath = dirPath + varFile;
+  dirPath = getDirWithBackslash(activeEditor);
+  varFilePath = dirPath + varFile;
 }
 
 /**
@@ -139,9 +131,9 @@ function setVarFileAndDirPath(activeEditor: TextEditor) {
  *  including a terminating back-slash
  */
 function getDirWithBackslash(activeEditor: TextEditor) {
-    const activeEditorPath = activeEditor.document.uri.path;
-    const lastIndex = activeEditorPath.lastIndexOf("/");
-    return activeEditorPath.substring(0, lastIndex + 1);
+  const activeEditorPath = activeEditor.document.uri.path;
+  const lastIndex = activeEditorPath.lastIndexOf("/");
+  return activeEditorPath.substring(0, lastIndex + 1);
 }
 
 /**
@@ -152,15 +144,12 @@ function getDirWithBackslash(activeEditor: TextEditor) {
  * Initialises the status bar by registering the command, setting
  *  default values and pushing it to our context.
  */
-function initialiseStatusBar(
-    statusBar: StatusBarItem,
-    context: ExtensionContext
-) {
-    setDefaultStatusBarValues(statusBar);
-    statusBar.command = "extension.clickEnvSelector";
-    statusBar.show();
-    context.subscriptions.push(statusBar);
-    disposables.push(statusBar);
+function initialiseStatusBar(statusBar: StatusBarItem, context: ExtensionContext) {
+  setDefaultStatusBarValues(statusBar);
+  statusBar.command = "extension.clickEnvSelector";
+  statusBar.show();
+  context.subscriptions.push(statusBar);
+  disposables.push(statusBar);
 }
 
 /**
@@ -170,11 +159,9 @@ function initialiseStatusBar(
  * Sets default values for the environment status bar
  */
 function setDefaultStatusBarValues(statusBar: StatusBarItem) {
-    currentEnvironment = "";
-    statusBar.text = "zzAPI: Set Environment";
-    statusBar.backgroundColor = new ThemeColor(
-        "statusBarItem.warningBackground"
-    );
+  currentEnvironment = "";
+  statusBar.text = "zzAPI: Set Environment";
+  statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
 }
 
 /**
@@ -186,35 +173,29 @@ function setDefaultStatusBarValues(statusBar: StatusBarItem) {
  *  call @function showEnvironmentOptions to show the options by
  *  reading from '@var varFilePath'
  */
-function createEnvironmentSelector(
-    statusBar: StatusBarItem,
-    context: ExtensionContext
-) {
-    const statusClick = commands.registerCommand(
-        "extension.clickEnvSelector",
-        () => {
-            showEnvironmentOptions();
-        }
-    );
-    context.subscriptions.push(statusClick);
+function createEnvironmentSelector(statusBar: StatusBarItem, context: ExtensionContext) {
+  const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
+    showEnvironmentOptions();
+  });
+  context.subscriptions.push(statusClick);
 
-    const showEnvironmentOptions = () => {
-        window
-            .showQuickPick(environmentsToDisplay, {
-                placeHolder: "Select An Environment",
-                matchOnDetail: true,
-                matchOnDescription: true,
-            })
-            .then((selectedEnvironment) => {
-                if (selectedEnvironment) {
-                    if (selectedEnvironment === defaultEnvironment) {
-                        setDefaultStatusBarValues(statusBar);
-                    } else {
-                        setEnvironment(statusBar, selectedEnvironment.label);
-                    }
-                }
-            });
-    };
+  const showEnvironmentOptions = () => {
+    window
+      .showQuickPick(environmentsToDisplay, {
+        placeHolder: "Select An Environment",
+        matchOnDetail: true,
+        matchOnDescription: true,
+      })
+      .then((selectedEnvironment) => {
+        if (selectedEnvironment) {
+          if (selectedEnvironment === defaultEnvironment) {
+            setDefaultStatusBarValues(statusBar);
+          } else {
+            setEnvironment(statusBar, selectedEnvironment.label);
+          }
+        }
+      });
+  };
 }
 
 /**
@@ -223,14 +204,14 @@ function createEnvironmentSelector(
  * @param environment The selected environment
  */
 function setEnvironment(statusBar: StatusBarItem, environment: string) {
-    currentEnvironment = environment;
-    statusBar.text = `Current Environment: ${currentEnvironment}`;
-    statusBar.backgroundColor = undefined;
+  currentEnvironment = environment;
+  statusBar.text = `Current Environment: ${currentEnvironment}`;
+  statusBar.backgroundColor = undefined;
 }
 
 const defaultEnvironment = {
-    label: "None of the Above",
-    description: "Do not set any environment",
+  label: "None of the Above",
+  description: "Do not set any environment",
 };
 let environmentsToDisplay: Array<{ label: string; description: string }> = [];
 
@@ -239,37 +220,37 @@ let environmentsToDisplay: Array<{ label: string; description: string }> = [];
  *  to select from.
  */
 function initialiseEnvironments(statusBar: StatusBarItem) {
-    environmentsToDisplay = [];
-    allEnvironments = {};
-    setDefaultStatusBarValues(statusBar);
+  environmentsToDisplay = [];
+  allEnvironments = {};
+  setDefaultStatusBarValues(statusBar);
 
-    if (fs.existsSync(varFilePath)) {
-        const data = fs.readFileSync(varFilePath, "utf-8");
-        const parsedData = YAML.parse(data);
+  if (fs.existsSync(varFilePath)) {
+    const data = fs.readFileSync(varFilePath, "utf-8");
+    const parsedData = YAML.parse(data);
 
-        if (parsedData !== undefined) {
-            const allEnvs = parsedData.varsets;
+    if (parsedData !== undefined) {
+      const allEnvs = parsedData.varsets;
 
-            if (allEnvs !== undefined && Array.isArray(allEnvs)) {
-                const numEnvs = allEnvs.length;
+      if (allEnvs !== undefined && Array.isArray(allEnvs)) {
+        const numEnvs = allEnvs.length;
 
-                for (let i = 0; i < numEnvs; i++) {
-                    const env = allEnvs[i];
+        for (let i = 0; i < numEnvs; i++) {
+          const env = allEnvs[i];
 
-                    const name: string = env.name;
-                    const vars: Array<string> = env.vars;
-                    environmentsToDisplay.push({
-                        label: `${name}`,
-                        description: `Set Environment: ${name} -> ${vars}`,
-                    });
+          const name: string = env.name;
+          const vars: Array<string> = env.vars;
+          environmentsToDisplay.push({
+            label: `${name}`,
+            description: `Set Environment: ${name} -> ${vars}`,
+          });
 
-                    allEnvironments[name] = vars;
-                }
-            }
+          allEnvironments[name] = vars;
         }
+      }
     }
+  }
 
-    environmentsToDisplay.push(defaultEnvironment);
+  environmentsToDisplay.push(defaultEnvironment);
 }
 
 /**
@@ -277,8 +258,8 @@ function initialiseEnvironments(statusBar: StatusBarItem) {
  *  deactivation
  */
 export function deactivate() {
-    if (disposables) {
-        disposables.forEach((item) => item.dispose());
-    }
-    disposables = [];
+  if (disposables) {
+    disposables.forEach((item) => item.dispose());
+  }
+  disposables = [];
 }

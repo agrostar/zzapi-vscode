@@ -8,30 +8,30 @@ let variables: any = {};
  * Stores the variables loaded from the files in the selected environment, if any
  */
 export function loadVariables() {
-    variables = {};
+  variables = {};
 
-    const dirPath = getDirPath();
-    const [currentEnvironment, allEnvironments] = getEnvDetails();
+  const dirPath = getDirPath();
+  const [currentEnvironment, allEnvironments] = getEnvDetails();
 
-    const filesToLoad: Array<string> = allEnvironments[currentEnvironment];
+  const filesToLoad: Array<string> = allEnvironments[currentEnvironment];
 
-    if (filesToLoad !== undefined) {
-        const numFiles = filesToLoad.length;
-        for (let i = 0; i < numFiles; i++) {
-            let filePath = dirPath + filesToLoad[i];
-            if (fs.existsSync(filePath)) {
-                let fileData = fs.readFileSync(filePath, "utf-8");
-                let parsedVariables = YAML.parse(fileData);
+  if (filesToLoad !== undefined) {
+    const numFiles = filesToLoad.length;
+    for (let i = 0; i < numFiles; i++) {
+      let filePath = dirPath + filesToLoad[i];
+      if (fs.existsSync(filePath)) {
+        let fileData = fs.readFileSync(filePath, "utf-8");
+        let parsedVariables = YAML.parse(fileData);
 
-                for (const key in parsedVariables) {
-                    if (parsedVariables.hasOwnProperty(key)) {
-                        variables[key] = parsedVariables[key];
-                        replaceVariablesInSelf();
-                    }
-                }
-            }
+        for (const key in parsedVariables) {
+          if (parsedVariables.hasOwnProperty(key)) {
+            variables[key] = parsedVariables[key];
+            replaceVariablesInSelf();
+          }
         }
+      }
     }
+  }
 }
 
 const varRegexWithBraces = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
@@ -42,13 +42,11 @@ const varRegexWithoutBraces = /(?<!\\)\$(?:(?![0-9])[_a-zA-Z]\w*(?=\W|$))/g;
  *
  * @returns the object after replacing the variables wherever required
  */
-export function replaceVariablesInObject(
-    objectData: object
-): object | undefined {
-    if (objectData === undefined) {
-        return undefined;
-    }
-    return JSON.parse(replaceVariables(JSON.stringify(objectData)));
+export function replaceVariablesInObject(objectData: object): object | undefined {
+  if (objectData === undefined) {
+    return undefined;
+  }
+  return JSON.parse(replaceVariables(JSON.stringify(objectData)));
 }
 
 /**
@@ -57,7 +55,7 @@ export function replaceVariablesInObject(
  *  in another.
  */
 function replaceVariablesInSelf() {
-    variables = JSON.parse(replaceVariables(JSON.stringify(variables)));
+  variables = JSON.parse(replaceVariables(JSON.stringify(variables)));
 }
 
 /**
@@ -66,12 +64,12 @@ function replaceVariablesInSelf() {
  * @returns The array after replacing the variables wherever required
  */
 export function replaceVariablesInArray(arr: Array<object>): Array<object> {
-    let newArr: Array<object> = [];
-    arr.forEach((element) => {
-        newArr.push(JSON.parse(replaceVariables(JSON.stringify(element))));
-    });
+  let newArr: Array<object> = [];
+  arr.forEach((element) => {
+    newArr.push(JSON.parse(replaceVariables(JSON.stringify(element))));
+  });
 
-    return newArr;
+  return newArr;
 }
 
 /**
@@ -81,31 +79,25 @@ export function replaceVariablesInArray(arr: Array<object>): Array<object> {
  *  their respective values from @var variables
  */
 function replaceVariables(text: string): string {
-    const outputTextWithBraces = text.replace(
-        varRegexWithBraces,
-        (match, variable) => {
-            const varVal = variables[variable];
-            if (varVal !== undefined) {
-                return varVal;
-            }
-            return match;
-        }
-    );
+  const outputTextWithBraces = text.replace(varRegexWithBraces, (match, variable) => {
+    const varVal = variables[variable];
+    if (varVal !== undefined) {
+      return varVal;
+    }
+    return match;
+  });
 
-    const outputTextWithoutBraces = outputTextWithBraces.replace(
-        varRegexWithoutBraces,
-        (match) => {
-            const variable = match.slice(1);
-            if (variable === undefined) {
-                return match;
-            }
-            const varVal = variables[variable];
-            if (varVal !== undefined) {
-                return varVal;
-            }
-            return match;
-        }
-    );
+  const outputTextWithoutBraces = outputTextWithBraces.replace(varRegexWithoutBraces, (match) => {
+    const variable = match.slice(1);
+    if (variable === undefined) {
+      return match;
+    }
+    const varVal = variables[variable];
+    if (varVal !== undefined) {
+      return varVal;
+    }
+    return match;
+  });
 
-    return outputTextWithoutBraces;
+  return outputTextWithoutBraces;
 }
