@@ -1,0 +1,3 @@
+myserver: https://prod.example.com
+username: $(myUsername)
+authToken: $(prodAuthToken)

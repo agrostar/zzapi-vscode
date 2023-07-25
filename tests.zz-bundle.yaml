@@ -1,0 +1,170 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/agrostar/zzapi/main/zz-bundle.schema.json
+
+# This bundle contains a series of test requests against various endpoints,
+# most of them being the postman echo service. We use this to both serve as
+# an example of how to create test bundles as well as testing zzapi runner itself.
+
+common:
+  baseUrl: https://postman-echo.com
+  headers:
+    - { name: Content-type, value: application/json }
+  options:
+    follow: false    # the default, so this can be omitted
+    verifySSL: false # the default, so this can be omitted
+  tests:
+    status: { $eq: 300 }
+    headers:
+      Content-type: application/json
+
+requests:
+  - name: simple-get
+    method: GET
+    url: /get
+    params:
+      - { name: foo1, value: bar1 }
+      - { name: foo2, value: bar2 }
+    tests:
+      json:
+        args.foo1: bar1
+        args.foo2: bar2
+
+  - name: post-header-merge
+    url: /post
+    method: POST
+    headers: 
+      - { name: X-Custom-Header, value: Custom Value }
+    body: |-
+      {
+        "foo1": "bar1",
+        "foo2": 42
+      }
+    tests:
+      json:
+        data.foo1: bar1
+        data.foo2: { $type: number, $gt: 41, $lt: 43 }
+      headers:
+        X-Custom-Header: Custom Value
+
+  - name: post-header-override
+    url: /post
+    method: POST
+    headers: 
+      - { name: Content-Type, value: text/plain }
+    body: { foo: bar }
+    tests:
+      json:
+        data: "{ foo bar }"
+
+  - name: status-404
+    url: /notfound
+    method: GET
+    tests:
+      status: 404
+
+  - name: status-401
+    url: /status/401
+    method: GET
+    tests:
+      status: 401
+      json:
+        status: 401
+
+  - name: encoding
+    method: GET
+    url: /get
+    params:
+      - { name: foo, value: 30% of 200 is 60 }
+    tests:
+      json:
+        url: https://postman-echo.com/get?foo=30%25%20of%20200%20is%2060
+        args.foo: 30% of 200 is 60
+
+  - name: no-encoding
+    method: GET
+    url: /get
+    params:
+      - { name: foo, value: 30%25+of+200, encode: false }
+    tests:
+      json:
+        url: https://postman-echo.com/get?foo=30%25%+of%+200
+        args: 30% of 200
+
+  # The cookies endpoint does a redirect (no clue why), let's use that.
+  - name: no-redirects
+    method: GET
+    url: /cookies/set
+    tests:
+      status: 302
+      headers:
+        Location: /cookies
+        Content-Type: { $ne: application/json }
+
+  - name: redirects
+    options:
+      follow: true
+    method: GET
+    url: /cookies/set
+    tests:
+      # code: 200 - this is inherited from common
+      json:
+        cookies: { $exists: true } # Header names are case insensitive
+
+  - name: non-json
+    method: GET
+    url: /encoding/utf8
+    tests:
+      body: { $regex: unicode demo, $options: i }
+
+  - name: response-headers
+    method: GET
+    url: /response-headers
+    params:
+      - { name: foo, value: bar }
+    tests:
+      headers:
+        foo: bar
+
+  - name: override-base-url
+    method: GET
+    url: https://postman-echo.com/get
+
+  - name: variables-in-params
+    method: GET
+    url: $(getUrl)
+    params:
+      - { name: replaced1, value: $username }
+      - { name: replaced2, value: some$myUsername }
+      - { name: replaced3, value: some$(myUsername)else }
+      - { name: verbatim1, value: $usernameelse }
+      - { name: verbatim2, value: \$(username) }
+    tests:
+      json:
+        args.replaced1: vasan.subramanian
+        args.replaced2: somevasan.subramanian
+        args.replaced3: somevasan.subramanianelse
+        args.verbatim1: { $ne: vasan.subramaniansome, $eq: $usernameelse }
+        args.verbatim2: { $ne: vasan.subramanian, $eq: \$(username) }
+
+  - name: variables-in-headers
+    method: GET
+    url: $(getUrl)
+    headers:
+      - { name: foo, value: $(fooValue) }
+    tests:
+      json:
+        headers.foo: bar
+
+  - name: variables-in-body
+    method: POST
+    url: /post
+    body: |-
+      {
+        "foo1": "$(fooValue)",
+        "foo2": $pi
+      }
+    tests:
+      json:
+        data.foo1: bar
+        data.foo2: { $type: number, $eq: 3.414 }
+
+  

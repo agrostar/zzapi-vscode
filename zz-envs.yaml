@@ -1,0 +1,7 @@
+varsets:
+  - name: test
+    vars: [ personal.zz-vars.yaml, common.zz-vars.yml, test.zz-vars.yaml ]
+  - name: staging
+    vars: [ personal.zz-vars.yaml, common.zz-vars.yml, staging.zz-vars.yaml ]
+  - name: production
+    vars: [ personal.zz-vars.yaml, common.zz-vars.yml, prod.zz-vars.yaml ]
