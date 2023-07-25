@@ -111,8 +111,7 @@ function runJSONTests(jsonTests: any, responseContent: object) {
   for (const key in jsonTests) {
     if (jsonTests.hasOwnProperty(key)) {
       let required = jsonTests[key];
-
-      let received = jp.value(responseContent, key);
+      let received = getValueForJSONTests(responseContent, key);
 
       if (typeof required !== "object") {
         required = getStringIfScalar(required);
@@ -135,6 +134,38 @@ function runJSONTests(jsonTests: any, responseContent: object) {
   }
 
   return [numFailed, numTests];
+}
+
+/**
+ * Idea: return true if we have [] and the content in between is not
+ *  an integer index
+ */
+const hasQueryIdentifier = /\[[^\]]*\D[^\]]*\]/;
+
+function hasArrayIdentifier(key: string): boolean {
+  return hasQueryIdentifier.test(key);
+}
+
+function getValueForJSONTests(responseContent: object, key: string) {
+  if (hasArrayIdentifier(key)) {
+    try {
+      return jp.query(responseContent, key);
+    } catch (err: any) {
+      if (err.description) {
+        return err.description;
+      }
+      return "Invalid Path";
+    }
+  }
+
+  try {
+    return jp.value(responseContent, key);
+  } catch (err: any) {
+    if (err.description) {
+      return err.description;
+    }
+    return "Invalid Path";
+  }
 }
 
 //if RHS is an object
@@ -161,11 +192,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
         numTests++;
       } else if (key === "$ne") {
-        if (Array.isArray(compareTo)) {
-          compareTo = compareTo.toString();
-        } else if (typeof compareTo === "object") {
-          compareTo = JSON.stringify(compareTo);
-        }
+        compareTo = getStringIfScalar(compareTo);
+        received = getStringIfScalar(received);
 
         if (received !== compareTo) {
           outputChannel.appendLine(
@@ -294,6 +322,12 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
+        numTests++;
+      } else {
+        outputChannel.appendLine(
+          `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} ${key} ${compareTo} \t Invalid Operator ${key}`,
+        );
+        numFailed++;
         numTests++;
       }
     }

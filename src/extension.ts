@@ -74,6 +74,8 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(editorChangeListener);
   disposables.push(editorChangeListener);
 
+  outputChannel = window.createOutputChannel("zzAPI");
+
   /**
    * Registers the codelens provider as well as the commands that are executed
    *  if they are clicked.
@@ -85,8 +87,6 @@ export function activate(context: ExtensionContext) {
   commands.registerCommand("extension.runAllRequests", async () => {
     await registerRunAllRequests();
   });
-
-  outputChannel = window.createOutputChannel("zzAPI");
 }
 
 let outputChannel: OutputChannel;
