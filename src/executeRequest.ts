@@ -16,14 +16,6 @@ import { loadVariables } from "./variableReplacement";
 
 import { runAllTests } from "./runTests";
 
-/**
- * @param commonData Stores data under "common" in the yaml bundle
- * @param requestData Stores the data specific to the request with name "name"
- * @param name Stores the name of the running request
- *
- * Calls @function individualRequestWithProgress to get the response, and opens
- * it in an editor if it wasn't cancelled.
- */
 export async function getIndividualResponse(commonData: any, requestData: any, name: string) {
   loadVariables();
   requestData.name = name;
@@ -41,16 +33,6 @@ export async function getIndividualResponse(commonData: any, requestData: any, n
   }
 }
 
-/**
- * @param commonData Stores the data under "common" in the yaml bundle
- * @param allRequests Stores all the data of all the requests under "requests" in
- *  the yaml bundle
- *
- * Calls @function individualRequestWithProgress for each request in @param allRequests
- *      to get the response and appends it to an object containing all responses, if it
- *      wasn't cancelled.
- * Opens these responses in an editor, if there are any.
- */
 export async function getAllResponses(commonData: any, allRequests: Array<any>) {
   let responses = [];
   let atleastOneExecuted = false;
@@ -86,16 +68,6 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
   }
 }
 
-/**
- * @param requestData Stores all the data of the the request, required to
- *  run the request, except the parameters and the tests
- * @param paramsForUrl Stores the parameter list to be appended to the URL
- *
- * @returns whether or not the request was cancelled, as well as the response data
- *
- * Calls @function constructRequest to create the request and @function executeHttpRequest
- * to actually call it. Creates a response object and returns it.
- */
 async function individualRequestWithProgress(
   requestData: any,
   paramsForUrl: string,
@@ -150,11 +122,6 @@ async function individualRequestWithProgress(
   return [cancelled, response, headers];
 }
 
-/**
- * @param headersObj the rawHeaders in the http response
- * @returns The headers in the http response in a readable format
- *  to output into the editor, if required.
- */
 export function getHeadersAsString(headersObj: Array<string>) {
   let formattedString = "\n";
   if (headersObj === undefined) {
@@ -170,13 +137,6 @@ export function getHeadersAsString(headersObj: Array<string>) {
   return `\n\t${formattedString}`;
 }
 
-/**
- * @param allData The data to given to construct the request, except the params
- * @param paramsForUrl Stores the parameter list to be appended to the URL
- *
- * @returns The constructed request using npm got, with the required options and URL
- * Calls @function getURL to construct the URL using @param allData.
- */
 function constructRequest(allData: any, paramsForUrl: string) {
   let completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
@@ -205,14 +165,6 @@ function constructRequest(allData: any, paramsForUrl: string) {
   }
 }
 
-/**
- * @param baseUrl Stores the base-url of the request, if any
- * @param url Stores the url of the request, if any
- * @param paramsForUrl Stores the parameter list to be appended to the URL
- *
- * @returns The final URL used for the request. It also implements the
- *  override base url if the url does not begin with a forward-slash.
- */
 function getURL(baseUrl: string | undefined, url: string | undefined, paramsForUrl: string) {
   let completeUrl = "";
   if (baseUrl !== undefined) {
@@ -229,11 +181,6 @@ function getURL(baseUrl: string | undefined, url: string | undefined, paramsForU
   return completeUrl + paramsForUrl;
 }
 
-/**
- * @param httpRequest Executes the stored http request
- *
- * @returns The response from executing the request
- */
 async function executeHttpRequest(httpRequest: any) {
   try {
     return await httpRequest;

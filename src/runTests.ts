@@ -7,7 +7,7 @@ const spaceBetweenTestAndStatus = "\t";
 const fail = "❌ FAILED";
 const pass = "✅ PASSED";
 
-function getStringIfScalar(data: any) {
+function getStringIfNotScalar(data: any) {
   if (data !== undefined && (Array.isArray(data) || typeof data === "object")) {
     return JSON.stringify(data);
   }
@@ -46,8 +46,8 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
             let received = headers[headerTest];
 
             if (typeof required !== "object") {
-              required = getStringIfScalar(required);
-              received = getStringIfScalar(received);
+              required = getStringIfNotScalar(required);
+              received = getStringIfNotScalar(received);
               if (received === required) {
                 outputChannel.appendLine(
                   `\t${pass} ${spaceBetweenTestAndStatus} ${headerTest} : ${required}`,
@@ -75,8 +75,8 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
         let received = responseData[test];
 
         if (typeof required !== "object") {
-          required = getStringIfScalar(required);
-          received = getStringIfScalar(received);
+          required = getStringIfNotScalar(required);
+          received = getStringIfNotScalar(received);
           if (received === required) {
             outputChannel.appendLine(`${pass} ${spaceBetweenTestAndStatus} ${test} : ${required}`);
           } else {
@@ -114,8 +114,8 @@ function runJSONTests(jsonTests: any, responseContent: object) {
       let received = getValueForJSONTests(responseContent, key);
 
       if (typeof required !== "object") {
-        required = getStringIfScalar(required);
-        received = getStringIfScalar(received);
+        required = getStringIfNotScalar(required);
+        received = getStringIfNotScalar(received);
         if (received === required) {
           outputChannel.appendLine(`\t${pass} ${spaceBetweenTestAndStatus} ${key} : ${required}`);
         } else {
@@ -154,7 +154,7 @@ function getValueForJSONTests(responseContent: object, key: string) {
       if (err.description) {
         return err.description;
       }
-      return "Invalid Path";
+      return undefined;
     }
   }
 
@@ -164,7 +164,7 @@ function getValueForJSONTests(responseContent: object, key: string) {
     if (err.description) {
       return err.description;
     }
-    return "Invalid Path";
+    return undefined;
   }
 }
 
@@ -177,8 +177,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
     if (required.hasOwnProperty(key)) {
       let compareTo = required[key];
       if (key === "$eq") {
-        compareTo = getStringIfScalar(compareTo);
-        received = getStringIfScalar(compareTo);
+        compareTo = getStringIfNotScalar(compareTo);
+        received = getStringIfNotScalar(received);
 
         if (received === compareTo) {
           outputChannel.appendLine(
@@ -192,8 +192,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
         numTests++;
       } else if (key === "$ne") {
-        compareTo = getStringIfScalar(compareTo);
-        received = getStringIfScalar(received);
+        compareTo = getStringIfNotScalar(compareTo);
+        received = getStringIfNotScalar(received);
 
         if (received !== compareTo) {
           outputChannel.appendLine(

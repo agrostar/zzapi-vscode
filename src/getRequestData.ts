@@ -15,15 +15,6 @@ export function setLowerCaseHeaderKeys(headers: any): any {
   return newObj;
 }
 
-/**
- * @param body The body in got must be in a readable format
- *  Thus, we ensure to return either string or undefined.
- * @returns If body is undefined, we can return undefined as we
- *  do not want to set a body in got options.
- *  Else, if the body is not parsed as an object, we can return it
- *      immediately as it must be a string of readable format.
- *  If it is an object, we pass the stringified version.
- */
 export function getBody(body: any) {
   if (body === undefined || !(typeof body === "object")) {
     return body;
@@ -55,10 +46,6 @@ export function getHeadersAsJSON(objectSet: any) {
   return getObjectSetAsJSON(objectSet);
 }
 
-/**
- * @param objectSet an array of type {name: "name",  value: "value"}
- * @returns a JSON object of type {"name": "value"} for each element in the array
- */
 function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
   let finalObject: { [key: string]: any } = {};
 
@@ -75,27 +62,12 @@ function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
   return finalObject;
 }
 
-/**
- * @param commonData The data under "common" in the yaml bundle
- * @param requestData The data of the particular request in the yaml bundle
- *
- * @returns the merged data except the parameters and the tests
- */
 export function getMergedDataExceptParamsAndTests(commonData: any, requestData: any): any {
   delete commonData.params, requestData.params, commonData.tests, requestData.tests;
 
   return replaceVariablesInObject(getMergedData(commonData, requestData));
 }
 
-/**
- * @param commonData Usually, the data under common in the yaml bundle, but may
- *  represent any inferior JSON object, with values that need to be overwritten
- *  by values in requestData in case of a common key.
- * @param requestData Usually, the data of the particular request in the yaml bundle,
- *  but may represent any superior JSON object.
- *
- * @returns the merged data, with requestData being given precedence.
- */
 export function getMergedData(commonData: any, requestData: any) {
   let mergedData = Object.assign({}, commonData, requestData);
 
@@ -174,12 +146,6 @@ export function getMergedTests(commonTests: any, requestTests: any) {
   return mergedData;
 }
 
-/**
- * @param commonParams The params array under "common" in the yaml bundle
- * @param requestParams the params array under the particular request in the yaml bundle
- *
- * @returns the string component representing the params to be appended to the URL
- */
 export function getParamsForUrl(commonParams: Array<any>, requestParams: Array<any>) {
   let params: Array<any>;
 

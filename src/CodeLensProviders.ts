@@ -3,11 +3,6 @@ import { getRequestPositions } from "./parseBundle";
 
 const requiredFileEnd = ".zz-bundle.yaml";
 
-/**
- * Uses parseDocument to build Position items that define where codelenses
- * are defined, and returns the names of the requests to define the pass to
- * the commands.
- */
 export class CodeLensProvider implements vscode.CodeLensProvider {
   private codeLenses: vscode.CodeLens[] = [];
   private _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
