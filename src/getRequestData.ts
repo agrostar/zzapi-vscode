@@ -65,8 +65,13 @@ function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
   return finalObject;
 }
 
-export function getMergedDataExceptParamsAndTests(commonData: any, requestData: any): any {
-  delete commonData.params, requestData.params, commonData.tests, requestData.tests;
+export function getMergedDataExceptParamsTestsCapture(commonData: any, requestData: any): any {
+  delete commonData.params,
+    requestData.params,
+    commonData.tests,
+    requestData.tests,
+    commonData.capture,
+    requestData.capture;
 
   return replaceVariablesInObject(getMergedData(commonData, requestData));
 }

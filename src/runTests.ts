@@ -18,7 +18,7 @@ function getStringIfNotScalar(data: any) {
   return data;
 }
 
-export async function runAllTests(name: string, tests: any, responseData: any, headers: any) {
+export function runAllTests(name: string, tests: any, responseData: any, headers: any) {
   if (tests === undefined) {
     return;
   }
@@ -143,7 +143,7 @@ function getValueForJSONTests(responseContent: object, key: string) {
 
 //if RHS is an object
 function runObjectTests(required: any, received: any, keyName: string) {
-  let regexAlreadyRan = false;
+  let regexRan = false;
 
   for (const key in required) {
     if (required.hasOwnProperty(key)) {
@@ -228,9 +228,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
           receivedLen = received.length;
         }
 
-        if (!canBeNumber(compareTo)) {
+        if (!canBeInteger(compareTo)) {
           outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t ${compareTo} is not a number`,
+            `\t${fail} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t ${compareTo} is not an integer`,
           );
           numFailed++;
           numTests++;
@@ -285,11 +285,11 @@ function runObjectTests(required: any, received: any, keyName: string) {
           numFailed++;
         }
       } else if (key === "$regex" || key === "$options") {
-        if (regexAlreadyRan) {
+        if (regexRan) {
           continue;
         }
 
-        regexAlreadyRan = true;
+        regexRan = true;
 
         received = getStringIfNotScalar(received);
 
@@ -346,10 +346,10 @@ function runObjectTests(required: any, received: any, keyName: string) {
   }
 }
 
-function canBeNumber(input: any): boolean {
+function canBeInteger(input: any): boolean {
   if (input === undefined || typeof input === "object") {
     return false;
   }
 
-  return typeof input === "number" || /^[+-]?\d+(\.\d+)?$/.test(input);
+  return typeof input === "number" || /^[+-]?\d+$/.test(input);
 }

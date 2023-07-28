@@ -5,7 +5,7 @@ import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEd
 
 import {
   getParamsForUrl,
-  getMergedDataExceptParamsAndTests,
+  getMergedDataExceptParamsTestsCapture,
   getAsStringIfDefined,
   getHeadersAsJSON,
   getMergedTests,
@@ -15,11 +15,12 @@ import {
 import { loadVariables } from "./variableReplacement";
 
 import { runAllTests } from "./runTests";
+import { captureVariables } from "./captureVars";
 
 export async function getIndividualResponse(commonData: any, requestData: any, name: string) {
   loadVariables();
   requestData.name = name;
-  const allData = getMergedDataExceptParamsAndTests(commonData, requestData);
+  const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
   allData.headers = setLowerCaseHeaderKeys(allData.headers);
 
   const params = getParamsForUrl(commonData.params, requestData.params);
@@ -29,7 +30,8 @@ export async function getIndividualResponse(commonData: any, requestData: any, n
   let [reqCancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
   if (!reqCancelled) {
     await openEditorForIndividualReq(responseData, allData.name);
-    await runAllTests(name, tests, responseData, headers);
+    runAllTests(name, tests, responseData, headers);
+    captureVariables(requestData.capture, responseData);
   }
 }
 
@@ -42,7 +44,7 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
     if (allRequests.hasOwnProperty(name)) {
       let request = allRequests[name];
       request.name = name;
-      const allData = getMergedDataExceptParamsAndTests(commonData, request);
+      const allData = getMergedDataExceptParamsTestsCapture(commonData, request);
       allData.headers = setLowerCaseHeaderKeys(allData.headers);
 
       const params = getParamsForUrl(commonData.params, request.params);
@@ -56,6 +58,7 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
       if (!reqCancelled) {
         responses.push({ response: responseData, name: request.name });
         runAllTests(name, tests, responseData, headers);
+        captureVariables(request.capture, responseData);
         atleastOneExecuted = true;
       }
     }

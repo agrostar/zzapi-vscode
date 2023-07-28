@@ -3,6 +3,9 @@ import * as fs from "fs";
 import * as YAML from "yaml";
 
 let variables: any = {};
+export function setVariable(key: any, value: any){
+  variables[key] = value;
+}
 
 export function loadVariables() {
   variables = {};
