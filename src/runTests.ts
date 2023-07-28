@@ -7,6 +7,9 @@ const spaceBetweenTestAndStatus = "\t";
 const fail = "❌ FAILED";
 const pass = "✅ PASSED";
 
+let numFailed = 0;
+let numTests = 0;
+
 function getStringIfNotScalar(data: any) {
   if (data !== undefined && (Array.isArray(data) || typeof data === "object")) {
     return JSON.stringify(data);
@@ -23,22 +26,26 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
   outputChannel = getOutputChannel();
   outputChannel.show();
 
-  let numFailed: number = 0;
-  let numTests: number = 0;
+  numFailed = 0;
+  numTests = 0;
 
   outputChannel.appendLine("--------------------------------------");
   outputChannel.appendLine(`Running Request '${name}'\n`);
   for (const test in tests) {
     if (tests.hasOwnProperty(test)) {
       if (test === "json") {
-        const [incrementNumFailed, incrementNumTests] = runJSONTests(
-          tests.json,
-          JSON.parse(responseData.body),
-        );
-        numFailed += incrementNumFailed;
-        numTests += incrementNumTests;
+        runJSONTests(tests.json, JSON.parse(responseData.body));
+        try {
+          runJSONTests(tests.json, JSON.parse(responseData.body));
+        } catch (err: any) {
+          outputChannel.appendLine("JSON:");
+          outputChannel.appendLine(
+            `\t${fail} ${spaceBetweenTestAndStatus} Error in parsing: \n\t\t${err}`,
+          );
+        }
       } else if (test === "headers") {
         outputChannel.appendLine("Headers");
+
         const headerTests = tests[test];
         for (const headerTest in headerTests) {
           if (headerTests.hasOwnProperty(headerTest)) {
@@ -60,13 +67,7 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
               }
               numTests++;
             } else {
-              const [incrementNumFailed, incrementNumTests] = runObjectTests(
-                required,
-                received,
-                test,
-              );
-              numFailed += incrementNumFailed;
-              numTests += incrementNumTests;
+              runObjectTests(required, received, test);
             }
           }
         }
@@ -87,9 +88,7 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
           }
           numTests++;
         } else {
-          const [incrementNumFailed, incrementNumTests] = runObjectTests(required, received, test);
-          numFailed += incrementNumFailed;
-          numTests += incrementNumTests;
+          runObjectTests(required, received, test);
         }
       }
     }
@@ -104,9 +103,6 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
 }
 
 function runJSONTests(jsonTests: any, responseContent: object) {
-  let numFailed = 0;
-  let numTests = 0;
-
   outputChannel.appendLine("JSON:");
   for (const key in jsonTests) {
     if (jsonTests.hasOwnProperty(key)) {
@@ -126,42 +122,17 @@ function runJSONTests(jsonTests: any, responseContent: object) {
         }
         numTests++;
       } else {
-        const [incrementNumFailed, incrementNumTests] = runObjectTests(required, received, key);
-        numFailed += incrementNumFailed;
-        numTests += incrementNumTests;
+        runObjectTests(required, received, key);
       }
     }
   }
-
-  return [numFailed, numTests];
-}
-
-/**
- * Idea: return true if we have [] and the content in between is not
- *  an integer index
- */
-const hasQueryIdentifier = /\[[^\]]*\D[^\]]*\]/;
-
-function hasArrayIdentifier(key: string): boolean {
-  return hasQueryIdentifier.test(key);
 }
 
 function getValueForJSONTests(responseContent: object, key: string) {
-  if (hasArrayIdentifier(key)) {
-    try {
-      return jp.query(responseContent, key);
-    } catch (err: any) {
-      if (err.description) {
-        return err.description;
-      }
-      return undefined;
-    }
-  }
-
   try {
     return jp.value(responseContent, key);
   } catch (err: any) {
-    if (err.description) {
+    if (err !== undefined && err.description !== undefined) {
       return err.description;
     }
     return undefined;
@@ -170,8 +141,7 @@ function getValueForJSONTests(responseContent: object, key: string) {
 
 //if RHS is an object
 function runObjectTests(required: any, received: any, keyName: string) {
-  let numFailed = 0;
-  let numTests = 0;
+  let regexAlreadyRan = false;
 
   for (const key in required) {
     if (required.hasOwnProperty(key)) {
@@ -190,7 +160,6 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$ne") {
         compareTo = getStringIfNotScalar(compareTo);
         received = getStringIfNotScalar(received);
@@ -205,13 +174,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$lt") {
-        if (
-          canBeNumber(received) &&
-          canBeNumber(compareTo) &&
-          parseFloat(received) < parseFloat(compareTo)
-        ) {
+        if (received < compareTo) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} `,
           );
@@ -221,13 +185,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$gt") {
-        if (
-          canBeNumber(received) &&
-          canBeNumber(compareTo) &&
-          parseFloat(received) > parseFloat(compareTo)
-        ) {
+        if (received > compareTo) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo}  `,
           );
@@ -237,13 +196,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$lte") {
-        if (
-          canBeNumber(received) &&
-          canBeNumber(compareTo) &&
-          parseFloat(received) <= parseFloat(compareTo)
-        ) {
+        if (received <= compareTo) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo}  `,
           );
@@ -253,13 +207,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$gte") {
-        if (
-          canBeNumber(received) &&
-          canBeNumber(compareTo) &&
-          parseFloat(received) >= parseFloat(compareTo)
-        ) {
+        if (received >= compareTo) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} `,
           );
@@ -269,7 +218,6 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$size") {
         let receivedLen: number | undefined = undefined;
         if (typeof received === "object") {
@@ -278,11 +226,17 @@ function runObjectTests(required: any, received: any, keyName: string) {
           receivedLen = received.length;
         }
 
-        if (
-          receivedLen !== undefined &&
-          canBeNumber(compareTo) &&
-          receivedLen === parseInt(compareTo)
-        ) {
+        if (!canBeNumber(compareTo)) {
+          outputChannel.appendLine(
+            `\t${fail} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t ${compareTo} is not a number`,
+          );
+          numFailed++;
+          numTests++;
+
+          continue;
+        }
+
+        if (receivedLen === parseInt(compareTo)) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} `,
           );
@@ -292,26 +246,32 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$exists") {
-        if (typeof compareTo === "boolean" && (received !== undefined) === compareTo) {
+        if (typeof compareTo !== "boolean") {
           outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `,
+            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} exists \t ${compareTo} is not a boolean`,
           );
+          numFailed++;
+          numTests++;
+
+          continue;
+        }
+
+        if ((received !== undefined) === compareTo) {
+          outputChannel.appendLine(`\t${pass} ${spaceBetweenTestAndStatus} ${keyName} exists`);
         } else {
           outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} exists ${compareTo}  `,
+            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} does not exist`,
           );
           numFailed++;
         }
-        numTests++;
       } else if (key === "$type") {
         if (
           (typeof compareTo === "string" &&
             compareTo.toLowerCase() === "array" &&
             Array.isArray(received)) ||
-          (compareTo === null && received === null) ||
-          typeof received === compareTo
+          typeof received === compareTo.toLowerCase() ||
+          (compareTo === null && received === null)
         ) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo}`,
@@ -322,26 +282,72 @@ function runObjectTests(required: any, received: any, keyName: string) {
           );
           numFailed++;
         }
-        numTests++;
+      } else if (key === "$regex" || key === "$options") {
+        if (regexAlreadyRan) {
+          continue;
+        }
+
+        regexAlreadyRan = true;
+
+        received = getStringIfNotScalar(received);
+
+        let options: any;
+        let regexTest: any;
+        if (key === "$options") {
+          options = compareTo;
+          regexTest = required.$regex;
+        } else {
+          regexTest = compareTo;
+          options = required.$options;
+        }
+
+        if (regexTest === undefined) {
+          outputChannel.appendLine(
+            `\t${fail} ${spaceBetweenTestAndStatus} Regex ${regexTest} is not specified`,
+          );
+          numFailed++;
+        } else {
+          let regexStr = getStringIfNotScalar(regexTest);
+          regexStr = regexStr.toString();
+
+          let regex = new RegExp(regexStr, options);
+
+          let result: boolean = false;
+          try {
+            result = regex.test(received as string);
+          } catch (err: any) {
+            outputChannel.appendLine(
+              `\t${fail} ${spaceBetweenTestAndStatus} Regex ${regexTest} \t Error: ${err}`,
+            );
+            numFailed++;
+            numTests++;
+
+            continue;
+          }
+
+          if (result) {
+            outputChannel.appendLine(`\t${pass} Regex ${regexTest} on ${received} is succesful`);
+          } else {
+            outputChannel.appendLine(`\t${pass} Regex ${regexTest} on ${received} is unsuccesul`);
+            numFailed++;
+          }
+        }
       } else {
         outputChannel.appendLine(
           `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} ${key} ${compareTo} \t Invalid Operator ${key}`,
         );
         numFailed++;
-        numTests++;
       }
+
+      numTests++;
     }
   }
-
-  return [numFailed, numTests];
 }
 
 function canBeNumber(input: any): boolean {
-  if (Array.isArray(input)) {
-    return false;
-  } else if (typeof input === "object") {
+  if (input === undefined || typeof input === "object") {
     return false;
   }
 
-  return /^[+-]?\d+(\.\d+)?$/.test(input);
+  return typeof input === "number" || /^[+-]?\d+(\.\d+)?$/.test(input);
 }

@@ -1,8 +1,7 @@
 import { window, commands, workspace } from "vscode";
 import { getEnvDetails } from "./extension";
 
-let keysInContent = ["executionTime", "status", "body"];
-// let keysInHeaders = ["headers"];
+let keysInContent = ["body"];
 
 export async function openEditorForIndividualReq(responseData: object, name: string) {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);
@@ -18,9 +17,11 @@ export async function openEditorForAllRequests(
 
   for (let i = 0; i < numResponses; i++) {
     let responseObj = responses[i];
+
+    formattedContent += `${responseObj.name}\n\n`;
     let [contentData, headersData] = getDataOfIndReqAsString(
-      responseObj["response"],
-      responseObj["name"],
+      responseObj.response,
+      responseObj.name,
     );
     formattedContent += contentData + "\n-------\n";
     formattedHeaders += headersData + "\n-------\n";
@@ -28,7 +29,6 @@ export async function openEditorForAllRequests(
 
   await showContent(formattedContent, formattedHeaders);
 }
-
 
 function getDataOfIndReqAsString(
   responseData: any,
@@ -39,7 +39,7 @@ function getDataOfIndReqAsString(
     currentEnvironment = "None Selected";
   }
 
-  let contentData = `${name} content\nEnvironment: ${currentEnvironment}\n\n`;
+  let contentData = "";
   let headersData = `${name} headers\nEnvironment: ${currentEnvironment}\n\n`;
 
   for (const key in responseData) {
