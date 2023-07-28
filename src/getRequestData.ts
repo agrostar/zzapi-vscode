@@ -15,12 +15,15 @@ export function setLowerCaseHeaderKeys(headers: any): any {
   return newObj;
 }
 
-export function getBody(body: any) {
-  if (body === undefined || !(typeof body === "object")) {
-    return body;
+export function getAsStringIfDefined(body: any) {
+  if (body === undefined) {
+    return undefined;
+  }
+  if (typeof body === "object") {
+    return JSON.stringify(body);
   }
 
-  return JSON.stringify(body);
+  return body.toString();
 }
 
 /**

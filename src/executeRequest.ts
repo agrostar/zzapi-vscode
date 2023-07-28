@@ -6,7 +6,7 @@ import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEd
 import {
   getParamsForUrl,
   getMergedDataExceptParamsAndTests,
-  getBody,
+  getAsStringIfDefined,
   getHeadersAsJSON,
   getMergedTests,
   setLowerCaseHeaderKeys,
@@ -130,7 +130,7 @@ export function getHeadersAsString(headersObj: Array<string>) {
 
   const numElement = headersObj.length;
   for (let i = 0; i < numElement - 1; i += 2) {
-    formattedString += `\t${headersObj[i]}: ${headersObj[i + 1]}\n`;
+    formattedString += `\t${headersObj[i]}: ${getAsStringIfDefined(headersObj[i + 1])}\n`;
   }
 
   formattedString = formattedString.trim();
@@ -141,7 +141,7 @@ function constructRequest(allData: any, paramsForUrl: string) {
   let completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
   let options = {
-    body: getBody(allData.body),
+    body: getAsStringIfDefined(allData.body),
     headers: getHeadersAsJSON(allData.headers),
     followRedirect: allData.options.follow,
 

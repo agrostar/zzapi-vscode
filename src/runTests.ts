@@ -3,15 +3,15 @@ import { getOutputChannel } from "./extension";
 import { OutputChannel } from "vscode";
 
 let outputChannel: OutputChannel;
-const spaceBetweenTestAndStatus = "\t";
-const fail = "❌ FAILED";
-const pass = "✅ PASSED";
+const spaceBetweenTestAndStatus = "\t|";
+const fail = "❌";
+const pass = "✅";
 
 let numFailed = 0;
 let numTests = 0;
 
 function getStringIfNotScalar(data: any) {
-  if (data !== undefined && (Array.isArray(data) || typeof data === "object")) {
+  if (typeof data === "object") {
     return JSON.stringify(data);
   }
 
@@ -34,13 +34,12 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
   for (const test in tests) {
     if (tests.hasOwnProperty(test)) {
       if (test === "json") {
-        runJSONTests(tests.json, JSON.parse(responseData.body));
         try {
           runJSONTests(tests.json, JSON.parse(responseData.body));
-        } catch (err: any) {
+        } catch (err) {
           outputChannel.appendLine("JSON:");
           outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} Error in parsing: \n\t\t${err}`,
+            `\t${fail} ${spaceBetweenTestAndStatus} JSON tests not evaluated due to error in parsing: \n\t\t${err}`,
           );
         }
       } else if (test === "headers") {
@@ -50,7 +49,7 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
         for (const headerTest in headerTests) {
           if (headerTests.hasOwnProperty(headerTest)) {
             let required = headerTests[headerTest];
-            let received = headers[headerTest];
+            let received = headers !== undefined ? headers[headerTest] : undefined;
 
             if (typeof required !== "object") {
               required = getStringIfNotScalar(required);
@@ -95,11 +94,14 @@ export async function runAllTests(name: string, tests: any, responseData: any, h
   }
 
   const numPassed = numTests - numFailed;
-  outputChannel.appendLine(
-    `\n${fail}: ${numFailed}/${numTests}\t\t${pass}: ${numPassed}/${numTests}`,
-  );
+  if (numFailed > 0) {
+    outputChannel.appendLine(
+      `\n${fail} FAILED: ${numFailed}/${numTests}\t\t${pass} PASSED: ${numPassed}/${numTests}`,
+    );
+  } else {
+    outputChannel.appendLine(`\n${pass} PASSED: ${numPassed}/${numTests}`);
+  }
   outputChannel.appendLine("--------------------------------------");
-  // outputChannel.show();
 }
 
 function runJSONTests(jsonTests: any, responseContent: object) {
