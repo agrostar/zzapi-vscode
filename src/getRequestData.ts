@@ -1,6 +1,22 @@
 import { replaceVariablesInObject, replaceVariablesInArray } from "./variableReplacement";
 
-export function setLowerCaseHeaderKeys(headers: any): any {
+export function setHeadersToLowerCase(obj: any){
+  if(obj === undefined){
+    return undefined;
+  }
+
+  obj.headers = setNameOfHeadersToLowerCase(obj.headers);
+  if(obj.tests !== undefined){
+    obj.tests.headers = setKeyOfHeadersToLowerCase(obj.tests.headers);
+  }
+  if(obj.capture !== undefined){
+    obj.capture.headers = setKeyOfHeadersToLowerCase(obj.capture.headers);
+  }
+
+  return obj;
+}
+
+function setKeyOfHeadersToLowerCase(headers: any) {
   if (headers === undefined) {
     return undefined;
   }
@@ -8,11 +24,25 @@ export function setLowerCaseHeaderKeys(headers: any): any {
   let newObj: { [key: string]: any } = {};
   for (const key in headers) {
     if (headers.hasOwnProperty(key)) {
-      newObj[key.toLocaleLowerCase()] = headers[key];
+      newObj[key.toLowerCase()] = headers[key];
     }
   }
 
   return newObj;
+}
+
+function setNameOfHeadersToLowerCase(headers: Array<{ name: string; value: string }>): any {
+  if (headers === undefined) {
+    return undefined;
+  }
+
+  let newHeaders: Array<{ name: string; value: string }> = [];
+  headers.forEach((arrHeader) => {
+    const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
+    newHeaders.push(newHeader);
+  });
+
+  return newHeaders;
 }
 
 export function getAsStringIfDefined(body: any) {

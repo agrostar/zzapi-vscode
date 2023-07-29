@@ -9,7 +9,7 @@ import {
   getAsStringIfDefined,
   getHeadersAsJSON,
   getMergedTests,
-  setLowerCaseHeaderKeys,
+  setHeadersToLowerCase,
 } from "./getRequestData";
 
 import { runAllTests } from "./runTests";
@@ -17,12 +17,13 @@ import { captureVariables } from "./captureVars";
 
 export async function getIndividualResponse(commonData: any, requestData: any, name: string) {
   requestData.name = name;
+
+  commonData = setHeadersToLowerCase(commonData);
+  requestData = setHeadersToLowerCase(requestData);
   const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
-  allData.headers = setLowerCaseHeaderKeys(allData.headers);
 
   const params = getParamsForUrl(commonData.params, requestData.params);
   const tests = getMergedTests(commonData.tests, requestData.tests);
-  tests.headers = setLowerCaseHeaderKeys(tests.headers);
 
   let [reqCancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
   if (!reqCancelled) {
@@ -40,13 +41,16 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
     if (allRequests.hasOwnProperty(name)) {
       let request = allRequests[name];
       request.name = name;
+
+      //important to set headers to lower case before merging to ensure requestData gets
+      // precedence if there are common names. 
+      commonData = setHeadersToLowerCase(commonData);
+      request = setHeadersToLowerCase(request);
       const allData = getMergedDataExceptParamsTestsCapture(commonData, request);
-      allData.headers = setLowerCaseHeaderKeys(allData.headers);
 
       const params = getParamsForUrl(commonData.params, request.params);
       const tests = getMergedTests(commonData.tests, request.tests);
 
-      tests.headers = setLowerCaseHeaderKeys(tests.headers);
       let [reqCancelled, responseData, headers] = await individualRequestWithProgress(
         allData,
         params,
