@@ -5,35 +5,6 @@ export function setHeadersToLowerCase(obj: any){
     return undefined;
   }
 
-  function setKeyOfHeadersToLowerCase(headers: { [key: string]: any }) {
-    if (headers === undefined) {
-      return undefined;
-    }
-
-    let newObj: { [key: string]: any } = {};
-    for (const key in headers) {
-      if (headers.hasOwnProperty(key)) {
-        newObj[key.toLowerCase()] = headers[key];
-      }
-    }
-
-    return newObj;
-  }
-
-  function setNameOfHeadersToLowerCase(headers: Array<{ name: string; value: string }>): any {
-    if (headers === undefined) {
-      return undefined;
-    }
-
-    let newHeaders: Array<{ name: string; value: string }> = [];
-    headers.forEach((arrHeader) => {
-      const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
-      newHeaders.push(newHeader);
-    });
-
-    return newHeaders;
-  }
-
   obj.headers = setNameOfHeadersToLowerCase(obj.headers);
   if(obj.tests !== undefined){
     obj.tests.headers = setKeyOfHeadersToLowerCase(obj.tests.headers);
@@ -43,6 +14,35 @@ export function setHeadersToLowerCase(obj: any){
   }
 
   return obj;
+}
+
+function setKeyOfHeadersToLowerCase(headers: any) {
+  if (headers === undefined) {
+    return undefined;
+  }
+
+  let newObj: { [key: string]: any } = {};
+  for (const key in headers) {
+    if (headers.hasOwnProperty(key)) {
+      newObj[key.toLowerCase()] = headers[key];
+    }
+  }
+
+  return newObj;
+}
+
+function setNameOfHeadersToLowerCase(headers: Array<{ name: string; value: string }>): any {
+  if (headers === undefined) {
+    return undefined;
+  }
+
+  let newHeaders: Array<{ name: string; value: string }> = [];
+  headers.forEach((arrHeader) => {
+    const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
+    newHeaders.push(newHeader);
+  });
+
+  return newHeaders;
 }
 
 export function getAsStringIfDefined(body: any) {
@@ -62,14 +62,16 @@ export function getAsStringIfDefined(body: any) {
  * @returns a JSON version of type {"name": "value", ....} that can be passed
  *  as an option in got.
  * If headers are defined in both the request itself as well as in "common",
- *  then the objectSet may already be converted to an object by the
+ *  then the objectSet may already be converted by the
  *  @function getMergedDataExceptParamsAndTests, which is why we pass it back if it
- *  it is not an array. Else, we call @function getObjectSetAsJSON to perform the above
+ *  it not an array. Else, we call @function getObjectSetAsJSON to perform the above
  *  stated operation.
  * If headers are not defined, then we do not want it as an option in got, so we
  *  simply return undefined, as before.
  */
 export function getHeadersAsJSON(objectSet: any) {
+  //If both common and request has headers then mergeData itself will make it JSON,
+  // so we can immediately return it, else we handle it ourselves
   if (objectSet === undefined || !Array.isArray(objectSet)) {
     return objectSet;
   }
@@ -145,7 +147,7 @@ export function getMergedData(commonData: any, requestData: any) {
 }
 
 //reason for distinction from getMergedData is because of non-array specification
-// of headers as well as non-usage of name:, value: keys in objects.
+// of headers as well as non-usage of name:, value: words.
 export function getMergedTests(commonTests: any, requestTests: any) {
   let mergedData = Object.assign({}, commonTests, requestTests);
 

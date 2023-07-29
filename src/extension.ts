@@ -14,7 +14,7 @@ import {
 
 import { CodeLensProvider } from "./CodeLensProviders";
 
-import { registerRunRequest, registerRunAllRequests } from "./registerAndRunRequests";
+import { registerRunRequest, registerRunAllRequests } from "./registerRequests";
 
 import * as fs from "fs";
 import * as YAML from "yaml";

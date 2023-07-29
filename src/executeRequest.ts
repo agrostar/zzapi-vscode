@@ -18,8 +18,6 @@ import { captureVariables } from "./captureVars";
 export async function getIndividualResponse(commonData: any, requestData: any, name: string) {
   requestData.name = name;
 
-  //important to set headers to lower case before merging to ensure requestData gets
-  // precedence if there are common names.
   commonData = setHeadersToLowerCase(commonData);
   requestData = setHeadersToLowerCase(requestData);
   const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
@@ -44,6 +42,8 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
       let request = allRequests[name];
       request.name = name;
 
+      //important to set headers to lower case before merging to ensure requestData gets
+      // precedence if there are common names. 
       commonData = setHeadersToLowerCase(commonData);
       request = setHeadersToLowerCase(request);
       const allData = getMergedDataExceptParamsTestsCapture(commonData, request);
