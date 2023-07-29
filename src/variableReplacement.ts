@@ -5,17 +5,17 @@ import { BundleParams } from "./models";
 
 let variables: any = {};
 
-export function setVariable(key: any, value: any) {
-  function getStrictStringValue(value: any): string {
-    if (value === undefined) {
-      return "undefined";
-    } else if (typeof value === "object") {
-      return JSON.stringify(value);
-    } else {
-      return value.toString();
-    }
+export function getStrictStringValue(value: any): string {
+  if (value === undefined) {
+    return "undefined";
+  } else if (typeof value === "object") {
+    return JSON.stringify(value);
+  } else {
+    return value.toString();
   }
+}
 
+export function setVariable(key: any, value: any) {
   variables[key] = getStrictStringValue(value);
 }
 

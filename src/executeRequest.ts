@@ -15,6 +15,7 @@ import {
 import { runAllTests } from "./runTests";
 import { captureVariables } from "./captureVars";
 import { AllRequests, CommonData, RequestData, ResponseData } from "./models";
+import { getStrictStringValue } from "./variableReplacement";
 
 export async function getIndividualResponse(
   commonData: CommonData,
@@ -135,7 +136,7 @@ export function getHeadersAsString(rawHeaders: Array<string>) {
 
   const numElement = rawHeaders.length;
   for (let i = 0; i < numElement - 1; i += 2) {
-    formattedString += `\t${rawHeaders[i]}: ${getAsStringIfDefined(rawHeaders[i + 1])}\n`;
+    formattedString += `\t${rawHeaders[i]}: ${getStrictStringValue(rawHeaders[i + 1])}\n`;
   }
 
   formattedString = formattedString.trim();

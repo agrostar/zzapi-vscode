@@ -26,7 +26,6 @@ export interface CommonData {
   tests?: any;
   capture?: any;
 }
-
 export interface RequestData extends CommonData {
   name: string;
 }

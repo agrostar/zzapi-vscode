@@ -40,30 +40,12 @@ export function activate(context: ExtensionContext) {
 
   const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
   initialiseStatusBar(statusBar, context);
-
   createEnvironmentSelector(statusBar, context);
 
-  const envChangeListener = workspace.onDidChangeTextDocument((event) => {
-    if (event.document.uri.path === varFilePath) {
-      initialiseEnvironments(statusBar);
-    }
-  });
-  context.subscriptions.push(envChangeListener);
-  disposables.push(envChangeListener);
-
   initialiseEnvironments(statusBar);
+  reloadEnvironmentsOnChange();
 
-  const editorChangeListener = window.onDidChangeActiveTextEditor((activeEditor) => {
-    if (activeEditor && activeEditor.document.uri.fsPath.endsWith(requiredFileEnd)) {
-      //if we are referring to a new bundle, then we have to reload environments
-      if (getDirWithBackslash(activeEditor) !== dirPath) {
-        setVarFileAndDirPath(activeEditor);
-        initialiseEnvironments(statusBar);
-      }
-    }
-  });
-  context.subscriptions.push(editorChangeListener);
-  disposables.push(editorChangeListener);
+  resetEnvironmentsOnDirChange();
 
   outputChannel = window.createOutputChannel("zzAPI");
 
@@ -74,6 +56,30 @@ export function activate(context: ExtensionContext) {
   commands.registerCommand("extension.runAllRequests", async () => {
     await registerRunAllRequests();
   });
+
+  function reloadEnvironmentsOnChange() {
+    const envChangeListener = workspace.onDidChangeTextDocument((event) => {
+      if (event.document.uri.path === varFilePath) {
+        initialiseEnvironments(statusBar);
+      }
+    });
+    context.subscriptions.push(envChangeListener);
+    disposables.push(envChangeListener);
+  }
+
+  function resetEnvironmentsOnDirChange() {
+    const editorChangeListener = window.onDidChangeActiveTextEditor((activeEditor) => {
+      if (activeEditor && activeEditor.document.uri.fsPath.endsWith(requiredFileEnd)) {
+        //if we are referring to a new bundle, then we have to reload environments
+        if (getDirWithBackslash(activeEditor) !== dirPath) {
+          setVarFileAndDirPath(activeEditor);
+          initialiseEnvironments(statusBar);
+        }
+      }
+    });
+    context.subscriptions.push(editorChangeListener);
+    disposables.push(editorChangeListener);
+  }
 }
 
 let outputChannel: OutputChannel;
