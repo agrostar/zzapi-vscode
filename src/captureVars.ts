@@ -29,7 +29,7 @@ export function captureVariables(
           errorInParsing = true;
         }
 
-        if(!errorInParsing){
+        if (!errorInParsing) {
           try {
             body = JSON.parse(responseData.body as string);
           } catch (err) {

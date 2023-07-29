@@ -1,4 +1,4 @@
-import got, { CancelableRequest } from "got";
+import got from "got";
 import { window, ProgressLocation } from "vscode";
 
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
