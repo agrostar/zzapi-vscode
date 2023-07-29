@@ -11,8 +11,7 @@ export function setVariable(key: any, value: any) {
     } else if (typeof value === "object") {
       return JSON.stringify(value);
     } else {
-      const stringVal: string = value.toString();
-      return stringVal;
+      return value.toString();
     }
   }
 
@@ -70,25 +69,25 @@ export function replaceVariablesInArray(arr: Array<object>): Array<object> {
 }
 
 function replaceVariables(text: string): string {
-  const outputTextWithBraces = text.replace(varRegexWithBraces, (match, variable) => {
-    const varVal = variables[variable];
-    if (varVal !== undefined) {
-      return varVal;
-    }
-    return match;
-  });
-
-  const outputTextWithoutBraces = outputTextWithBraces.replace(varRegexWithoutBraces, (match) => {
-    const variable = match.slice(1);
-    if (variable === undefined) {
+  const outputText = text
+    .replace(varRegexWithBraces, (match, variable) => {
+      const varVal = variables[variable];
+      if (varVal !== undefined) {
+        return varVal;
+      }
       return match;
-    }
-    const varVal = variables[variable];
-    if (varVal !== undefined) {
-      return varVal;
-    }
-    return match;
-  });
+    })
+    .replace(varRegexWithoutBraces, (match) => {
+      const variable = match.slice(1);
+      if (variable === undefined) {
+        return match;
+      }
+      const varVal = variables[variable];
+      if (varVal !== undefined) {
+        return varVal;
+      }
+      return match;
+    });
 
-  return outputTextWithoutBraces;
+  return outputText;
 }

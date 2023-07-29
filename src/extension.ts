@@ -19,6 +19,7 @@ import { registerRunRequest, registerRunAllRequests } from "./registerRequests";
 import * as fs from "fs";
 import * as YAML from "yaml";
 import { loadVariables } from "./variableReplacement";
+import { AllEnvironments } from "./models";
 
 let disposables: Disposable[] = [];
 
@@ -29,7 +30,7 @@ let dirPath: string;
 let varFilePath: string;
 
 let currentEnvironment: string = "";
-let allEnvironments: any = {};
+let allEnvironments: AllEnvironments;
 
 export function activate(context: ExtensionContext) {
   const activeEditor = window.activeTextEditor;
@@ -77,30 +78,30 @@ export function activate(context: ExtensionContext) {
 
 let outputChannel: OutputChannel;
 
-export function getOutputChannel() {
+export function getOutputChannel(): OutputChannel {
   return outputChannel;
 }
 
-export function getDirPath() {
+export function getDirPath(): string {
   return dirPath;
 }
 
-export function getEnvDetails() {
+export function getEnvDetails(): [string, AllEnvironments] {
   return [currentEnvironment, allEnvironments];
 }
 
-function setVarFileAndDirPath(activeEditor: TextEditor) {
+function setVarFileAndDirPath(activeEditor: TextEditor): void {
   dirPath = getDirWithBackslash(activeEditor);
   varFilePath = dirPath + varFile;
 }
 
-function getDirWithBackslash(activeEditor: TextEditor) {
+function getDirWithBackslash(activeEditor: TextEditor): string {
   const activeEditorPath = activeEditor.document.uri.path;
   const lastIndex = activeEditorPath.lastIndexOf("/");
   return activeEditorPath.substring(0, lastIndex + 1);
 }
 
-function initialiseStatusBar(statusBar: StatusBarItem, context: ExtensionContext) {
+function initialiseStatusBar(statusBar: StatusBarItem, context: ExtensionContext): void {
   setDefaultStatusBarValues(statusBar);
   statusBar.command = "extension.clickEnvSelector";
   statusBar.show();
@@ -108,13 +109,13 @@ function initialiseStatusBar(statusBar: StatusBarItem, context: ExtensionContext
   disposables.push(statusBar);
 }
 
-function setDefaultStatusBarValues(statusBar: StatusBarItem) {
+function setDefaultStatusBarValues(statusBar: StatusBarItem): void {
   currentEnvironment = "";
   statusBar.text = "zzAPI: Set Environment";
   statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
 }
 
-function createEnvironmentSelector(statusBar: StatusBarItem, context: ExtensionContext) {
+function createEnvironmentSelector(statusBar: StatusBarItem, context: ExtensionContext): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     showEnvironmentOptions();
   });
@@ -139,7 +140,7 @@ function createEnvironmentSelector(statusBar: StatusBarItem, context: ExtensionC
   };
 }
 
-function setEnvironment(statusBar: StatusBarItem, environment: string) {
+function setEnvironment(statusBar: StatusBarItem, environment: string): void {
   currentEnvironment = environment;
   statusBar.text = `Current Environment: ${currentEnvironment}`;
   statusBar.backgroundColor = undefined;
@@ -153,7 +154,7 @@ const defaultEnvironment = {
 };
 let environmentsToDisplay: Array<{ label: string; description: string }> = [];
 
-function initialiseEnvironments(statusBar: StatusBarItem) {
+function initialiseEnvironments(statusBar: StatusBarItem): void {
   environmentsToDisplay = [];
   allEnvironments = {};
   setDefaultStatusBarValues(statusBar);
