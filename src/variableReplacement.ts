@@ -3,8 +3,19 @@ import * as fs from "fs";
 import * as YAML from "yaml";
 
 let variables: any = {};
-export function setVariable(key: any, value: any){
-  variables[key] = value;
+
+export function setVariable(key: any, value: any) {
+  function getStrictStringValue(value: any): string {
+    if (value === undefined) {
+      return "undefined";
+    } else if (typeof value === "object") {
+      return JSON.stringify(value);
+    } else {
+      return (value as string).toString();
+    }
+  }
+
+  variables[key] = getStrictStringValue(value);
 }
 
 export function loadVariables() {
@@ -14,24 +25,24 @@ export function loadVariables() {
   const [currentEnvironment, allEnvironments] = getEnvDetails();
 
   const filesToLoad: Array<string> = allEnvironments[currentEnvironment];
+  if (filesToLoad === undefined) {
+    return;
+  }
 
-  if (filesToLoad !== undefined) {
-    const numFiles = filesToLoad.length;
-    for (let i = 0; i < numFiles; i++) {
-      let filePath = dirPath + filesToLoad[i];
-      if (fs.existsSync(filePath)) {
-        let fileData = fs.readFileSync(filePath, "utf-8");
-        let parsedVariables = YAML.parse(fileData);
+  filesToLoad.forEach((file) => {
+    let filePath = dirPath + file;
+    if (fs.existsSync(filePath)) {
+      let fileData = fs.readFileSync(filePath, "utf-8");
+      let parsedVariables = YAML.parse(fileData);
 
-        for (const key in parsedVariables) {
-          if (parsedVariables.hasOwnProperty(key)) {
-            variables[key] = parsedVariables[key];
-            replaceVariablesInSelf();
-          }
+      for (const key in parsedVariables) {
+        if (parsedVariables.hasOwnProperty(key)) {
+          variables[key] = parsedVariables[key];
+          replaceVariablesInSelf();
         }
       }
     }
-  }
+  });
 }
 
 const varRegexWithBraces = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;

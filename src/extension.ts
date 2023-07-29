@@ -18,6 +18,7 @@ import { registerRunRequest, registerRunAllRequests } from "./registerRequests";
 
 import * as fs from "fs";
 import * as YAML from "yaml";
+import { loadVariables } from "./variableReplacement";
 
 let disposables: Disposable[] = [];
 
@@ -141,6 +142,8 @@ function setEnvironment(statusBar: StatusBarItem, environment: string) {
   currentEnvironment = environment;
   statusBar.text = `Current Environment: ${currentEnvironment}`;
   statusBar.backgroundColor = undefined;
+
+  loadVariables();
 }
 
 const defaultEnvironment = {

@@ -12,13 +12,10 @@ import {
   setLowerCaseHeaderKeys,
 } from "./getRequestData";
 
-import { loadVariables } from "./variableReplacement";
-
 import { runAllTests } from "./runTests";
 import { captureVariables } from "./captureVars";
 
 export async function getIndividualResponse(commonData: any, requestData: any, name: string) {
-  loadVariables();
   requestData.name = name;
   const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
   allData.headers = setLowerCaseHeaderKeys(allData.headers);
@@ -31,7 +28,7 @@ export async function getIndividualResponse(commonData: any, requestData: any, n
   if (!reqCancelled) {
     await openEditorForIndividualReq(responseData, allData.name);
     runAllTests(name, tests, responseData, headers);
-    captureVariables(requestData.capture, responseData);
+    captureVariables(name, requestData.capture, responseData, headers);
   }
 }
 
@@ -39,7 +36,6 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
   let responses = [];
   let atleastOneExecuted = false;
 
-  loadVariables();
   for (const name in allRequests) {
     if (allRequests.hasOwnProperty(name)) {
       let request = allRequests[name];
@@ -58,7 +54,7 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
       if (!reqCancelled) {
         responses.push({ response: responseData, name: request.name });
         runAllTests(name, tests, responseData, headers);
-        captureVariables(request.capture, responseData);
+        captureVariables(name, request.capture, responseData, headers);
         atleastOneExecuted = true;
       }
     }
@@ -153,15 +149,20 @@ function constructRequest(allData: any, paramsForUrl: string) {
     },
   };
 
-  if (allData.method === "POST") {
+  if (typeof allData.method !== "string") {
+    return got.get(completeUrl, options);
+  }
+
+  const method = (allData.method as string).toLowerCase();
+  if (method === "post") {
     return got.post(completeUrl, options);
-  } else if (allData.method === "HEAD") {
+  } else if (method === "head") {
     return got.head(completeUrl, options);
-  } else if (allData.method === "PUT") {
+  } else if (method === "put") {
     return got.put(completeUrl, options);
-  } else if (allData.method === "DELETE") {
+  } else if (method === "delete") {
     return got.delete(completeUrl, options);
-  } else if (allData.method === "PATCH") {
+  } else if (method === "patch") {
     return got.patch(completeUrl, options);
   } else {
     return got.get(completeUrl, options);
