@@ -11,7 +11,8 @@ export function setVariable(key: any, value: any) {
     } else if (typeof value === "object") {
       return JSON.stringify(value);
     } else {
-      return (value as string).toString();
+      const stringVal: string = value.toString();
+      return stringVal;
     }
   }
 

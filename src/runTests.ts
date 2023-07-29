@@ -7,8 +7,8 @@ const spaceBetweenTestAndStatus = "\t|";
 const fail = "❌";
 const pass = "✅";
 
-let numFailed = 0;
-let numTests = 0;
+let numFailed: number;
+let numTests: number;
 
 function getStringIfNotScalar(data: any) {
   if (typeof data === "object") {
@@ -34,13 +34,21 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
   for (const test in tests) {
     if (tests.hasOwnProperty(test)) {
       if (test === "json") {
+        let parseError = false;
+        let jsonBody: object = {};
+
         try {
-          runJSONTests(tests.json, JSON.parse(responseData.body));
+          jsonBody = JSON.parse(responseData.body);
         } catch (err) {
           outputChannel.appendLine("JSON:");
           outputChannel.appendLine(
             `\t${fail} ${spaceBetweenTestAndStatus} JSON tests not evaluated due to error in parsing: \n\t\t${err}`,
           );
+          parseError = true;
+        }
+
+        if (!parseError) {
+          runJSONTests(tests.json, jsonBody);
         }
       } else if (test === "headers") {
         outputChannel.appendLine("Headers");
@@ -150,9 +158,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
       let compareTo = required[key];
       if (key === "$eq") {
         compareTo = getStringIfNotScalar(compareTo);
-        received = getStringIfNotScalar(received);
+        const receivedData = getStringIfNotScalar(received);
 
-        if (received === compareTo) {
+        if (receivedData === compareTo) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} `,
           );
@@ -164,9 +172,9 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
       } else if (key === "$ne") {
         compareTo = getStringIfNotScalar(compareTo);
-        received = getStringIfNotScalar(received);
+        const receivedData = getStringIfNotScalar(received);
 
-        if (received !== compareTo) {
+        if (receivedData !== compareTo) {
           outputChannel.appendLine(
             `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} `,
           );
@@ -268,11 +276,14 @@ function runObjectTests(required: any, received: any, keyName: string) {
           numFailed++;
         }
       } else if (key === "$type") {
+        if (compareTo === "null") {
+          compareTo = null;
+        }
+
         if (
           (typeof compareTo === "string" &&
-            compareTo.toLowerCase() === "array" &&
-            Array.isArray(received)) ||
-          typeof received === compareTo.toLowerCase() ||
+            ((compareTo.toLowerCase() === "array" && Array.isArray(received)) ||
+              typeof received === compareTo.toLowerCase())) ||
           (compareTo === null && received === null)
         ) {
           outputChannel.appendLine(
@@ -291,7 +302,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
 
         regexRan = true;
 
-        received = getStringIfNotScalar(received);
+        const receivedData = getStringIfNotScalar(received);
 
         let options: any;
         let regexTest: any;
@@ -316,7 +327,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
 
           let result: boolean = false;
           try {
-            result = regex.test(received as string);
+            result = regex.test(receivedData as string);
           } catch (err: any) {
             outputChannel.appendLine(
               `\t${fail} ${spaceBetweenTestAndStatus} Regex ${regexTest} \t Error: ${err}`,

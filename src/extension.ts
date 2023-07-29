@@ -24,6 +24,7 @@ let disposables: Disposable[] = [];
 
 const requiredFileEnd = ".zz-bundle.yaml";
 const varFile = "zz-envs.yaml";
+
 let dirPath: string;
 let varFilePath: string;
 

@@ -5,6 +5,35 @@ export function setHeadersToLowerCase(obj: any) {
     return undefined;
   }
 
+  function setKeyOfHeadersToLowerCase(headers: any) {
+    if (headers === undefined) {
+      return undefined;
+    }
+
+    let newObj: { [key: string]: any } = {};
+    for (const key in headers) {
+      if (headers.hasOwnProperty(key)) {
+        newObj[key.toLowerCase()] = headers[key];
+      }
+    }
+
+    return newObj;
+  }
+
+  function setNameOfHeadersToLowerCase(headers: Array<{ name: string; value: string }>): any {
+    if (headers === undefined) {
+      return undefined;
+    }
+
+    let newHeaders: Array<{ name: string; value: string }> = [];
+    headers.forEach((arrHeader) => {
+      const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
+      newHeaders.push(newHeader);
+    });
+
+    return newHeaders;
+  }
+
   obj.headers = setNameOfHeadersToLowerCase(obj.headers);
   if (obj.tests !== undefined && obj.tests.headers !== undefined) {
     obj.tests.headers = setKeyOfHeadersToLowerCase(obj.tests.headers);
@@ -14,35 +43,6 @@ export function setHeadersToLowerCase(obj: any) {
   }
 
   return obj;
-}
-
-function setKeyOfHeadersToLowerCase(headers: any) {
-  if (headers === undefined) {
-    return undefined;
-  }
-
-  let newObj: { [key: string]: any } = {};
-  for (const key in headers) {
-    if (headers.hasOwnProperty(key)) {
-      newObj[key.toLowerCase()] = headers[key];
-    }
-  }
-
-  return newObj;
-}
-
-function setNameOfHeadersToLowerCase(headers: Array<{ name: string; value: string }>): any {
-  if (headers === undefined) {
-    return undefined;
-  }
-
-  let newHeaders: Array<{ name: string; value: string }> = [];
-  headers.forEach((arrHeader) => {
-    const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
-    newHeaders.push(newHeader);
-  });
-
-  return newHeaders;
 }
 
 export function getAsStringIfDefined(body: any) {
@@ -70,8 +70,6 @@ export function getAsStringIfDefined(body: any) {
  *  simply return undefined, as before.
  */
 export function getHeadersAsJSON(objectSet: any) {
-  //If both common and request has headers then mergeData itself will make it JSON,
-  // so we can immediately return it, else we handle it ourselves
   if (objectSet === undefined || !Array.isArray(objectSet)) {
     return objectSet;
   }
