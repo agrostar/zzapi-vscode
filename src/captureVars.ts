@@ -1,8 +1,14 @@
 import jp from "jsonpath";
 import { setVariable } from "./variableReplacement";
 import { getOutputChannel } from "./extension";
+import { ResponseData } from "./models";
 
-export function captureVariables(name: string, capture: any, responseData: any, headers: any) {
+export function captureVariables(
+  name: string,
+  capture: any,
+  responseData: ResponseData,
+  headers: any,
+) {
   if (capture === undefined) {
     return;
   }
@@ -17,13 +23,21 @@ export function captureVariables(name: string, capture: any, responseData: any, 
 
         let errorInParsing = false;
         let body: object = {};
-        try {
-          body = JSON.parse(responseData.body);
-        } catch (err) {
-          outputChannel.appendLine(
-            `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}`,
-          );
+
+        if (responseData.body === undefined) {
+          outputChannel.appendLine(`\tJSON capture not evaluated, body not defined`);
           errorInParsing = true;
+        }
+
+        if(!errorInParsing){
+          try {
+            body = JSON.parse(responseData.body as string);
+          } catch (err) {
+            outputChannel.appendLine(
+              `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}`,
+            );
+            errorInParsing = true;
+          }
         }
 
         if (!errorInParsing) {

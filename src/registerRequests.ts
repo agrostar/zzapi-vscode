@@ -1,7 +1,7 @@
 import { window } from "vscode";
 import { runIndividualRequest, runAllRequests } from "./runRequests";
 
-export async function registerRunRequest(name: string) {
+export async function registerRunRequest(name: string): Promise<void> {
   const activeEditor = window.activeTextEditor;
   if (activeEditor) {
     const text = activeEditor.document.getText();
@@ -9,7 +9,7 @@ export async function registerRunRequest(name: string) {
   }
 }
 
-export async function registerRunAllRequests() {
+export async function registerRunAllRequests(): Promise<void> {
   const activeEditor = window.activeTextEditor;
   if (activeEditor) {
     const text = activeEditor.document.getText();

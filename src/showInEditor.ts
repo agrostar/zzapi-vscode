@@ -1,15 +1,16 @@
 import { window, commands, workspace } from "vscode";
 import { getEnvDetails } from "./extension";
+import { ResponseData } from "./models";
 
 let keysInContent = ["body"];
 
-export async function openEditorForIndividualReq(responseData: object, name: string) {
+export async function openEditorForIndividualReq(responseData: ResponseData, name: string) {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);
   await showContent(contentData, headersData);
 }
 
 export async function openEditorForAllRequests(
-  responses: Array<{ response: object; name: string }>,
+  responses: Array<{ response: ResponseData; name: string }>,
 ) {
   const numResponses = responses.length;
   let formattedContent = "";

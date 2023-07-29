@@ -1,4 +1,5 @@
-import { replaceVariablesInObject, replaceVariablesInArray } from "./variableReplacement";
+import { BundleParams } from "./models";
+import { replaceVariablesInObject, replaceVariablesInParams } from "./variableReplacement";
 
 export function setHeadersToLowerCase(obj: any) {
   if (obj === undefined) {
@@ -182,22 +183,22 @@ export function getMergedTests(commonTests: any, requestTests: any) {
   return mergedData;
 }
 
-export function getParamsForUrl(commonParams: Array<any>, requestParams: Array<any>) {
-  let params: Array<any>;
+export function getParamsForUrl(commonParams?: BundleParams, requestParams?: BundleParams) {
+  let mixedParams: BundleParams | undefined;
 
   if (commonParams === undefined || !Array.isArray(commonParams)) {
-    params = requestParams;
+    mixedParams = requestParams;
   } else if (requestParams === undefined || !Array.isArray(requestParams)) {
-    params = commonParams;
+    mixedParams = commonParams;
   } else {
-    params = commonParams.concat(requestParams);
+    mixedParams = commonParams.concat(requestParams);
   }
 
-  if (params === undefined || !Array.isArray(params)) {
+  if (mixedParams === undefined || !Array.isArray(mixedParams)) {
     return "";
   }
 
-  params = replaceVariablesInArray(params);
+  let params: BundleParams = replaceVariablesInParams(mixedParams);
   let paramString = "";
   let paramArray: Array<string> = [];
 

@@ -1,6 +1,7 @@
 import { getDirPath, getEnvDetails } from "./extension";
 import * as fs from "fs";
 import * as YAML from "yaml";
+import { BundleParams } from "./models";
 
 let variables: any = {};
 
@@ -59,8 +60,8 @@ function replaceVariablesInSelf() {
   variables = JSON.parse(replaceVariables(JSON.stringify(variables)));
 }
 
-export function replaceVariablesInArray(arr: Array<object>): Array<object> {
-  let newArr: Array<object> = [];
+export function replaceVariablesInParams(arr: BundleParams): BundleParams {
+  let newArr: BundleParams = [];
   arr.forEach((element) => {
     newArr.push(JSON.parse(replaceVariables(JSON.stringify(element))));
   });

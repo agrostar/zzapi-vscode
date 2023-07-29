@@ -1,4 +1,4 @@
-import got from "got";
+import got, { CancelableRequest } from "got";
 import { window, ProgressLocation } from "vscode";
 
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
@@ -14,8 +14,13 @@ import {
 
 import { runAllTests } from "./runTests";
 import { captureVariables } from "./captureVars";
+import { AllRequests, CommonData, RequestData, ResponseData } from "./models";
 
-export async function getIndividualResponse(commonData: any, requestData: any, name: string) {
+export async function getIndividualResponse(
+  commonData: CommonData,
+  requestData: RequestData,
+  name: string,
+) {
   requestData.name = name;
 
   commonData = setHeadersToLowerCase(commonData);
@@ -33,17 +38,17 @@ export async function getIndividualResponse(commonData: any, requestData: any, n
   }
 }
 
-export async function getAllResponses(commonData: any, allRequests: Array<any>) {
+export async function getAllResponses(commonData: CommonData, allRequests: AllRequests) {
   let responses = [];
   let atleastOneExecuted = false;
 
   for (const name in allRequests) {
     if (allRequests.hasOwnProperty(name)) {
-      let request = allRequests[name];
+      let request: RequestData = allRequests[name];
       request.name = name;
 
       //important to set headers to lower case before merging to ensure requestData gets
-      // precedence if there are common names. 
+      // precedence if there are common names.
       commonData = setHeadersToLowerCase(commonData);
       request = setHeadersToLowerCase(request);
       const allData = getMergedDataExceptParamsTestsCapture(commonData, request);
@@ -72,9 +77,9 @@ export async function getAllResponses(commonData: any, allRequests: Array<any>) 
 }
 
 async function individualRequestWithProgress(
-  requestData: any,
+  requestData: RequestData,
   paramsForUrl: string,
-): Promise<[boolean, object, object | undefined]> {
+): Promise<[boolean, ResponseData, object | undefined]> {
   let seconds = 0;
 
   const [cancelled, response, headers]: any = await window.withProgress(
@@ -104,52 +109,49 @@ async function individualRequestWithProgress(
       const executionTime = new Date().getTime() - startTime;
 
       clearInterval(interval);
+
       // displaying rawHeaders, testing against headers
-      if (!cancelled) {
-        response = {
-          executionTime: executionTime,
-          status: httpResponse.statusCode,
-          // statusText: httpResponse.statusMessage,
-          body: httpResponse.body as string,
-          headers: getHeadersAsString(httpResponse.rawHeaders),
-          // httpVersion: httpResponse.httpVersion,
-        };
+      response = {
+        executionTime: executionTime,
+        status: httpResponse.statusCode,
+        // statusText: httpResponse.statusMessage,
+        body: httpResponse.body as string,
+        headers: getHeadersAsString(httpResponse.rawHeaders),
+        // httpVersion: httpResponse.httpVersion,
+      };
 
-        return [false, response, httpResponse.headers];
-      }
-
-      return [cancelled, httpResponse, httpResponse.headers];
+      return [cancelled, response, httpResponse.headers];
     },
   );
 
   return [cancelled, response, headers];
 }
 
-export function getHeadersAsString(headersObj: Array<string>) {
+export function getHeadersAsString(rawHeaders: Array<string>) {
   let formattedString = "\n";
-  if (headersObj === undefined) {
+  if (rawHeaders === undefined) {
     return formattedString;
   }
 
-  const numElement = headersObj.length;
+  const numElement = rawHeaders.length;
   for (let i = 0; i < numElement - 1; i += 2) {
-    formattedString += `\t${headersObj[i]}: ${getAsStringIfDefined(headersObj[i + 1])}\n`;
+    formattedString += `\t${rawHeaders[i]}: ${getAsStringIfDefined(rawHeaders[i + 1])}\n`;
   }
 
   formattedString = formattedString.trim();
   return `\n\t${formattedString}`;
 }
 
-function constructRequest(allData: any, paramsForUrl: string) {
+function constructRequest(allData: RequestData, paramsForUrl: string) {
   let completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
   let options = {
     body: getAsStringIfDefined(allData.body),
     headers: getHeadersAsJSON(allData.headers),
-    followRedirect: allData.options.follow,
+    followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
 
     https: {
-      rejectUnauthorized: allData.options.verifySSL,
+      rejectUnauthorized: allData.options !== undefined ? allData.options.verifySSL : undefined,
     },
   };
 
