@@ -47,7 +47,7 @@ export function captureVariables(name: string, capture: any, responseData: any, 
                 outputChannel.appendLine(`\tCould not set "${key}", error: ${errorInJP}`);
               } else {
                 setVariable(key, value);
-                outputChannel.appendLine(`\tVariable "${key}" = "${value}" set`);
+                outputChannel.appendLine(`\tVariable Set : "${key}" = "${value}"`);
               }
             }
           }
@@ -62,7 +62,7 @@ export function captureVariables(name: string, capture: any, responseData: any, 
             const key = headerCaptures[headerName];
 
             setVariable(key, value);
-            outputChannel.appendLine(`\tVariable "${key}" = "${value}" set`);
+            outputChannel.appendLine(`\tVariable Set : "${key}" = "${value}"`);
           }
         }
       } else {
@@ -70,7 +70,7 @@ export function captureVariables(name: string, capture: any, responseData: any, 
         const key = capture[test];
 
         setVariable(key, value);
-        outputChannel.appendLine(`Variable "${key}" = "${value}" set`);
+        outputChannel.appendLine(`Variable Set : "${key}" = "${value}"`);
       }
     }
   }
