@@ -1,7 +1,7 @@
 import { replaceVariablesInObject, replaceVariablesInArray } from "./variableReplacement";
 
-export function setHeadersToLowerCase(obj: any) {
-  if (obj === undefined) {
+export function setHeadersToLowerCase(obj: any){
+  if(obj === undefined){
     return undefined;
   }
 
@@ -35,10 +35,10 @@ export function setHeadersToLowerCase(obj: any) {
   }
 
   obj.headers = setNameOfHeadersToLowerCase(obj.headers);
-  if (obj.tests !== undefined && obj.tests.headers !== undefined) {
+  if(obj.tests !== undefined){
     obj.tests.headers = setKeyOfHeadersToLowerCase(obj.tests.headers);
   }
-  if (obj.capture !== undefined && obj.capture.headers !== undefined) {
+  if(obj.capture !== undefined){
     obj.capture.headers = setKeyOfHeadersToLowerCase(obj.capture.headers);
   }
 
