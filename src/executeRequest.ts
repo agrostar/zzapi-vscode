@@ -8,7 +8,7 @@ import {
   getMergedDataExceptParamsTestsCapture,
   getAsStringIfDefined,
   getHeadersAsJSON,
-  getMergedTests,
+  getMergedTestsAndCapture,
   setHeadersToLowerCase,
 } from "./getRequestData";
 
@@ -29,13 +29,14 @@ export async function getIndividualResponse(
   const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
 
   const params = getParamsForUrl(commonData.params, requestData.params);
-  const tests = getMergedTests(commonData.tests, requestData.tests);
+  const tests = getMergedTestsAndCapture(commonData.tests, requestData.tests);
+  const capture = getMergedTestsAndCapture(commonData.capture, requestData.capture);
 
   let [reqCancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
   if (!reqCancelled) {
     await openEditorForIndividualReq(responseData, allData.name);
     runAllTests(name, tests, responseData, headers);
-    captureVariables(name, requestData.capture, responseData, headers);
+    captureVariables(name, capture, responseData, headers);
   }
 }
 
@@ -55,7 +56,8 @@ export async function getAllResponses(commonData: CommonData, allRequests: AllRe
       const allData = getMergedDataExceptParamsTestsCapture(commonData, request);
 
       const params = getParamsForUrl(commonData.params, request.params);
-      const tests = getMergedTests(commonData.tests, request.tests);
+      const tests = getMergedTestsAndCapture(commonData.tests, request.tests);
+      const capture = getMergedTestsAndCapture(commonData.capture, request.capture);
 
       let [reqCancelled, responseData, headers] = await individualRequestWithProgress(
         allData,
@@ -64,7 +66,7 @@ export async function getAllResponses(commonData: CommonData, allRequests: AllRe
       if (!reqCancelled) {
         responses.push({ response: responseData, name: request.name });
         runAllTests(name, tests, responseData, headers);
-        captureVariables(name, request.capture, responseData, headers);
+        captureVariables(name, capture, responseData, headers);
         atleastOneExecuted = true;
       }
     }

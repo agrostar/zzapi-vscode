@@ -109,69 +109,69 @@ export function getMergedDataExceptParamsTestsCapture(
 
   function getMergedData(commonData: any, requestData: any) {
     let mergedData = Object.assign({}, commonData, requestData);
-  
+
     for (const key in requestData) {
       if (requestData.hasOwnProperty(key)) {
         if (commonData.hasOwnProperty(key) && Array.isArray(requestData[key])) {
           let finalKeyData: { [key: string]: any } = {};
-  
+
           let currProp: any;
-  
+
           //idea: set value for each key for commonData, and then for requestData,
           //  thus, if there is a common key, then the requestData value will overwrite
           if (Array.isArray(commonData[key])) {
             currProp = commonData[key];
-  
+
             currProp.forEach((obj: { name: string; value: string }) => {
               const key = obj.name;
               const value = obj.value;
               finalKeyData[key] = value;
             });
           }
-  
+
           currProp = requestData[key];
-  
+
           currProp.forEach((obj: { name: string; value: string }) => {
             const key = obj.name;
             const value = obj.value;
             finalKeyData[key] = value;
           });
-  
+
           mergedData[key] = finalKeyData;
         }
       }
     }
-  
+
     return mergedData;
   }
 }
 
 //reason for distinction from getMergedData is because of non-array specification
 // of headers as well as non-usage of name:, value: words.
-export function getMergedTests(commonTests: any, requestTests: any) {
-  let mergedData = Object.assign({}, commonTests, requestTests);
+export function getMergedTestsAndCapture(common: any, request: any) {
+  let mergedData = Object.assign({}, common, request);
 
-  for (const test in requestTests) {
-    if (requestTests.hasOwnProperty(test)) {
-      if (commonTests.hasOwnProperty(test) && typeof requestTests[test] === "object") {
+  for (const test in request) {
+    if (request.hasOwnProperty(test)) {
+      if (common.hasOwnProperty(test) && typeof request[test] === "object") {
         let finalKeyData: { [key: string]: any } = {};
 
         //idea: set value for each key for commonTests, and then for requestTests,
         //  thus, if there is a common key, then the requestTests value will overwrite
-        if (typeof commonTests[test] === "object") {
-          for (const cTest in commonTests[test]) {
-            if (commonTests[test].hasOwnProperty(cTest)) {
+        if (typeof common[test] === "object") {
+          for (const cTest in common[test]) {
+            if (common[test].hasOwnProperty(cTest)) {
               const key = cTest;
-              const value = commonTests[test][cTest];
+              const value = common[test][cTest];
               finalKeyData[key] = value;
             }
           }
         }
 
-        for (const rTest in requestTests[test]) {
-          if (requestTests[test].hasOwnProperty(rTest)) {
+        for (const rTest in request[test]) {
+          if (request[test].hasOwnProperty(rTest)) {
             const key = rTest;
-            const value = requestTests[test][rTest];
+            const value = request[test][rTest];
             finalKeyData[key] = value;
           }
         }
