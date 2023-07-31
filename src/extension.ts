@@ -20,16 +20,20 @@ import * as YAML from "yaml";
 import { loadVariables } from "./variableReplacement";
 import { AllEnvironments } from "./models";
 
+// TODO: it is a good practice to use ALL_CAPS for global variables, especially constants.
+// This is so that we know they are global. Let's change each of these to ALL_CAPS.
 let disposables: Disposable[] = [];
 
 const requiredFileEnd = ".zz-bundle.yaml";
 const varFile = "zz-envs.yaml";
 
+// TODO: dirPath and varFilePath are ambigous. I think you mean "current dir path" etc.
+// Like working directory. If so, call them as such.
 let dirPath: string;
 let varFilePath: string;
 
 let currentEnvironment: string = "";
-let allEnvironments: AllEnvironments;
+let allEnvironments: AllEnvironments;  // TODO: a type for AllEnvironments seems unnecessary.
 
 const defaultEnvironment = {
   label: "None of the Above",
@@ -61,6 +65,12 @@ export function activate(context: ExtensionContext) {
     await registerRunAllRequests();
   });
 
+  // TODO: functions within functions are useful when you need a closure. This
+  // does not need a closure, and can be made more reusable if it is a function 
+  // on its own. Functions within functions are confusing to most developers,
+  // so we should avoid them. We can also separate all the status bar related
+  // code to a separate file/module.
+
   // implementations below
   function initialiseStatusBar() {
     setDefaultStatusBarValues();
@@ -75,6 +85,13 @@ export function activate(context: ExtensionContext) {
     });
     context.subscriptions.push(statusClick);
 
+    // There is no great advantage in making this a function and calling it above.
+    // It's simpler if it is expanded inline above.
+
+    // Also, functions normally are good to declare using the "function functionName(params)" syntax.
+    // Assigning an anonymous function to a constant makes debuggability not so good (eg, when
+    // there are stack traces). Avoid these unless the variable (like showEnvironmentOptions) 
+    // is actually a variable, and can change, or is a class method.
     const showEnvironmentOptions = () => {
       window
         .showQuickPick(environmentsToDisplay, {
@@ -94,6 +111,8 @@ export function activate(context: ExtensionContext) {
     };
   }
 
+  // TODO: since this is something that's called on change of dir or change of the file
+  // itself, let's call this loadEnvironments. Initialize is typically done only once.
   function initialiseEnvironments() {
     environmentsToDisplay = [];
     allEnvironments = {};
@@ -128,6 +147,12 @@ export function activate(context: ExtensionContext) {
     environmentsToDisplay.push(defaultEnvironment);
   }
 
+  // TODO: these are "setup" kind of functions, not an action. A better name
+  // for these would be setupEnvironmentChangeHandler, or register ... 
+  // TODO: small functions such as these can be inline, we don't need a separate
+  // function if it is being called from only one place. If it is a big function
+  // and distracts while reading another functional flow, it makes sense to separate
+  // these out for readability. This one and the next also can be inline.
   function reloadEnvironmentsOnChange() {
     const envChangeListener = workspace.onDidChangeTextDocument((event) => {
       if (event.document.uri.path === varFilePath) {
@@ -155,6 +180,9 @@ export function activate(context: ExtensionContext) {
     varFilePath = dirPath + varFile;
   }
 
+  // TODO: this won't work on windows computers for sure. There should be some
+  // JavaScript/Typescript inbuilt slash handlers for directory names. Let's use
+  // that instead of trying to do this ourselves.
   function getDirWithBackslash(activeEditor: TextEditor): string {
     const activeEditorPath = activeEditor.document.uri.path;
     const lastIndex = activeEditorPath.lastIndexOf("/");
