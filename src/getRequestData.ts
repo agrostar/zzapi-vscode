@@ -98,13 +98,6 @@ export function getMergedDataExceptParamsTestsCapture(
   commonData: CommonData,
   requestData: RequestData,
 ): any {
-  delete commonData.params,
-    requestData.params,
-    commonData.tests,
-    requestData.tests,
-    commonData.capture,
-    requestData.capture;
-
   return replaceVariablesInObject(getMergedData(commonData, requestData));
 
   function getMergedData(commonData: any, requestData: any) {

@@ -1,5 +1,6 @@
 import { window, commands, workspace } from "vscode";
-import { getEnvDetails } from "./extension";
+
+import { getEnvDetails } from "./EnvironmentSelection";
 import { ResponseData } from "./models";
 
 let keysInContent = ["body"];

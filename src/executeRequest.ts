@@ -1,8 +1,8 @@
-import got from "got";
 import { window, ProgressLocation } from "vscode";
 
-import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
+import got from "got";
 
+import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import {
   getParamsForUrl,
   getMergedDataExceptParamsTestsCapture,
@@ -11,10 +11,9 @@ import {
   getMergedTestsAndCapture,
   setHeadersToLowerCase,
 } from "./getRequestData";
-
 import { runAllTests } from "./runTests";
 import { captureVariables } from "./captureVars";
-import { AllRequests, CommonData, RequestData, ResponseData } from "./models";
+import { Requests, CommonData, RequestData, ResponseData } from "./models";
 import { getStrictStringValue } from "./variableReplacement";
 
 export async function getIndividualResponse(
@@ -26,11 +25,12 @@ export async function getIndividualResponse(
 
   commonData = setHeadersToLowerCase(commonData);
   requestData = setHeadersToLowerCase(requestData);
-  const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
 
   const params = getParamsForUrl(commonData.params, requestData.params);
   const tests = getMergedTestsAndCapture(commonData.tests, requestData.tests);
   const capture = getMergedTestsAndCapture(commonData.capture, requestData.capture);
+
+  const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
 
   let [reqCancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
   if (!reqCancelled) {
@@ -40,7 +40,10 @@ export async function getIndividualResponse(
   }
 }
 
-export async function getAllResponses(commonData: CommonData, allRequests: AllRequests) {
+export async function getAllResponses(
+  commonData: CommonData,
+  allRequests: Requests,
+) {
   let responses = [];
   let atleastOneExecuted = false;
 
@@ -49,15 +52,18 @@ export async function getAllResponses(commonData: CommonData, allRequests: AllRe
       let request: RequestData = allRequests[name];
       request.name = name;
 
+      // deep copy
+      let commonReqData = commonData;
+      commonReqData = setHeadersToLowerCase(commonReqData);
+      request = setHeadersToLowerCase(request);
+
+      const params = getParamsForUrl(commonReqData.params, request.params);
+      const tests = getMergedTestsAndCapture(commonReqData.tests, request.tests);
+      const capture = getMergedTestsAndCapture(commonReqData.capture, request.capture);
+
       //important to set headers to lower case before merging to ensure requestData gets
       // precedence if there are common names.
-      commonData = setHeadersToLowerCase(commonData);
-      request = setHeadersToLowerCase(request);
-      const allData = getMergedDataExceptParamsTestsCapture(commonData, request);
-
-      const params = getParamsForUrl(commonData.params, request.params);
-      const tests = getMergedTestsAndCapture(commonData.tests, request.tests);
-      const capture = getMergedTestsAndCapture(commonData.capture, request.capture);
+      const allData = getMergedDataExceptParamsTestsCapture(commonReqData, request);
 
       let [reqCancelled, responseData, headers] = await individualRequestWithProgress(
         allData,
@@ -73,7 +79,7 @@ export async function getAllResponses(commonData: CommonData, allRequests: AllRe
   }
 
   if (atleastOneExecuted) {
-    openEditorForAllRequests(responses);
+    await openEditorForAllRequests(responses);
   } else {
     window.showInformationMessage("ALL REQUESTS WERE CANCELLED");
   }

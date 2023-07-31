@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { getRequestPositions } from "./parseBundle";
 
-const requiredFileEnd = ".zz-bundle.yaml";
+import { getRequestPositions } from "./parseBundle";
+import { getRequiredFileEnd } from "./extension";
 
 export class CodeLensProvider implements vscode.CodeLensProvider {
   private codeLenses: vscode.CodeLens[] = [];
@@ -18,7 +18,7 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
     document: vscode.TextDocument,
     token: vscode.CancellationToken,
   ): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-    if (!document.uri.fsPath.endsWith(requiredFileEnd)) {
+    if (!document.uri.fsPath.endsWith(getRequiredFileEnd())) {
       return [];
     }
 

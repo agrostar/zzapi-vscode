@@ -3,10 +3,11 @@
 // 2. import yaml (installed library)
 // 3. models, extension (our own modules)
 
-import { getDirPath, getEnvDetails } from "./extension";
 import * as fs from "fs";
 import * as YAML from "yaml";
+import * as path from "path";
 import { BundleParams } from "./models";
+import { getCurrDirPath, getEnvDetails } from "./EnvironmentSelection";
 
 let variables: any = {};
 
@@ -27,7 +28,7 @@ export function setVariable(key: any, value: any) {
 export function loadVariables() {
   variables = {};
 
-  const dirPath = getDirPath();
+  const dirPath = getCurrDirPath();
   const [currentEnvironment, allEnvironments] = getEnvDetails();
 
   const filesToLoad: Array<string> = allEnvironments[currentEnvironment];
@@ -36,7 +37,7 @@ export function loadVariables() {
   }
 
   filesToLoad.forEach((file) => {
-    let filePath = dirPath + file;
+    let filePath = path.join(dirPath, file);
     if (fs.existsSync(filePath)) {
       let fileData = fs.readFileSync(filePath, "utf-8");
       let parsedVariables = YAML.parse(fileData);
@@ -58,7 +59,7 @@ export function loadVariables() {
 const varRegexWithBraces = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
 const varRegexWithoutBraces = /(?<!\\)\$(?:(?![0-9])[_a-zA-Z]\w*(?=\W|$))/g;
 
-export function replaceVariablesInObject(objectData: object): object | undefined {
+export function replaceVariablesInObject(objectData: any): any {
   if (objectData === undefined) {
     return undefined;
   }

@@ -1,4 +1,5 @@
 import jp from "jsonpath";
+
 import { setVariable } from "./variableReplacement";
 import { getOutputChannel } from "./extension";
 import { ResponseData } from "./models";
@@ -9,7 +10,7 @@ export function captureVariables(
   responseData: ResponseData,
   headers: any,
 ) {
-  if (capture === undefined) {
+  if (capture === undefined || Object.keys(capture).length === 0) {
     return;
   }
 

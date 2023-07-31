@@ -1,6 +1,8 @@
-import jp from "jsonpath";
-import { getOutputChannel } from "./extension";
 import { OutputChannel } from "vscode";
+
+import jp from "jsonpath";
+
+import { getOutputChannel } from "./extension";
 
 let outputChannel: OutputChannel;
 const spaceBetweenTestAndStatus = "\t|";
