@@ -154,11 +154,11 @@ function constructRequest(allData: RequestData, paramsForUrl: string) {
   let options = {
     body: getAsStringIfDefined(allData.body),
     headers: getHeadersAsJSON(allData.headers),
-    followRedirect: allData.options !== undefined ? Boolean(allData.options.follow) : undefined,
+    followRedirect: allData.options !== undefined ? (allData.options.follow) : undefined,
 
     https: {
       rejectUnauthorized:
-        allData.options !== undefined ? Boolean(allData.options.verifySSL) : undefined,
+        allData.options !== undefined ? (allData.options.verifySSL) : undefined,
     },
   };
 
