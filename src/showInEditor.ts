@@ -3,7 +3,7 @@ import { window, commands, workspace } from "vscode";
 import { getEnvDetails } from "./EnvironmentSelection";
 import { ResponseData } from "./models";
 
-let keysInContent = ["body"];
+const keysInContent = ["body"];
 
 export async function openEditorForIndividualReq(responseData: ResponseData, name: string) {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);

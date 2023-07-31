@@ -40,10 +40,7 @@ export async function getIndividualResponse(
   }
 }
 
-export async function getAllResponses(
-  commonData: CommonData,
-  allRequests: Requests,
-) {
+export async function getAllResponses(commonData: CommonData, allRequests: Requests) {
   let responses = [];
   let atleastOneExecuted = false;
 
@@ -53,14 +50,13 @@ export async function getAllResponses(
       request.name = name;
 
       // deep copy
-      let commonReqData = commonData;
+      let commonReqData = JSON.parse(JSON.stringify(commonData)) as typeof commonData; 
       commonReqData = setHeadersToLowerCase(commonReqData);
       request = setHeadersToLowerCase(request);
 
       const params = getParamsForUrl(commonReqData.params, request.params);
       const tests = getMergedTestsAndCapture(commonReqData.tests, request.tests);
       const capture = getMergedTestsAndCapture(commonReqData.capture, request.capture);
-
       //important to set headers to lower case before merging to ensure requestData gets
       // precedence if there are common names.
       const allData = getMergedDataExceptParamsTestsCapture(commonReqData, request);
@@ -69,6 +65,7 @@ export async function getAllResponses(
         allData,
         params,
       );
+
       if (!reqCancelled) {
         responses.push({ response: responseData, name: request.name });
         runAllTests(name, tests, responseData, headers);
@@ -157,10 +154,11 @@ function constructRequest(allData: RequestData, paramsForUrl: string) {
   let options = {
     body: getAsStringIfDefined(allData.body),
     headers: getHeadersAsJSON(allData.headers),
-    followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
+    followRedirect: allData.options !== undefined ? Boolean(allData.options.follow) : undefined,
 
     https: {
-      rejectUnauthorized: allData.options !== undefined ? allData.options.verifySSL : undefined,
+      rejectUnauthorized:
+        allData.options !== undefined ? Boolean(allData.options.verifySSL) : undefined,
     },
   };
 

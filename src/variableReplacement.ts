@@ -5,7 +5,9 @@
 
 import * as fs from "fs";
 import * as YAML from "yaml";
+
 import * as path from "path";
+
 import { BundleParams } from "./models";
 import { getCurrDirPath, getEnvDetails } from "./EnvironmentSelection";
 
@@ -43,13 +45,8 @@ export function loadVariables() {
       let parsedVariables = YAML.parse(fileData);
 
       for (const key in parsedVariables) {
-        // TODO: hasOwnProperty is not needed, because we are iterating over the keys
-        // of the object. We don't need to be this defensive, especially when the parsedVariables
-        // has been initialized just here, and we know that it is the output of YAML parse.
-        if (parsedVariables.hasOwnProperty(key)) {
-          variables[key] = parsedVariables[key];
-          replaceVariablesInSelf();
-        }
+        variables[key] = parsedVariables[key];
+        replaceVariablesInSelf();
       }
     }
   });
@@ -68,18 +65,27 @@ export function replaceVariablesInObject(objectData: any): any {
   // more readable and also more efficient by replacing only the param/header values
   // JSON.stringify has the danger of replacing variables in the parameter name also,
   // which I am not sure is safe.
-  return JSON.parse(replaceVariables(JSON.stringify(objectData)));
+
+  for (const key in objectData) {
+    if (objectData.hasOwnProperty(key)) {
+      if (typeof objectData[key] === "object") {
+        objectData[key] = replaceVariablesInObject(objectData[key]);
+      } else if (typeof objectData[key] === "string") {
+        objectData[key] = replaceVariables(objectData[key]);
+      }
+    }
+  }
+  return objectData;
 }
 
 function replaceVariablesInSelf() {
-  variables = JSON.parse(replaceVariables(JSON.stringify(variables)));
+  variables = replaceVariablesInObject(variables);
 }
 
 export function replaceVariablesInParams(arr: BundleParams): BundleParams {
   let newArr: BundleParams = [];
   arr.forEach((element) => {
-    // TODO: let us only replace variables in the param values.
-    newArr.push(JSON.parse(replaceVariables(JSON.stringify(element))));
+    newArr.push(replaceVariablesInObject(element));
   });
 
   return newArr;

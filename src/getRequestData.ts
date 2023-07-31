@@ -98,6 +98,13 @@ export function getMergedDataExceptParamsTestsCapture(
   commonData: CommonData,
   requestData: RequestData,
 ): any {
+  delete commonData.params;
+  delete requestData.params;
+  delete commonData.tests;
+  delete requestData.tests;
+  delete commonData.capture;
+  delete requestData.capture;
+  
   return replaceVariablesInObject(getMergedData(commonData, requestData));
 
   function getMergedData(commonData: any, requestData: any) {
@@ -142,7 +149,7 @@ export function getMergedDataExceptParamsTestsCapture(
 //reason for distinction from getMergedData is because of non-array specification
 // of headers as well as non-usage of name:, value: words.
 export function getMergedTestsAndCapture(common: any, request: any) {
-  let mergedData = Object.assign({}, common, request);
+  let mergedData = replaceVariablesInObject(Object.assign({}, common, request));
 
   for (const test in request) {
     if (request.hasOwnProperty(test)) {
