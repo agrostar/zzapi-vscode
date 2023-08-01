@@ -3,7 +3,7 @@ import { window, commands, workspace } from "vscode";
 import { getEnvDetails } from "./EnvironmentSelection";
 import { ResponseData } from "./models";
 
-const keysInContent = ["body"];
+const KEYS_IN_BODY = ["body"];
 
 export async function openEditorForIndividualReq(responseData: ResponseData, name: string) {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);
@@ -48,7 +48,7 @@ function getDataOfIndReqAsString(
     if (responseData.hasOwnProperty(key)) {
       let value = responseData[key];
 
-      if (keysInContent.includes(key)) {
+      if (KEYS_IN_BODY.includes(key)) {
         contentData += `${key}: ${value}\n`;
       } else {
         headersData += `${key}: ${value}\n`;

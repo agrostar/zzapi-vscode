@@ -11,7 +11,7 @@ import * as path from "path";
 import { BundleParams } from "./models";
 import { getCurrDirPath, getEnvDetails } from "./EnvironmentSelection";
 
-let variables: any = {};
+let VARIABLES: any = {};
 
 export function getStrictStringValue(value: any): string {
   if (value === undefined) {
@@ -24,11 +24,11 @@ export function getStrictStringValue(value: any): string {
 }
 
 export function setVariable(key: any, value: any) {
-  variables[key] = getStrictStringValue(value);
+  VARIABLES[key] = getStrictStringValue(value);
 }
 
 export function loadVariables() {
-  variables = {};
+  VARIABLES = {};
 
   const dirPath = getCurrDirPath();
   const [currentEnvironment, allEnvironments] = getEnvDetails();
@@ -45,7 +45,7 @@ export function loadVariables() {
       let parsedVariables = YAML.parse(fileData);
 
       for (const key in parsedVariables) {
-        variables[key] = parsedVariables[key];
+        VARIABLES[key] = parsedVariables[key];
         replaceVariablesInSelf();
       }
     }
@@ -79,7 +79,7 @@ export function replaceVariablesInObject(objectData: any): any {
 }
 
 function replaceVariablesInSelf() {
-  variables = replaceVariablesInObject(variables);
+  VARIABLES = replaceVariablesInObject(VARIABLES);
 }
 
 export function replaceVariablesInParams(arr: BundleParams): BundleParams {
@@ -94,7 +94,7 @@ export function replaceVariablesInParams(arr: BundleParams): BundleParams {
 function replaceVariables(text: string): string {
   const outputText = text
     .replace(varRegexWithBraces, (match, variable) => {
-      const varVal = variables[variable];
+      const varVal = VARIABLES[variable];
       if (varVal !== undefined) {
         return varVal;
       }
@@ -105,7 +105,7 @@ function replaceVariables(text: string): string {
       if (variable === undefined) {
         return match;
       }
-      const varVal = variables[variable];
+      const varVal = VARIABLES[variable];
       if (varVal !== undefined) {
         return varVal;
       }

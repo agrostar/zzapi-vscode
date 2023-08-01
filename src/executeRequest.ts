@@ -49,7 +49,6 @@ export async function getAllResponses(commonData: CommonData, allRequests: Reque
       let request: RequestData = allRequests[name];
       request.name = name;
 
-      // deep copy
       let commonReqData = JSON.parse(JSON.stringify(commonData)) as typeof commonData; 
       commonReqData = setHeadersToLowerCase(commonReqData);
       request = setHeadersToLowerCase(request);
@@ -57,6 +56,7 @@ export async function getAllResponses(commonData: CommonData, allRequests: Reque
       const params = getParamsForUrl(commonReqData.params, request.params);
       const tests = getMergedTestsAndCapture(commonReqData.tests, request.tests);
       const capture = getMergedTestsAndCapture(commonReqData.capture, request.capture);
+
       //important to set headers to lower case before merging to ensure requestData gets
       // precedence if there are common names.
       const allData = getMergedDataExceptParamsTestsCapture(commonReqData, request);
@@ -149,9 +149,9 @@ export function getHeadersAsString(rawHeaders: Array<string>) {
 }
 
 function constructRequest(allData: RequestData, paramsForUrl: string) {
-  let completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
+  const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
-  let options = {
+  const options = {
     body: getAsStringIfDefined(allData.body),
     headers: getHeadersAsJSON(allData.headers),
     followRedirect: allData.options !== undefined ? (allData.options.follow) : undefined,

@@ -4,13 +4,13 @@ import jp from "jsonpath";
 
 import { getOutputChannel } from "./extension";
 
-let outputChannel: OutputChannel;
-const spaceBetweenTestAndStatus = "\t|";
-const fail = "❌";
-const pass = "✅";
+let OUTPUT_CHANNEL: OutputChannel;
+const GAP = "\t|";
+const FAIL = "❌";
+const PASS = "✅";
 
-let numFailed: number;
-let numTests: number;
+let NUM_FAILED: number;
+let NUM_TESTS: number;
 
 function getStringIfNotScalar(data: any) {
   if (typeof data === "object") {
@@ -25,14 +25,14 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
     return;
   }
 
-  outputChannel = getOutputChannel();
-  outputChannel.show();
+  OUTPUT_CHANNEL = getOutputChannel();
+  OUTPUT_CHANNEL.show();
 
-  numFailed = 0;
-  numTests = 0;
+  NUM_FAILED = 0;
+  NUM_TESTS = 0;
 
-  outputChannel.appendLine("--------------------------------------");
-  outputChannel.appendLine(`Running Request '${name}'\n`);
+  OUTPUT_CHANNEL.appendLine("--------------------------------------");
+  OUTPUT_CHANNEL.appendLine(`Running Request '${name}'\n`);
   for (const test in tests) {
     if (tests.hasOwnProperty(test)) {
       if (test === "json") {
@@ -42,9 +42,9 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
         try {
           jsonBody = JSON.parse(responseData.body);
         } catch (err) {
-          outputChannel.appendLine("JSON:");
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} JSON tests not evaluated due to error in parsing: \n\t\t${err}`,
+          OUTPUT_CHANNEL.appendLine("JSON:");
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} JSON tests not evaluated due to error in parsing: \n\t\t${err}`,
           );
           parseError = true;
         }
@@ -53,7 +53,7 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
           runJSONTests(tests.json, jsonBody);
         }
       } else if (test === "headers") {
-        outputChannel.appendLine("Headers");
+        OUTPUT_CHANNEL.appendLine("Headers");
 
         const headerTests = tests[test];
         for (const headerTest in headerTests) {
@@ -65,16 +65,16 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
               required = getStringIfNotScalar(required);
               received = getStringIfNotScalar(received);
               if (received === required) {
-                outputChannel.appendLine(
-                  `\t${pass} ${spaceBetweenTestAndStatus} ${headerTest} : ${required}`,
+                OUTPUT_CHANNEL.appendLine(
+                  `\t${PASS} ${GAP} ${headerTest} : ${required}`,
                 );
               } else {
-                outputChannel.appendLine(
-                  `\t${fail} ${spaceBetweenTestAndStatus} ${headerTest} : ${required} \t Received ${received}`,
+                OUTPUT_CHANNEL.appendLine(
+                  `\t${FAIL} ${GAP} ${headerTest} : ${required} ${GAP} Received ${received}`,
                 );
-                numFailed++;
+                NUM_FAILED++;
               }
-              numTests++;
+              NUM_TESTS++;
             } else {
               runObjectTests(required, received, test);
             }
@@ -88,14 +88,14 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
           required = getStringIfNotScalar(required);
           received = getStringIfNotScalar(received);
           if (received === required) {
-            outputChannel.appendLine(`${pass} ${spaceBetweenTestAndStatus} ${test} : ${required}`);
+            OUTPUT_CHANNEL.appendLine(`${PASS} ${GAP} ${test} : ${required}`);
           } else {
-            outputChannel.appendLine(
-              `${fail} ${spaceBetweenTestAndStatus} ${test} : ${required} \t Received ${received}`,
+            OUTPUT_CHANNEL.appendLine(
+              `${FAIL} ${GAP} ${test} : ${required} ${GAP} Received ${received}`,
             );
-            numFailed++;
+            NUM_FAILED++;
           }
-          numTests++;
+          NUM_TESTS++;
         } else {
           runObjectTests(required, received, test);
         }
@@ -103,19 +103,19 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
     }
   }
 
-  const numPassed = numTests - numFailed;
-  if (numFailed > 0) {
-    outputChannel.appendLine(
-      `\n${fail} FAILED: ${numFailed}/${numTests}\t\t${pass} PASSED: ${numPassed}/${numTests}`,
+  const numPassed = NUM_TESTS - NUM_FAILED;
+  if (NUM_FAILED > 0) {
+    OUTPUT_CHANNEL.appendLine(
+      `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\t\t${PASS} PASSED: ${numPassed}/${NUM_TESTS}`,
     );
   } else {
-    outputChannel.appendLine(`\n${pass} PASSED: ${numPassed}/${numTests}`);
+    OUTPUT_CHANNEL.appendLine(`\n${PASS} PASSED: ${numPassed}/${NUM_TESTS}`);
   }
-  outputChannel.appendLine("--------------------------------------");
+  OUTPUT_CHANNEL.appendLine("--------------------------------------");
 }
 
 function runJSONTests(jsonTests: any, responseContent: object) {
-  outputChannel.appendLine("JSON:");
+  OUTPUT_CHANNEL.appendLine("JSON:");
   for (const key in jsonTests) {
     if (jsonTests.hasOwnProperty(key)) {
       let required = jsonTests[key];
@@ -125,14 +125,14 @@ function runJSONTests(jsonTests: any, responseContent: object) {
         required = getStringIfNotScalar(required);
         received = getStringIfNotScalar(received);
         if (received === required) {
-          outputChannel.appendLine(`\t${pass} ${spaceBetweenTestAndStatus} ${key} : ${required}`);
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${key} : ${required}`);
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${key} : ${required} \t Received ${received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${key} : ${required} ${GAP} Received ${received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
-        numTests++;
+        NUM_TESTS++;
       } else {
         runObjectTests(required, received, key);
       }
@@ -163,72 +163,72 @@ function runObjectTests(required: any, received: any, keyName: string) {
         const receivedData = getStringIfNotScalar(received);
 
         if (receivedData === compareTo) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} `,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} ${keyName} == ${compareTo} `,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} == ${compareTo} \t Received ${received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} == ${compareTo} ${GAP} Received ${received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$ne") {
         compareTo = getStringIfNotScalar(compareTo);
         const receivedData = getStringIfNotScalar(received);
 
         if (receivedData !== compareTo) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} `,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} ${keyName} != ${compareTo} `,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} != ${compareTo} \t Received ${received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} != ${compareTo} ${GAP} Received ${received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$lt") {
         if (received < compareTo) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} `,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} ${keyName} < ${compareTo} `,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} < ${compareTo} \t Received ${received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} < ${compareTo} ${GAP} Received ${received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$gt") {
         if (received > compareTo) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo}  `,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} ${keyName} > ${compareTo}  `,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} > ${compareTo} \t Received ${received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} > ${compareTo} ${GAP} Received ${received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$lte") {
         if (received <= compareTo) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo}  `,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} ${keyName} <= ${compareTo}  `,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} <= ${compareTo} \t Received ${received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} <= ${compareTo} ${GAP} Received ${received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$gte") {
         if (received >= compareTo) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} `,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} ${keyName} >= ${compareTo} `,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} >= ${compareTo} \t Received ${received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} >= ${compareTo} ${GAP} Received ${received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$size") {
         let receivedLen: number | undefined = undefined;
@@ -239,43 +239,43 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
 
         if (!canBeInteger(compareTo)) {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t ${compareTo} is not an integer`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not an integer`,
           );
-          numFailed++;
-          numTests++;
+          NUM_FAILED++;
+          NUM_TESTS++;
 
           continue;
         }
 
         if (receivedLen === parseInt(compareTo)) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} `,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} size of ${keyName} == ${compareTo} `,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} size of ${keyName} == ${compareTo} \t Received ${received} of size ${receivedLen}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} Received ${received} of size ${receivedLen}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$exists") {
         if (typeof compareTo !== "boolean") {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} exists \t ${compareTo} is not a boolean`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} exists ${GAP} ${compareTo} is not a boolean`,
           );
-          numFailed++;
-          numTests++;
+          NUM_FAILED++;
+          NUM_TESTS++;
 
           continue;
         }
 
         if ((received !== undefined) === compareTo) {
-          outputChannel.appendLine(`\t${pass} ${spaceBetweenTestAndStatus} ${keyName} exists`);
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} exists`);
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} does not exist`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} ${keyName} does not exist`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$type") {
         if (compareTo === "null") {
@@ -288,14 +288,14 @@ function runObjectTests(required: any, received: any, keyName: string) {
               typeof received === compareTo.toLowerCase())) ||
           (compareTo === null && received === null)
         ) {
-          outputChannel.appendLine(
-            `\t${pass} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${PASS} ${GAP} type of ${keyName} is ${compareTo}`,
           );
         } else {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} type of ${keyName} is ${compareTo} \t Received ${received} of type ${typeof received}`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${typeof received}`,
           );
-          numFailed++;
+          NUM_FAILED++;
         }
       } else if (key === "$regex" || key === "$options") {
         if (regexRan) {
@@ -317,10 +317,10 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
 
         if (regexTest === undefined) {
-          outputChannel.appendLine(
-            `\t${fail} ${spaceBetweenTestAndStatus} Regex ${regexTest} is not specified`,
+          OUTPUT_CHANNEL.appendLine(
+            `\t${FAIL} ${GAP} Regex ${regexTest} is not specified`,
           );
-          numFailed++;
+          NUM_FAILED++;
         } else {
           let regexStr = getStringIfNotScalar(regexTest);
           regexStr = regexStr.toString();
@@ -331,30 +331,30 @@ function runObjectTests(required: any, received: any, keyName: string) {
           try {
             result = regex.test(receivedData as string);
           } catch (err: any) {
-            outputChannel.appendLine(
-              `\t${fail} ${spaceBetweenTestAndStatus} Regex ${regexTest} \t Error: ${err}`,
+            OUTPUT_CHANNEL.appendLine(
+              `\t${FAIL} ${GAP} Regex ${regexTest} ${GAP} Error: ${err}`,
             );
-            numFailed++;
-            numTests++;
+            NUM_FAILED++;
+            NUM_TESTS++;
 
             continue;
           }
 
           if (result) {
-            outputChannel.appendLine(`\t${pass} Regex ${regexTest} on ${received} is succesful`);
+            OUTPUT_CHANNEL.appendLine(`\t${PASS} Regex ${regexTest} on ${received} is succesful`);
           } else {
-            outputChannel.appendLine(`\t${pass} Regex ${regexTest} on ${received} is unsuccesul`);
-            numFailed++;
+            OUTPUT_CHANNEL.appendLine(`\t${PASS} Regex ${regexTest} on ${received} is unsuccesul`);
+            NUM_FAILED++;
           }
         }
       } else {
-        outputChannel.appendLine(
-          `\t${fail} ${spaceBetweenTestAndStatus} ${keyName} ${key} ${compareTo} \t Invalid Operator ${key}`,
+        OUTPUT_CHANNEL.appendLine(
+          `\t${FAIL} ${GAP} ${keyName} ${key} ${compareTo} ${GAP} Invalid Operator ${key}`,
         );
-        numFailed++;
+        NUM_FAILED++;
       }
 
-      numTests++;
+      NUM_TESTS++;
     }
   }
 }
