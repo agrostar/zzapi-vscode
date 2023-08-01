@@ -1,17 +1,16 @@
 import { replaceVariablesInObject, replaceVariablesInParams } from "./core/variableReplacement";
-import { CombinedData, CommonData, Header, Param, RequestData } from "./models";
+import { CombinedData, CommonData, Header, Param, RequestData, TestsAndCaptures } from "./models";
 
 export function splitParsedData(
-  common: CommonData,
+  common: CommonData | undefined,
   request: RequestData,
-): [params: string, tests: any, capture: any, allData: CombinedData] {
+): [params: string, tests: TestsAndCaptures, capture: TestsAndCaptures, allData: CombinedData] {
   // making deep copies of the objects because we will be deleting some data
   let commonData =
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as typeof common);
   let requestData = JSON.parse(JSON.stringify(request)) as typeof request;
 
-  commonData = setHeadersToLowerCase(commonData);
-  requestData = setHeadersToLowerCase(requestData);
+  [commonData, requestData] = setHeadersToLowerCase(commonData, requestData);
 
   const params = getParamsForUrl(
     commonData === undefined ? undefined : commonData.params,
@@ -31,12 +30,8 @@ export function splitParsedData(
   return [params, tests, capture, allData];
 }
 
-function setKeyOfHeadersObjectToLowerCase(headers: any) {
-  if (headers === undefined) {
-    return undefined;
-  }
-
-  let newObj: { [key: string]: any } = {};
+function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }) {
+  let newObj: { [key: string]: string | object } = {};
   for (const key in headers) {
     if (headers.hasOwnProperty(key)) {
       newObj[key.toLowerCase()] = headers[key];
@@ -46,11 +41,7 @@ function setKeyOfHeadersObjectToLowerCase(headers: any) {
   return newObj;
 }
 
-function setNameOfHeadersArrayToLowerCase(headers: Array<Header> | undefined): any {
-  if (headers === undefined) {
-    return undefined;
-  }
-
+function setNameOfHeadersArrayToLowerCase(headers: Array<Header>): Array<Header> {
   let newHeaders: Array<Header> = [];
   headers.forEach((arrHeader) => {
     const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
@@ -60,26 +51,39 @@ function setNameOfHeadersArrayToLowerCase(headers: Array<Header> | undefined): a
   return newHeaders;
 }
 
-export function setHeadersToLowerCase(obj: any) {
-  if (obj === undefined) {
-    return undefined;
+export function setHeadersToLowerCase(
+  common: CommonData | undefined,
+  request: RequestData,
+): [CommonData | undefined, RequestData] {
+  if (common !== undefined) {
+    if (common.headers !== undefined) {
+      common.headers = setNameOfHeadersArrayToLowerCase(common.headers);
+    }
+    if (common.tests !== undefined && common.tests.headers !== undefined) {
+      common.tests.headers = setKeyOfHeadersObjectToLowerCase(common.tests.headers);
+    }
+    if (common.capture !== undefined && common.capture.headers !== undefined) {
+      common.capture.headers = setKeyOfHeadersObjectToLowerCase(common.capture.headers);
+    }
   }
 
-  obj.headers = setNameOfHeadersArrayToLowerCase(obj.headers);
-  if (obj.tests !== undefined && obj.tests.headers !== undefined) {
-    obj.tests.headers = setKeyOfHeadersObjectToLowerCase(obj.tests.headers);
+  if (request.headers !== undefined) {
+    request.headers = setNameOfHeadersArrayToLowerCase(request.headers);
   }
-  if (obj.capture !== undefined && obj.capture.headers !== undefined) {
-    obj.capture.headers = setKeyOfHeadersObjectToLowerCase(obj.capture.headers);
+  if (request.tests !== undefined && request.tests.headers !== undefined) {
+    request.tests.headers = setKeyOfHeadersObjectToLowerCase(request.tests.headers);
+  }
+  if (request.capture !== undefined && request.capture.headers !== undefined) {
+    request.capture.headers = setKeyOfHeadersObjectToLowerCase(request.capture.headers);
   }
 
-  return obj;
+  return [common, request];
 }
 
 function getParamsForUrl(
   commonParams: Array<Param> | undefined,
   requestParams: Array<Param> | undefined,
-) {
+): string {
   let mixedParams: Array<Param> | undefined;
 
   if (commonParams === undefined || !Array.isArray(commonParams)) {
@@ -111,36 +115,39 @@ function getParamsForUrl(
   return `?${paramString}`;
 }
 
-export function getMergedTestsAndCapture(common: any, request: any) {
+export function getMergedTestsAndCapture(
+  common: TestsAndCaptures | undefined,
+  request: TestsAndCaptures | undefined,
+) {
   let mergedData = replaceVariablesInObject(Object.assign({}, common, request));
 
   for (const test in request) {
-    if (request.hasOwnProperty(test)) {
-      if (common.hasOwnProperty(test) && typeof request[test] === "object") {
-        let finalKeyData: { [key: string]: any } = {};
+    const requestValue = request[test as keyof typeof request];
+    if (common !== undefined && common.hasOwnProperty(test) && typeof requestValue === "object") {
+      let finalKeyData: { [key: string]: any } = {};
 
-        //idea: set value for each key for commonTests, and then for requestTests,
-        //  thus, if there is a common key, then the requestTests value will overwrite
-        if (typeof common[test] === "object") {
-          for (const cTest in common[test]) {
-            if (common[test].hasOwnProperty(cTest)) {
-              const key = cTest;
-              const value = common[test][cTest];
-              finalKeyData[key] = value;
-            }
-          }
-        }
-
-        for (const rTest in request[test]) {
-          if (request[test].hasOwnProperty(rTest)) {
-            const key = rTest;
-            const value = request[test][rTest];
+      //idea: set value for each key for commonTests, and then for requestTests,
+      //  thus, if there is a common key, then the requestTests value will overwrite
+      const commonValue = common[test as keyof typeof common];
+      if (typeof commonValue === "object") {
+        for (const cTest in commonValue as CommonData) {
+          if (commonValue !== undefined && commonValue.hasOwnProperty(cTest)) {
+            const key = cTest;
+            const value = commonValue[cTest as keyof typeof commonValue];
             finalKeyData[key] = value;
           }
         }
-
-        mergedData[test] = finalKeyData;
       }
+
+      for (const rTest in requestValue) {
+        if (requestValue.hasOwnProperty(rTest)) {
+          const key = rTest;
+          const value = requestValue[rTest as keyof typeof requestValue];
+          finalKeyData[key] = value;
+        }
+      }
+
+      mergedData[test] = finalKeyData;
     }
   }
 

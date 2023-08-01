@@ -33,7 +33,7 @@ export async function openEditorForAllRequests(
 }
 
 function getDataOfIndReqAsString(
-  responseData: any,
+  responseData: ResponseData,
   name: string,
 ): [contentData: string, headersData: string] {
   let currentEnvironment = getEnvDetails()[0];
@@ -46,7 +46,7 @@ function getDataOfIndReqAsString(
 
   for (const key in responseData) {
     if (responseData.hasOwnProperty(key)) {
-      let value = responseData[key];
+      let value = responseData[key as keyof ResponseData];
 
       if (KEYS_IN_BODY.includes(key)) {
         contentData += `${key}: ${value}\n`;

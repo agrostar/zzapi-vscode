@@ -4,12 +4,11 @@ import got from "got";
 
 import { ResponseData, CombinedData } from "../models";
 import { getStrictStringValue } from "./variableReplacement";
-import { getAsStringIfDefined, getHeadersAsJSON } from "./getRequestData";
 
 export async function individualRequestWithProgress(
   requestData: CombinedData,
   paramsForUrl: string,
-): Promise<[boolean, ResponseData, object | undefined]> {
+): Promise<[boolean, ResponseData, { [key: string]: string } | undefined]> {
   let seconds = 0;
 
   const [cancelled, response, headers]: any = await window.withProgress(
@@ -119,6 +118,56 @@ function getURL(baseUrl: string | undefined, url: string | undefined, paramsForU
   }
 
   return completeUrl + paramsForUrl;
+}
+
+export function getAsStringIfDefined(body: any) {
+  if (body === undefined) {
+    return undefined;
+  }
+  if (typeof body === "object") {
+    return JSON.stringify(body);
+  }
+
+  return body.toString();
+}
+
+/**
+ * @param objectSet May be an array of type {name: "name",  value: "value"}, or a JSON
+ *  object, or may remain undefined.
+ * @returns a JSON version of type {"name": "value", ....} that can be passed
+ *  as an option in got.
+ * If headers are defined in both the request itself as well as in "common",
+ *  then the objectSet may already be converted by the
+ *  @function getMergedDataExceptParamsAndTests, which is why we pass it back if it
+ *  it not an array. Else, we call @function getObjectSetAsJSON to perform the above
+ *  stated operation.
+ * If headers are not defined, then we do not want it as an option in got, so we
+ *  simply return undefined, as before.
+ */
+export function getHeadersAsJSON(
+  objectSet: { [key: string]: string } | Array<{ name: string; value: string }> | undefined,
+) {
+  if (objectSet === undefined || !Array.isArray(objectSet)) {
+    return objectSet;
+  }
+
+  return getObjectSetAsJSON(objectSet);
+
+  function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
+    let finalObject: { [key: string]: any } = {};
+
+    const numElements = objectSet.length;
+    for (let i = 0; i < numElements; i++) {
+      const currObj: { name: string; value: any } = objectSet[i];
+
+      const key = currObj.name;
+      const value = currObj.value;
+
+      finalObject[key] = value;
+    }
+
+    return finalObject;
+  }
 }
 
 async function executeHttpRequest(httpRequest: any) {

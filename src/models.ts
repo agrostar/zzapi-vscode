@@ -9,17 +9,24 @@ export interface Param {
   encode?: boolean;
 }
 
-export interface CommonData {
-  baseUrl?: string;
+export interface TestsAndCaptures {
+  json?: { [key: string]: any };
+  body?: object | string;
+  status?: number;
+  headers?: { [key: string]: string | object };
+}
 
-  url?: string;
-  method?: string;
-  headers?: Array<Header>;
-  params?: Array<Param>;
-  body?: string;
-  options?: { follow?: boolean; verifySSL?: boolean };
-  tests?: any;
-  capture?: any;
+export interface CommonData {
+  "baseUrl"?: string;
+
+  "url"?: string;
+  "method"?: string;
+  "headers"?: Array<Header>;
+  "params"?: Array<Param>;
+  "body"?: string;
+  "options"?: { follow?: boolean; verifySSL?: boolean };
+  "tests"?: TestsAndCaptures;
+  "capture"?: TestsAndCaptures;
 }
 export interface RequestData {
   name: string;
@@ -30,10 +37,11 @@ export interface RequestData {
   params?: Array<Param>;
   body?: string;
   options?: { follow?: boolean; verifySSL?: boolean };
-  tests?: any;
-  capture?: any;
+  tests?: TestsAndCaptures;
+  capture?: TestsAndCaptures;
 }
 
+//combined data apart from params, tests, captures
 export interface CombinedData {
   name: string;
   baseUrl?: string;

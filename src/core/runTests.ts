@@ -3,6 +3,7 @@ import { OutputChannel } from "vscode";
 import jp from "jsonpath";
 
 import { getOutputChannel } from "../extension";
+import { ResponseData, TestsAndCaptures } from "../models";
 
 let OUTPUT_CHANNEL: OutputChannel;
 const GAP = "\t|";
@@ -20,7 +21,12 @@ function getStringIfNotScalar(data: any) {
   return data;
 }
 
-export function runAllTests(name: string, tests: any, responseData: any, headers: any) {
+export function runAllTests(
+  name: string,
+  tests: TestsAndCaptures,
+  responseData: ResponseData,
+  headers: { [key: string]: string } | undefined,
+) {
   if (tests === undefined || Object.keys(tests).length === 0) {
     return;
   }
@@ -36,17 +42,29 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
   for (const test in tests) {
     if (tests.hasOwnProperty(test)) {
       if (test === "json") {
+        if(tests.json === undefined){
+          continue;
+        }
+
         let parseError = false;
         let jsonBody: object = {};
 
-        try {
-          jsonBody = JSON.parse(responseData.body);
-        } catch (err) {
+        if (responseData.body === undefined) {
           OUTPUT_CHANNEL.appendLine("JSON:");
           OUTPUT_CHANNEL.appendLine(
-            `\t${FAIL} ${GAP} JSON tests not evaluated due to error in parsing: \n\t\t${err}`,
+            `\t${FAIL} ${GAP} JSON tests not evaluated due body being undefined`,
           );
           parseError = true;
+        } else {
+          try {
+            jsonBody = JSON.parse(responseData.body);
+          } catch (err) {
+            OUTPUT_CHANNEL.appendLine("JSON:");
+            OUTPUT_CHANNEL.appendLine(
+              `\t${FAIL} ${GAP} JSON tests not evaluated due to error in parsing: \n\t\t${err}`,
+            );
+            parseError = true;
+          }
         }
 
         if (!parseError) {
@@ -79,8 +97,8 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
           }
         }
       } else {
-        let required = tests[test];
-        let received = responseData[test];
+        let required = tests[test as keyof TestsAndCaptures];
+        let received = responseData[test as keyof ResponseData];
 
         if (typeof required !== "object") {
           required = getStringIfNotScalar(required);
@@ -112,7 +130,7 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
   OUTPUT_CHANNEL.appendLine("--------------------------------------");
 }
 
-function runJSONTests(jsonTests: any, responseContent: object) {
+function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object) {
   OUTPUT_CHANNEL.appendLine("JSON:");
   for (const key in jsonTests) {
     if (jsonTests.hasOwnProperty(key)) {
