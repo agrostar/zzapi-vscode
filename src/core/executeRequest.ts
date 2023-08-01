@@ -1,6 +1,6 @@
 import { window, ProgressLocation } from "vscode";
 
-import got from "got";
+import got, {CancelableRequest, Response} from "got";
 
 import { ResponseData, CombinedData } from "../models";
 import { getStrictStringValue } from "./variableReplacement";
@@ -170,7 +170,7 @@ export function getHeadersAsJSON(
   }
 }
 
-async function executeHttpRequest(httpRequest: any) {
+async function executeHttpRequest(httpRequest: CancelableRequest<Response<string>>) {
   try {
     return await httpRequest;
   } catch (e: any) {

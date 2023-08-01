@@ -42,7 +42,7 @@ export function runAllTests(
   for (const test in tests) {
     if (tests.hasOwnProperty(test)) {
       if (test === "json") {
-        if(tests.json === undefined){
+        if (tests.json === undefined) {
           continue;
         }
 
@@ -168,7 +168,7 @@ function getValueForJSONTests(responseContent: object, key: string) {
 }
 
 //if RHS is an object
-function runObjectTests(required: any, received: any, keyName: string) {
+function runObjectTests(required: { [key: string]: any }, received: any, keyName: string) {
   let regexRan = false;
 
   for (const key in required) {
@@ -304,8 +304,8 @@ function runObjectTests(required: any, received: any, keyName: string) {
 
         const receivedData = getStringIfNotScalar(received);
 
-        let options: any;
-        let regexTest: any;
+        let options;
+        let regexTest = undefined;
         if (key === "$options") {
           options = compareTo;
           regexTest = required.$regex;

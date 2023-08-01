@@ -11,7 +11,7 @@ import * as YAML from "yaml";
 import { getCurrDirPath, getEnvDetails } from "../EnvironmentSelection";
 import { Param } from "../models";
 
-let VARIABLES: any = {};
+let VARIABLES: {[key: string]: string} = {};
 
 export function getStrictStringValue(value: any): string {
   if (value === undefined) {

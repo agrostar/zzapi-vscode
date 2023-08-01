@@ -49,7 +49,7 @@ export function captureVariables(
               const key = jsonCaptures[path];
 
               let errorInJP = undefined;
-              let value: any;
+              let value = undefined;
               try {
                 value = jp.value(body, path);
               } catch (err: any) {
