@@ -2,7 +2,7 @@ import { OutputChannel } from "vscode";
 
 import jp from "jsonpath";
 
-import { getOutputChannel } from "./extension";
+import { getOutputChannel } from "../extension";
 
 let OUTPUT_CHANNEL: OutputChannel;
 const GAP = "\t|";
@@ -65,9 +65,7 @@ export function runAllTests(name: string, tests: any, responseData: any, headers
               required = getStringIfNotScalar(required);
               received = getStringIfNotScalar(received);
               if (received === required) {
-                OUTPUT_CHANNEL.appendLine(
-                  `\t${PASS} ${GAP} ${headerTest} : ${required}`,
-                );
+                OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${headerTest} : ${required}`);
               } else {
                 OUTPUT_CHANNEL.appendLine(
                   `\t${FAIL} ${GAP} ${headerTest} : ${required} ${GAP} Received ${received}`,
@@ -163,9 +161,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         const receivedData = getStringIfNotScalar(received);
 
         if (receivedData === compareTo) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} ${keyName} == ${compareTo} `,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} == ${compareTo} `);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} ${keyName} == ${compareTo} ${GAP} Received ${received}`,
@@ -177,9 +173,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         const receivedData = getStringIfNotScalar(received);
 
         if (receivedData !== compareTo) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} ${keyName} != ${compareTo} `,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} != ${compareTo} `);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} ${keyName} != ${compareTo} ${GAP} Received ${received}`,
@@ -188,9 +182,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
       } else if (key === "$lt") {
         if (received < compareTo) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} ${keyName} < ${compareTo} `,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} < ${compareTo} `);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} ${keyName} < ${compareTo} ${GAP} Received ${received}`,
@@ -199,9 +191,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
       } else if (key === "$gt") {
         if (received > compareTo) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} ${keyName} > ${compareTo}  `,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} > ${compareTo}  `);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} ${keyName} > ${compareTo} ${GAP} Received ${received}`,
@@ -210,9 +200,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
       } else if (key === "$lte") {
         if (received <= compareTo) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} ${keyName} <= ${compareTo}  `,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} <= ${compareTo}  `);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} ${keyName} <= ${compareTo} ${GAP} Received ${received}`,
@@ -221,9 +209,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
       } else if (key === "$gte") {
         if (received >= compareTo) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} ${keyName} >= ${compareTo} `,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} >= ${compareTo} `);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} ${keyName} >= ${compareTo} ${GAP} Received ${received}`,
@@ -249,9 +235,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
 
         if (receivedLen === parseInt(compareTo)) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} size of ${keyName} == ${compareTo} `,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} size of ${keyName} == ${compareTo} `);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} Received ${received} of size ${receivedLen}`,
@@ -272,9 +256,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         if ((received !== undefined) === compareTo) {
           OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} exists`);
         } else {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${FAIL} ${GAP} ${keyName} does not exist`,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${FAIL} ${GAP} ${keyName} does not exist`);
           NUM_FAILED++;
         }
       } else if (key === "$type") {
@@ -288,9 +270,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
               typeof received === compareTo.toLowerCase())) ||
           (compareTo === null && received === null)
         ) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${PASS} ${GAP} type of ${keyName} is ${compareTo}`,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} type of ${keyName} is ${compareTo}`);
         } else {
           OUTPUT_CHANNEL.appendLine(
             `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${typeof received}`,
@@ -317,9 +297,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
         }
 
         if (regexTest === undefined) {
-          OUTPUT_CHANNEL.appendLine(
-            `\t${FAIL} ${GAP} Regex ${regexTest} is not specified`,
-          );
+          OUTPUT_CHANNEL.appendLine(`\t${FAIL} ${GAP} Regex ${regexTest} is not specified`);
           NUM_FAILED++;
         } else {
           let regexStr = getStringIfNotScalar(regexTest);
@@ -331,9 +309,7 @@ function runObjectTests(required: any, received: any, keyName: string) {
           try {
             result = regex.test(receivedData as string);
           } catch (err: any) {
-            OUTPUT_CHANNEL.appendLine(
-              `\t${FAIL} ${GAP} Regex ${regexTest} ${GAP} Error: ${err}`,
-            );
+            OUTPUT_CHANNEL.appendLine(`\t${FAIL} ${GAP} Regex ${regexTest} ${GAP} Error: ${err}`);
             NUM_FAILED++;
             NUM_TESTS++;
 

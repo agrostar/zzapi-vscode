@@ -1,8 +1,8 @@
 import jp from "jsonpath";
 
 import { setVariable } from "./variableReplacement";
-import { getOutputChannel } from "./extension";
-import { ResponseData } from "./models";
+import { getOutputChannel } from "../extension";
+import { ResponseData } from "../models";
 
 export function captureVariables(
   name: string,

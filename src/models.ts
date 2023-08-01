@@ -1,8 +1,8 @@
-interface BundleHeader {
+interface Header {
   name: string;
   value: string;
 }
-export type BundleHeaders = Array<BundleHeader>;
+export type BundleHeaders = Array<Header>;
 
 interface Param {
   name: string;
@@ -31,7 +31,7 @@ export interface Requests {
 }
 
 export interface ResponseData {
-  executionTime: number;
+  executionTime: number | string;
   status?: number | string;
   body?: string;
   headers?: string;

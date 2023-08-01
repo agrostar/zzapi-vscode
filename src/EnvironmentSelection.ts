@@ -6,7 +6,7 @@ import * as path from "path";
 import * as YAML from "yaml";
 
 import { getRequiredVarFileName } from "./extension";
-import { loadVariables } from "./variableReplacement";
+import { loadVariables } from "./core/variableReplacement";
 
 let CURRENT_ENVIRONMENT: string = "";
 let ALL_ENVIRONMENTS: { [key: string]: Array<string> };
