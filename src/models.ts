@@ -1,33 +1,48 @@
-interface Header {
+export interface Header {
   name: string;
   value: string;
 }
-export type BundleHeaders = Array<Header>;
 
-interface Param {
+export interface Param {
   name: string;
   value: string;
   encode?: boolean;
 }
-export type BundleParams = Array<Param>;
 
 export interface CommonData {
   baseUrl?: string;
+
   url?: string;
   method?: string;
-  headers?: BundleHeaders;
-  params?: BundleParams;
+  headers?: Array<Header>;
+  params?: Array<Param>;
   body?: string;
   options?: { follow?: boolean; verifySSL?: boolean };
   tests?: any;
   capture?: any;
 }
-export interface RequestData extends CommonData {
+export interface RequestData {
   name: string;
+
+  url?: string;
+  method?: string;
+  headers?: Array<Header>;
+  params?: Array<Param>;
+  body?: string;
+  options?: { follow?: boolean; verifySSL?: boolean };
+  tests?: any;
+  capture?: any;
 }
 
-export interface Requests {
-  [name: string]: RequestData;
+export interface CombinedData {
+  name: string;
+  baseUrl?: string;
+
+  url?: string;
+  method?: string;
+  headers?: Array<Header>;
+  body?: string;
+  options?: { follow?: boolean; verifySSL?: boolean };
 }
 
 export interface ResponseData {

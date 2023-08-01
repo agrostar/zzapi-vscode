@@ -1,38 +1,38 @@
-import { BundleHeaders, BundleParams, CommonData, RequestData } from "../models";
+import { CommonData, Header, Param, RequestData } from "../models";
 import { replaceVariablesInObject, replaceVariablesInParams } from "./variableReplacement";
+
+function setKeyOfHeadersToLowerCase(headers: any) {
+  if (headers === undefined) {
+    return undefined;
+  }
+
+  let newObj: { [key: string]: any } = {};
+  for (const key in headers) {
+    if (headers.hasOwnProperty(key)) {
+      newObj[key.toLowerCase()] = headers[key];
+    }
+  }
+
+  return newObj;
+}
+
+function setNameOfHeadersToLowerCase(headers: Array<Header> | undefined): any {
+  if (headers === undefined) {
+    return undefined;
+  }
+
+  let newHeaders: Array<Header> = [];
+  headers.forEach((arrHeader) => {
+    const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
+    newHeaders.push(newHeader);
+  });
+
+  return newHeaders;
+}
 
 export function setHeadersToLowerCase(obj: any) {
   if (obj === undefined) {
     return undefined;
-  }
-
-  function setKeyOfHeadersToLowerCase(headers: any) {
-    if (headers === undefined) {
-      return undefined;
-    }
-
-    let newObj: { [key: string]: any } = {};
-    for (const key in headers) {
-      if (headers.hasOwnProperty(key)) {
-        newObj[key.toLowerCase()] = headers[key];
-      }
-    }
-
-    return newObj;
-  }
-
-  function setNameOfHeadersToLowerCase(headers: BundleHeaders | undefined): any {
-    if (headers === undefined) {
-      return undefined;
-    }
-
-    let newHeaders: BundleHeaders = [];
-    headers.forEach((arrHeader) => {
-      const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
-      newHeaders.push(newHeader);
-    });
-
-    return newHeaders;
   }
 
   obj.headers = setNameOfHeadersToLowerCase(obj.headers);
@@ -192,10 +192,10 @@ export function getMergedTestsAndCapture(common: any, request: any) {
 }
 
 export function getParamsForUrl(
-  commonParams: BundleParams | undefined,
-  requestParams: BundleParams | undefined,
+  commonParams: Array<Param> | undefined,
+  requestParams: Array<Param> | undefined,
 ) {
-  let mixedParams: BundleParams | undefined;
+  let mixedParams: Array<Param> | undefined;
 
   if (commonParams === undefined || !Array.isArray(commonParams)) {
     mixedParams = requestParams;
@@ -209,7 +209,7 @@ export function getParamsForUrl(
     return "";
   }
 
-  let params: BundleParams = replaceVariablesInParams(mixedParams);
+  let params: Array<Param> = replaceVariablesInParams(mixedParams);
   let paramArray: Array<string> = [];
 
   params.forEach((param) => {

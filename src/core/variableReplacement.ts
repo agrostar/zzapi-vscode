@@ -8,8 +8,8 @@ import * as path from "path";
 
 import * as YAML from "yaml";
 
-import { BundleParams } from "../models";
 import { getCurrDirPath, getEnvDetails } from "../EnvironmentSelection";
+import { Param } from "../models";
 
 let VARIABLES: any = {};
 
@@ -73,8 +73,8 @@ function replaceVariablesInSelf() {
   VARIABLES = replaceVariablesInObject(VARIABLES);
 }
 
-export function replaceVariablesInParams(arr: BundleParams): BundleParams {
-  let newArr: BundleParams = [];
+export function replaceVariablesInParams(arr: Array<Param>): Array<Param> {
+  let newArr: Array<Param> = [];
   arr.forEach((element) => {
     newArr.push(replaceVariablesInObject(element));
   });

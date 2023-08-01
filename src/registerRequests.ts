@@ -1,6 +1,6 @@
 import { window } from "vscode";
 
-import { runIndividualRequest, runAllRequests } from "./core/runRequests";
+import { runIndividualRequest, runAllRequests } from "./runRequests";
 
 export async function registerRunRequest(name: string): Promise<void> {
   const activeEditor = window.activeTextEditor;
