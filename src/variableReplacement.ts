@@ -52,19 +52,10 @@ export function loadVariables() {
   });
 }
 
-// TODO: regexes can be explained. Not sure why the 0-9 is there in the second one.
-const varRegexWithBraces = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
-const varRegexWithoutBraces = /(?<!\\)\$(?:(?![0-9])[_a-zA-Z]\w*(?=\W|$))/g;
-
 export function replaceVariablesInObject(objectData: any): any {
   if (objectData === undefined) {
     return undefined;
   }
-  // TODO: this can be done better. Why stringify and replace? We know the value
-  // and that it is a string. We can replace within the string. We can make this
-  // more readable and also more efficient by replacing only the param/header values
-  // JSON.stringify has the danger of replacing variables in the parameter name also,
-  // which I am not sure is safe.
 
   for (const key in objectData) {
     if (objectData.hasOwnProperty(key)) {
@@ -91,16 +82,44 @@ export function replaceVariablesInParams(arr: BundleParams): BundleParams {
   return newArr;
 }
 
+/**
+ * (?<!\\) -> negative lookbehind assertion - ensures the $( is not preceded by a backslash
+ * \$\( -> matches the sequence \$\( which acts as the opening sequence
+ * ([_a-zA-Z]\w*) -> capturing group for the variable name.
+ *    [_a-zA-Z] -> matches any underscore or letter as starting character
+ *        as the variable name must not start with a number
+ *    \w* -> matches any combination of word characters (letters, digits, underscore)
+ * /) -> matches the losing parentheses
+ * g -> global option, regex should be tested against all possible matches in the string
+ *
+ * Thus, It is used to match all $(variableName)
+ */
+const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
+
+/**
+ * (?<!\\) -> negative lookbehind assertion - ensures the $( is not preceded by a backslash
+ * \$ -> matches the dollar sign
+ * ([_a-zA-Z]\w*) -> capturing group of the variable name
+ *    [_a-zA-Z] -> matches any underscore or letter as starting character
+ *        as the variable name must not start with a number
+ *    \w* -> matches any combination of word characters (letters, digits, underscore)
+ * (?=\W|$) -> Positive lookahead assertion. Ensures the match is followed by a non-word character
+ *    (\W) or the end of a line (represented by $).
+ *
+ * Thus, it is used to match all $variableName
+ */
+const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
+
 function replaceVariables(text: string): string {
   const outputText = text
-    .replace(varRegexWithBraces, (match, variable) => {
+    .replace(VAR_REGEX_WITH_BRACES, (match, variable) => {
       const varVal = VARIABLES[variable];
       if (varVal !== undefined) {
         return varVal;
       }
       return match;
     })
-    .replace(varRegexWithoutBraces, (match) => {
+    .replace(VAR_REGEX_WITHOUT_BRACES, (match) => {
       const variable = match.slice(1);
       if (variable === undefined) {
         return match;
