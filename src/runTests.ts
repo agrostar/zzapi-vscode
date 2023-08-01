@@ -21,7 +21,7 @@ function getStringIfNotScalar(data: any) {
 }
 
 export function runAllTests(name: string, tests: any, responseData: any, headers: any) {
-  if (tests === undefined) {
+  if (tests === undefined || Object.keys(tests).length === 0) {
     return;
   }
 

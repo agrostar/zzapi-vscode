@@ -15,7 +15,7 @@ export function captureVariables(
   }
 
   const outputChannel = getOutputChannel();
-  outputChannel.appendLine(`'${name}' Captures:`);
+  outputChannel.appendLine(`Running captures of '${name}':`);
 
   for (const test in capture) {
     if (capture.hasOwnProperty(test)) {

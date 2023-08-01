@@ -4,9 +4,9 @@
 // 3. models, extension (our own modules)
 
 import * as fs from "fs";
-import * as YAML from "yaml";
-
 import * as path from "path";
+
+import * as YAML from "yaml";
 
 import { BundleParams } from "./models";
 import { getCurrDirPath, getEnvDetails } from "./EnvironmentSelection";
@@ -24,7 +24,7 @@ export function getStrictStringValue(value: any): string {
 }
 
 export function setVariable(key: any, value: any) {
-  VARIABLES[key] = getStrictStringValue(value);
+  VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
 }
 
 export function loadVariables() {
@@ -86,7 +86,7 @@ export function replaceVariablesInParams(arr: BundleParams): BundleParams {
  * (?<!\\) -> negative lookbehind assertion - ensures the $( is not preceded by a backslash
  * \$\( -> matches the sequence \$\( which acts as the opening sequence
  * ([_a-zA-Z]\w*) -> capturing group for the variable name.
- *    [_a-zA-Z] -> matches any underscore or letter as starting character
+ *    [_a-zA-Z] -> matches any underscore or letter as starting character,
  *        as the variable name must not start with a number
  *    \w* -> matches any combination of word characters (letters, digits, underscore)
  * /) -> matches the losing parentheses
@@ -105,6 +105,7 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
  *    \w* -> matches any combination of word characters (letters, digits, underscore)
  * (?=\W|$) -> Positive lookahead assertion. Ensures the match is followed by a non-word character
  *    (\W) or the end of a line (represented by $).
+ * g -> global option, regex should be tested against all possible matches in the string
  *
  * Thus, it is used to match all $variableName
  */
