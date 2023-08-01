@@ -95,24 +95,31 @@ export function getHeadersAsJSON(objectSet: any) {
 }
 
 export function getMergedDataExceptParamsTestsCapture(
-  commonData: CommonData,
+  commonData: CommonData | undefined,
   requestData: RequestData,
 ): any {
-  delete commonData.params;
+  if (commonData !== undefined) {
+    delete commonData.params;
+    delete commonData.tests;
+    delete commonData.capture;
+  }
+
   delete requestData.params;
-  delete commonData.tests;
   delete requestData.tests;
-  delete commonData.capture;
   delete requestData.capture;
-  
+
   return replaceVariablesInObject(getMergedData(commonData, requestData));
 
   function getMergedData(commonData: any, requestData: any) {
-    let mergedData = Object.assign({}, commonData, requestData);
+    let mergedData = Object.assign({}, commonData === undefined ? {} : commonData, requestData);
 
     for (const key in requestData) {
       if (requestData.hasOwnProperty(key)) {
-        if (commonData.hasOwnProperty(key) && Array.isArray(requestData[key])) {
+        if (
+          commonData !== undefined &&
+          commonData.hasOwnProperty(key) &&
+          Array.isArray(requestData[key])
+        ) {
           let finalKeyData: { [key: string]: any } = {};
 
           let currProp: any;
@@ -184,7 +191,10 @@ export function getMergedTestsAndCapture(common: any, request: any) {
   return mergedData;
 }
 
-export function getParamsForUrl(commonParams?: BundleParams, requestParams?: BundleParams) {
+export function getParamsForUrl(
+  commonParams: BundleParams | undefined,
+  requestParams: BundleParams | undefined,
+) {
   let mixedParams: BundleParams | undefined;
 
   if (commonParams === undefined || !Array.isArray(commonParams)) {

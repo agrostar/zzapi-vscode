@@ -89,10 +89,10 @@ export function replaceVariablesInParams(arr: BundleParams): BundleParams {
  *    [_a-zA-Z] -> matches any underscore or letter as starting character,
  *        as the variable name must not start with a number
  *    \w* -> matches any combination of word characters (letters, digits, underscore)
- * /) -> matches the losing parentheses
+ * /) -> matches the closing parentheses
  * g -> global option, regex should be tested against all possible matches in the string
  *
- * Thus, It is used to match all $(variableName)
+ * Thus, it is used to match all $(variableName)
  */
 const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
 

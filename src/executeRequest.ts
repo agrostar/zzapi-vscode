@@ -26,36 +26,58 @@ export async function getIndividualResponse(
   commonData = setHeadersToLowerCase(commonData);
   requestData = setHeadersToLowerCase(requestData);
 
-  const params = getParamsForUrl(commonData.params, requestData.params);
-  const tests = getMergedTestsAndCapture(commonData.tests, requestData.tests);
-  const capture = getMergedTestsAndCapture(commonData.capture, requestData.capture);
+  const params = getParamsForUrl(
+    commonData === undefined ? undefined : commonData.params,
+    requestData.params,
+  );
+  const tests = getMergedTestsAndCapture(
+    commonData === undefined ? undefined : commonData.tests,
+    requestData.tests,
+  );
+  const capture = getMergedTestsAndCapture(
+    commonData === undefined ? undefined : commonData.capture,
+    requestData.capture,
+  );
 
   const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
 
   let [reqCancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
   if (!reqCancelled) {
-    await openEditorForIndividualReq(responseData, allData.name);
     runAllTests(name, tests, responseData, headers);
     captureVariables(name, capture, responseData, headers);
+    await openEditorForIndividualReq(responseData, allData.name);
   }
 }
 
 export async function getAllResponses(commonData: CommonData, allRequests: Requests) {
   let responses = [];
   let atleastOneExecuted = false;
+  commonData = setHeadersToLowerCase(commonData);
 
   for (const name in allRequests) {
     if (allRequests.hasOwnProperty(name)) {
       let request: RequestData = allRequests[name];
       request.name = name;
 
-      let commonReqData = JSON.parse(JSON.stringify(commonData)) as typeof commonData; 
-      commonReqData = setHeadersToLowerCase(commonReqData);
+      //deep copy of commonData to operate on
+      let commonReqData =
+        commonData === undefined
+          ? undefined
+          : (JSON.parse(JSON.stringify(commonData)) as typeof commonData);
       request = setHeadersToLowerCase(request);
 
-      const params = getParamsForUrl(commonReqData.params, request.params);
-      const tests = getMergedTestsAndCapture(commonReqData.tests, request.tests);
-      const capture = getMergedTestsAndCapture(commonReqData.capture, request.capture);
+      const params = getParamsForUrl(
+        commonReqData === undefined ? undefined : commonReqData.params,
+        request.params,
+      );
+      const tests = getMergedTestsAndCapture(
+        commonReqData === undefined ? undefined : commonReqData.tests,
+        request.tests,
+      );
+      const capture = getMergedTestsAndCapture(
+        commonReqData === undefined ? undefined : commonReqData.capture,
+        request.capture,
+      );
 
       //important to set headers to lower case before merging to ensure requestData gets
       // precedence if there are common names.
@@ -154,11 +176,10 @@ function constructRequest(allData: RequestData, paramsForUrl: string) {
   const options = {
     body: getAsStringIfDefined(allData.body),
     headers: getHeadersAsJSON(allData.headers),
-    followRedirect: allData.options !== undefined ? (allData.options.follow) : undefined,
+    followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
 
     https: {
-      rejectUnauthorized:
-        allData.options !== undefined ? (allData.options.verifySSL) : undefined,
+      rejectUnauthorized: allData.options !== undefined ? allData.options.verifySSL : undefined,
     },
   };
 
