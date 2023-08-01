@@ -33,9 +33,7 @@ export function splitParsedData(
 function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }) {
   let newObj: { [key: string]: string | object } = {};
   for (const key in headers) {
-    if (headers.hasOwnProperty(key)) {
-      newObj[key.toLowerCase()] = headers[key];
-    }
+    newObj[key.toLowerCase()] = headers[key];
   }
 
   return newObj;
@@ -131,7 +129,7 @@ export function getMergedTestsAndCapture(
       const commonValue = common[test as keyof typeof common];
       if (typeof commonValue === "object") {
         for (const cTest in commonValue as CommonData) {
-          if (commonValue !== undefined && commonValue.hasOwnProperty(cTest)) {
+          if (commonValue !== undefined) {
             const key = cTest;
             const value = commonValue[cTest as keyof typeof commonValue];
             finalKeyData[key] = value;
@@ -140,11 +138,9 @@ export function getMergedTestsAndCapture(
       }
 
       for (const rTest in requestValue) {
-        if (requestValue.hasOwnProperty(rTest)) {
-          const key = rTest;
-          const value = requestValue[rTest as keyof typeof requestValue];
-          finalKeyData[key] = value;
-        }
+        const key = rTest;
+        const value = requestValue[rTest as keyof typeof requestValue];
+        finalKeyData[key] = value;
       }
 
       mergedData[test] = finalKeyData;
@@ -174,38 +170,36 @@ export function getMergedDataExceptParamsTestsCapture(
     let mergedData = Object.assign({}, commonData === undefined ? {} : commonData, requestData);
 
     for (const key in requestData) {
-      if (requestData.hasOwnProperty(key)) {
-        if (
-          commonData !== undefined &&
-          commonData.hasOwnProperty(key) &&
-          Array.isArray(requestData[key])
-        ) {
-          let finalKeyData: { [key: string]: any } = {};
+      if (
+        commonData !== undefined &&
+        commonData.hasOwnProperty(key) &&
+        Array.isArray(requestData[key])
+      ) {
+        let finalKeyData: { [key: string]: any } = {};
 
-          let currProp: any;
+        let currProp: any;
 
-          //idea: set value for each key for commonData, and then for requestData,
-          //  thus, if there is a common key, then the requestData value will overwrite
-          if (Array.isArray(commonData[key])) {
-            currProp = commonData[key];
-
-            currProp.forEach((obj: { name: string; value: string }) => {
-              const key = obj.name;
-              const value = obj.value;
-              finalKeyData[key] = value;
-            });
-          }
-
-          currProp = requestData[key];
+        //idea: set value for each key for commonData, and then for requestData,
+        //  thus, if there is a common key, then the requestData value will overwrite
+        if (Array.isArray(commonData[key])) {
+          currProp = commonData[key];
 
           currProp.forEach((obj: { name: string; value: string }) => {
             const key = obj.name;
             const value = obj.value;
             finalKeyData[key] = value;
           });
-
-          mergedData[key] = finalKeyData;
         }
+
+        currProp = requestData[key];
+
+        currProp.forEach((obj: { name: string; value: string }) => {
+          const key = obj.name;
+          const value = obj.value;
+          finalKeyData[key] = value;
+        });
+
+        mergedData[key] = finalKeyData;
       }
     }
 

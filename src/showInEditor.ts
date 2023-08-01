@@ -45,14 +45,12 @@ function getDataOfIndReqAsString(
   let headersData = `${name} headers\nEnvironment: ${currentEnvironment}\n\n`;
 
   for (const key in responseData) {
-    if (responseData.hasOwnProperty(key)) {
-      let value = responseData[key as keyof ResponseData];
+    let value = responseData[key as keyof ResponseData];
 
-      if (KEYS_IN_BODY.includes(key)) {
-        contentData += `${key}: ${value}\n`;
-      } else {
-        headersData += `${key}: ${value}\n`;
-      }
+    if (KEYS_IN_BODY.includes(key)) {
+      contentData += `${key}: ${value}\n`;
+    } else {
+      headersData += `${key}: ${value}\n`;
     }
   }
 

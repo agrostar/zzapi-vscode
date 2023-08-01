@@ -11,7 +11,7 @@ import * as YAML from "yaml";
 import { getCurrDirPath, getEnvDetails } from "../EnvironmentSelection";
 import { Param } from "../models";
 
-let VARIABLES: {[key: string]: string} = {};
+let VARIABLES: { [key: string]: string } = {};
 
 export function getStrictStringValue(value: any): string {
   if (value === undefined) {
@@ -58,12 +58,10 @@ export function replaceVariablesInObject(objectData: any): any {
   }
 
   for (const key in objectData) {
-    if (objectData.hasOwnProperty(key)) {
-      if (typeof objectData[key] === "object") {
-        objectData[key] = replaceVariablesInObject(objectData[key]);
-      } else if (typeof objectData[key] === "string") {
-        objectData[key] = replaceVariables(objectData[key]);
-      }
+    if (typeof objectData[key] === "object") {
+      objectData[key] = replaceVariablesInObject(objectData[key]);
+    } else if (typeof objectData[key] === "string") {
+      objectData[key] = replaceVariables(objectData[key]);
     }
   }
   return objectData;
