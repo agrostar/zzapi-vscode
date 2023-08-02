@@ -10,7 +10,7 @@ import * as YAML from "yaml";
 
 // TODO: should not have any imports from ../
 import { getCurrDirPath, getEnvDetails } from "../EnvironmentSelection";
-import { Param } from "../models";
+import { Param } from "./models";
 
 let VARIABLES: { [key: string]: string } = {};
 

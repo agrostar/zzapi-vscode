@@ -65,26 +65,25 @@ export function loadEnvironments(statusBar: StatusBarItem) {
     const data = fs.readFileSync(CURR_VARIABLES_FILE_PATH, "utf-8");
     const parsedData = YAML.parse(data);
 
-    if (parsedData !== undefined) {
-      const allEnvs = parsedData.varsets;
-
-      if (allEnvs !== undefined && Array.isArray(allEnvs)) {
-        const numEnvs = allEnvs.length;
-
-        for (let i = 0; i < numEnvs; i++) {
-          const env = allEnvs[i];
-
-          const name: string = env.name;
-          const vars: Array<string> = env.vars;
-          ENVIRONMENTS_TO_DISPLAY.push({
-            label: `${name}`,
-            description: `Set Environment: ${name} -> ${vars}`,
-          });
-
-          ALL_ENVIRONMENTS[name] = vars;
-        }
-      }
+    if (parsedData === undefined) {
+      return;
     }
+    const allEnvs = parsedData.varsets;
+
+    if (allEnvs === undefined || !Array.isArray(allEnvs)) {
+      return;
+    }
+
+    allEnvs.forEach((env) => {
+      const name: string = env.name;
+      const vars: Array<string> = env.vars;
+      ENVIRONMENTS_TO_DISPLAY.push({
+        label: `${name}`,
+        description: `Set Environment: ${name} -> ${vars}`,
+      });
+
+      ALL_ENVIRONMENTS[name] = vars;
+    });
   }
 
   ENVIRONMENTS_TO_DISPLAY.push(DEFAULT_ENVIRONMENT);

@@ -1,22 +1,18 @@
 import { replaceVariablesInObject, replaceVariablesInParams } from "./core/variableReplacement";
 import {
-  SplitCombinedData,
+  CombinedData,
   CommonData,
   Header,
   Param,
   RequestData,
-  TestsAndCaptures,
-} from "./models";
+  Tests,
+  Captures,
+} from "./core/models";
 
-export function splitParsedData(
+export function getRequestData(
   common: CommonData | undefined,
   request: RequestData,
-): [
-  params: string,
-  tests: TestsAndCaptures,
-  capture: TestsAndCaptures,
-  allData: SplitCombinedData,
-] {
+): CombinedData {
   // making deep copies of the objects because we will be deleting some data
   let commonData =
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as typeof common);
@@ -37,9 +33,12 @@ export function splitParsedData(
     requestData.capture,
   );
 
-  const allData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
+  const allData: CombinedData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
+  allData.paramsForUrl = params;
+  allData.tests = tests;
+  allData.captures = capture;
 
-  return [params, tests, capture, allData];
+  return allData;
 }
 
 function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }) {
@@ -125,10 +124,7 @@ function getParamsForUrl(
   return `?${paramString}`;
 }
 
-export function getMergedTestsAndCapture(
-  common: TestsAndCaptures | undefined,
-  request: TestsAndCaptures | undefined,
-) {
+export function getMergedTestsAndCapture(common: Tests | undefined, request: Captures | undefined) {
   let mergedData = replaceVariablesInObject(Object.assign({}, common, request));
 
   for (const test in request) {
@@ -190,7 +186,7 @@ function getMergedData(
     delete commonData.headers;
   }
 
-  let mergedData: SplitCombinedData = Object.assign(
+  let mergedData: CombinedData = Object.assign(
     {},
     commonData === undefined ? {} : (commonData as Omit<typeof commonData, "headers">),
     requestData as Omit<typeof requestData, "headers">,

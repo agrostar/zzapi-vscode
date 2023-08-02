@@ -1,7 +1,7 @@
 import { window, commands, workspace } from "vscode";
 
 import { getEnvDetails } from "./EnvironmentSelection";
-import { ResponseData } from "./models";
+import { ResponseData } from "./core/models";
 
 const KEYS_IN_BODY = ["body"];
 

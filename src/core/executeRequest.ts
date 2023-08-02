@@ -1,11 +1,11 @@
 import got, { CancelableRequest, Response } from "got";
 
-import { SplitCombinedData } from "../models";
+import { CombinedData } from "./models";
 
 // TODO: it is a good practice to define the return value instead of letting typescript
 // figure it out on its own. if by mistake we are returning something else that is not
 // intended, it will get caught instead of TS making it this | that.
-export function constructRequest(allData: SplitCombinedData, paramsForUrl: string) {
+export function constructRequest(allData: CombinedData, paramsForUrl: string | undefined) {
   const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
   const options = {
@@ -39,8 +39,12 @@ export function constructRequest(allData: SplitCombinedData, paramsForUrl: strin
   }
 }
 
-function getURL(baseUrl: string | undefined, url: string | undefined, paramsForUrl: string) {
-  // TODO: all this can be done during getRequests itself.
+function getURL(baseUrl: string | undefined, url: string | undefined, paramsForUrl: string | undefined) {
+  // TODO: all this can be done during getRequests itself.  
+  if(paramsForUrl === undefined){
+    paramsForUrl = "";
+  }
+
   let completeUrl = "";
   if (baseUrl !== undefined) {
     completeUrl += baseUrl;

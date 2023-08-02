@@ -1,14 +1,15 @@
 import { window, ProgressLocation } from "vscode";
 
-import { ResponseData, SplitCombinedData } from "./models";
+import { ResponseData, CombinedData } from "./core/models";
 import { constructRequest, executeHttpRequest } from "./core/executeRequest";
 import { getStrictStringValue } from "./core/variableReplacement";
 
 export async function individualRequestWithProgress(
-  requestData: SplitCombinedData,
-  paramsForUrl: string,
+  requestData: CombinedData
 ): Promise<[boolean, ResponseData, { [key: string]: string } | undefined]> {
   let seconds = 0;
+
+  const paramsForUrl = requestData.paramsForUrl;
 
   const [cancelled, response, headers]: any = await window.withProgress(
     {

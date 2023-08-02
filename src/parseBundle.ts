@@ -1,5 +1,5 @@
 import * as YAML from "yaml";
-import { RequestData } from "./models";
+import { RequestData } from "./core/models";
 
 // TODO: move this into core.
 
@@ -65,20 +65,23 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
 }
 
 // TODO: add the following function:
-export function getRequests(document: string, variables: {[key: string]: string}): { [name: string]: RequestData } {
-  const parsed = YAML.parse(document);
+export function getRequests(
+  document: string,
+  variables: { [key: string]: string },
+): { [name: string]: RequestData } {
+  // const parsed = YAML.parse(document);
 
-  const requests : { [name: string]: RequestData } = {}
+  const requests: { [name: string]: RequestData } = {};
   // Do all the merging etc here. Depending on how we do the merge, we may not need
   // the CommonData model at all. We can also replace the variables here itself.
   // The returned set of requestData is then ready to be executed.
 
-  // Need to also validate the bundle, and ensure mandatory attributes (URL, Method) 
+  // Need to also validate the bundle, and ensure mandatory attributes (URL, Method)
   // exist in each request, otherwise throw an error.
 
   // The caller needs to handle errors in the bundle. We cannot assume it is always
   // valid. This includes YAML syntax errors and also schema errors.
 
   // return the list of requests
-  return requests
+  return requests;
 }

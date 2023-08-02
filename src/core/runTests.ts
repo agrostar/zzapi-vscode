@@ -3,7 +3,7 @@ import { OutputChannel } from "vscode";
 import jp from "jsonpath";
 
 import { getOutputChannel } from "../extension";
-import { ResponseData, TestsAndCaptures } from "../models";
+import { ResponseData, Tests } from "./models";
 
 let OUTPUT_CHANNEL: OutputChannel;
 const GAP = "\t|";
@@ -23,7 +23,7 @@ function getStringIfNotScalar(data: any) {
 
 export function runAllTests(
   name: string,
-  tests: TestsAndCaptures,
+  tests: Tests | undefined,
   responseData: ResponseData,
   headers: { [key: string]: string } | undefined,
 ) {
@@ -94,7 +94,7 @@ export function runAllTests(
         }
       }
     } else {
-      let required = tests[test as keyof TestsAndCaptures];
+      let required = tests[test as keyof Tests];
       let received = responseData[test as keyof ResponseData];
 
       if (typeof required !== "object") {

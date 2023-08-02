@@ -5,8 +5,8 @@ import * as YAML from "yaml";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 import { openEditorForAllRequests, openEditorForIndividualReq } from "./showInEditor";
-import { splitParsedData } from "./SplitParsedData";
-import { RequestData } from "./models";
+import { getRequestData } from "./SplitParsedData";
+import { RequestData } from "./core/models";
 import { individualRequestWithProgress } from "./getResponse";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
@@ -17,12 +17,12 @@ export async function runIndividualRequest(text: string, name: string): Promise<
   let request = parsedData.requests[name];
   request.name = name;
 
-  const [params, tests, capture, allData] = splitParsedData(commonData, request);
-  const [cancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
+  const allData = getRequestData(commonData, request);
+  const [cancelled, responseData, headers] = await individualRequestWithProgress(allData);
 
   if (!cancelled) {
-    runAllTests(allData.name, tests, responseData, headers);
-    captureVariables(allData.name, capture, responseData, headers);
+    runAllTests(allData.name, allData.tests, responseData, headers);
+    captureVariables(allData.name, allData.captures, responseData, headers);
     await openEditorForIndividualReq(responseData, allData.name);
   }
 }
@@ -41,13 +41,13 @@ export async function runAllRequests(text: string): Promise<void> {
   for (const name in allRequests) {
     let request: RequestData = allRequests[name];
     request.name = name;
-    const [params, tests, capture, allData] = splitParsedData(commonData, request);
+    const allData = getRequestData(commonData, request);
 
-    const [cancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
+    const [cancelled, responseData, headers] = await individualRequestWithProgress(allData);
     if (!cancelled) {
       responses.push({ response: responseData, name: request.name });
-      runAllTests(name, tests, responseData, headers);
-      captureVariables(name, capture, responseData, headers);
+      runAllTests(name, allData.tests, responseData, headers);
+      captureVariables(name, allData.captures, responseData, headers);
       atleastOneExecuted = true;
     }
   }

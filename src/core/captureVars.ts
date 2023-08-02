@@ -2,11 +2,11 @@ import jp from "jsonpath";
 
 import { setVariable } from "./variableReplacement";
 import { getOutputChannel } from "../extension";
-import { ResponseData, TestsAndCaptures } from "../models";
+import { ResponseData, Captures } from "./models";
 
 export function captureVariables(
   name: string,
-  capture: TestsAndCaptures,
+  capture: Captures | undefined,
   responseData: ResponseData,
   headers: { [key: string]: string } | undefined,
 ) {
@@ -77,7 +77,7 @@ export function captureVariables(
       }
     } else {
       const value = test;
-      const key = capture[test as keyof TestsAndCaptures];
+      const key = capture[test as keyof Captures];
 
       setVariable(key, value);
       outputChannel.appendLine(`Variable Set : "${key}" = "${value}"`);
