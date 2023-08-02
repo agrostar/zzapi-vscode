@@ -2,12 +2,12 @@ import { window } from "vscode";
 
 import * as YAML from "yaml";
 
-import { individualRequestWithProgress } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 import { openEditorForAllRequests, openEditorForIndividualReq } from "./showInEditor";
 import { splitParsedData } from "./SplitParsedData";
 import { RequestData } from "./models";
+import { individualRequestWithProgress } from "./getResponse";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
   const parsedData = YAML.parse(text);

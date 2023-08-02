@@ -13,7 +13,7 @@ export interface TestsAndCaptures {
   json?: { [key: string]: any };
   body?: object | string;
   status?: number;
-  headers?: { [key: string]: string | object };
+  headers?: { [key: string]: any };
 }
 
 export interface CommonData {
@@ -48,7 +48,7 @@ export interface SplitCombinedData {
 
   url?: string;
   method?: string;
-  headers?: {[key: string]: string};
+  headers?: { [key: string]: string };
   body?: string;
   options?: { follow?: boolean; verifySSL?: boolean };
 }

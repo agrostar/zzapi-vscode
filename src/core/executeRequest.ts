@@ -1,82 +1,13 @@
-import { window, ProgressLocation } from "vscode";
+import got, { CancelableRequest, Response } from "got";
 
-import got, {CancelableRequest, Response} from "got";
+import { SplitCombinedData } from "../models";
 
-import { ResponseData, SplitCombinedData } from "../models";
-import { getStrictStringValue } from "./variableReplacement";
-
-export async function individualRequestWithProgress(
-  requestData: SplitCombinedData,
-  paramsForUrl: string,
-): Promise<[boolean, ResponseData, { [key: string]: string } | undefined]> {
-  let seconds = 0;
-
-  const [cancelled, response, headers]: any = await window.withProgress(
-    {
-      location: ProgressLocation.Window,
-      cancellable: true,
-      title: `Running ${requestData.name}, click to cancel`,
-    },
-    async (progress, token) => {
-      const interval = setInterval(() => {
-        progress.report({ message: `${++seconds} sec` });
-      }, 1000);
-
-      const httpRequest = constructRequest(requestData, paramsForUrl);
-
-      let response: any;
-      let cancelled = false;
-
-      token.onCancellationRequested(() => {
-        window.showInformationMessage(`Request ${requestData.name} was cancelled`);
-        httpRequest.cancel();
-        cancelled = true;
-      });
-
-      const startTime = new Date().getTime();
-      const httpResponse = await executeHttpRequest(httpRequest);
-      const executionTime = new Date().getTime() - startTime;
-
-      clearInterval(interval);
-
-      // displaying rawHeaders, testing against headers
-      response = {
-        executionTime: executionTime + "ms",
-        status: httpResponse.statusCode,
-        // statusText: httpResponse.statusMessage,
-        body: httpResponse.body as string,
-        headers: getHeadersAsString(httpResponse.rawHeaders),
-        // httpVersion: httpResponse.httpVersion,
-      };
-
-      return [cancelled, response, httpResponse.headers];
-    },
-  );
-
-  return [cancelled, response, headers];
-}
-
-export function getHeadersAsString(rawHeaders: Array<string>) {
-  let formattedString = "\n";
-  if (rawHeaders === undefined) {
-    return formattedString;
-  }
-
-  const numElement = rawHeaders.length;
-  for (let i = 0; i < numElement - 1; i += 2) {
-    formattedString += `\t${rawHeaders[i]}: ${getStrictStringValue(rawHeaders[i + 1])}\n`;
-  }
-
-  formattedString = formattedString.trim();
-  return `\n\t${formattedString}`;
-}
-
-function constructRequest(allData: SplitCombinedData, paramsForUrl: string) {
+export function constructRequest(allData: SplitCombinedData, paramsForUrl: string) {
   const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
   const options = {
-    body: getAsStringIfDefined(allData.body),
-    headers: (allData.headers),
+    body: getBody(allData.body),
+    headers: allData.headers,
     followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
 
     https: {
@@ -120,7 +51,7 @@ function getURL(baseUrl: string | undefined, url: string | undefined, paramsForU
   return completeUrl + paramsForUrl;
 }
 
-export function getAsStringIfDefined(body: any) {
+function getBody(body: any): string | undefined {
   if (body === undefined) {
     return undefined;
   }
@@ -131,7 +62,7 @@ export function getAsStringIfDefined(body: any) {
   return body.toString();
 }
 
-async function executeHttpRequest(httpRequest: CancelableRequest<Response<string>>) {
+export async function executeHttpRequest(httpRequest: CancelableRequest<Response<string>>) {
   try {
     return await httpRequest;
   } catch (e: any) {
