@@ -10,6 +10,7 @@ import { RequestData } from "./models";
 import { individualRequestWithProgress } from "./getResponse";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
+  // TODO: use parseBundle.getRequests instead.
   const parsedData = YAML.parse(text);
 
   const commonData = parsedData.common;
@@ -35,6 +36,8 @@ export async function runAllRequests(text: string): Promise<void> {
   let responses = [];
   let atleastOneExecuted = false;
 
+  // TODO: we will want to show a single progress bar for all the requests together. The user
+  // may click the cancel "in the middle" of two requests.
   for (const name in allRequests) {
     let request: RequestData = allRequests[name];
     request.name = name;

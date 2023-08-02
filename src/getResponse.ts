@@ -21,6 +21,8 @@ export async function individualRequestWithProgress(
         progress.report({ message: `${++seconds} sec` });
       }, 1000);
 
+      // TODO: construct neeed not be a separate function. We could make it
+      // part of execute itself.
       const httpRequest = constructRequest(requestData, paramsForUrl);
 
       let response: any;
@@ -33,6 +35,8 @@ export async function individualRequestWithProgress(
       });
 
       const startTime = new Date().getTime();
+      // TODO: change execut3eHttpRequest to take in RequestData and return the exec time in addition
+      // to the response.
       const httpResponse = await executeHttpRequest(httpRequest);
       const executionTime = new Date().getTime() - startTime;
 

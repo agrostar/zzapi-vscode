@@ -8,6 +8,7 @@ import * as path from "path";
 
 import * as YAML from "yaml";
 
+// TODO: should not have any imports from ../
 import { getCurrDirPath, getEnvDetails } from "../EnvironmentSelection";
 import { Param } from "../models";
 
@@ -27,6 +28,8 @@ export function setVariable(key: any, value: any) {
   VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
 }
 
+// TODO: Change this to take a parameter for the currentEnvironment.
+// TODO: allEnvironments may not be needed.
 export function loadVariables() {
   VARIABLES = {};
 
