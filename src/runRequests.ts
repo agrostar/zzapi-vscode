@@ -11,15 +11,15 @@ import { getVariableFiles } from "./EnvironmentSelection";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
   const allData: RequestData = getRequestsData(text, getVariableFiles())[name];
-  const [cancelled, responseData, headers] = await individualRequestWithProgress(allData);
+  const [cancelled, responseData] = await individualRequestWithProgress(allData);
 
   if (!cancelled) {
     const outputChannel = getOutputChannel();
 
-    const testOutput = runAllTests(allData.name, allData.tests, responseData, headers);
+    const testOutput = runAllTests(allData.name, allData.tests, responseData);
     outputChannel.append(testOutput);
 
-    const captureOutput = captureVariables(allData.name, allData.captures, responseData, headers);
+    const captureOutput = captureVariables(allData.name, allData.captures, responseData);
     outputChannel.append(captureOutput);
 
     if (testOutput != "" || captureOutput != "") {
@@ -40,17 +40,17 @@ export async function runAllRequests(text: string): Promise<void> {
   for (const name in allRequests) {
     const allData = allRequests[name];
 
-    const [cancelled, responseData, headers] = await individualRequestWithProgress(allData);
+    const [cancelled, responseData] = await individualRequestWithProgress(allData);
     if (!cancelled) {
       const outputChannel = getOutputChannel();
 
       responses.push({ response: responseData, name: allData.name });
-      const testOutput = runAllTests(name, allData.tests, responseData, headers);
+      const testOutput = runAllTests(name, allData.tests, responseData);
       if (testOutput != "") {
         outputChannel.appendLine(testOutput);
         outputChannel.show();
       }
-      const captureOutput = captureVariables(name, allData.captures, responseData, headers);
+      const captureOutput = captureVariables(name, allData.captures, responseData);
       if (captureOutput != "") {
         outputChannel.appendLine(captureOutput);
         outputChannel.show();

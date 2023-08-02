@@ -7,11 +7,12 @@ export function captureVariables(
   name: string,
   capture: Captures | undefined,
   responseData: ResponseData,
-  headers: { [key: string]: string } | undefined,
 ): string {
   if (capture === undefined || Object.keys(capture).length === 0) {
     return "";
   }
+
+  const headers = responseData.headers;
 
   let captureOutput = "";
 
@@ -33,8 +34,7 @@ export function captureVariables(
         try {
           body = JSON.parse(responseData.body as string);
         } catch (err) {
-          captureOutput += 
-            `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}\n`;
+          captureOutput += `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}\n`;
           errorInParsing = true;
         }
       }

@@ -4,6 +4,7 @@ import { getEnvDetails } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
 
 const KEYS_IN_BODY = ["body"];
+const KEYS_IN_HEADERS = ["executionTime", "status", "rawHeaders"];
 
 export async function openEditorForIndividualReq(
   responseData: ResponseData,
@@ -51,8 +52,8 @@ function getDataOfIndReqAsString(
     let value = responseData[key as keyof ResponseData];
 
     if (KEYS_IN_BODY.includes(key)) {
-      contentData += `${key}: ${value}\n`;
-    } else {
+      contentData += `${value}\n`;
+    } else if (KEYS_IN_HEADERS.includes(key)) {
       headersData += `${key}: ${value}\n`;
     }
   }

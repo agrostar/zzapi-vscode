@@ -21,11 +21,12 @@ export function runAllTests(
   name: string,
   tests: Tests | undefined,
   responseData: ResponseData,
-  headers: { [key: string]: string } | undefined,
 ): string {
   if (tests === undefined || Object.keys(tests).length === 0) {
     return "";
   }
+
+  const headers = responseData.headers;
 
   let testOutput: string = "";
 
@@ -230,8 +231,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
     } else if (key === "$exists") {
       if (typeof compareTo !== "boolean") {
-        testOutput += 
-          `\t${FAIL} ${GAP} ${keyName} exists ${GAP} ${compareTo} is not a boolean\n`;
+        testOutput += `\t${FAIL} ${GAP} ${keyName} exists ${GAP} ${compareTo} is not a boolean\n`;
         NUM_FAILED++;
         NUM_TESTS++;
 
@@ -257,8 +257,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       ) {
         testOutput += `\t${PASS} ${GAP} type of ${keyName} is ${compareTo}\n`;
       } else {
-        testOutput += 
-          `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${typeof received}\n`;
+        testOutput += `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${typeof received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$regex" || key === "$options") {
@@ -308,8 +307,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         }
       }
     } else {
-      testOutput += 
-        `\t${FAIL} ${GAP} ${keyName} ${key} ${compareTo} ${GAP} Invalid Operator ${key}\n`;
+      testOutput += `\t${FAIL} ${GAP} ${keyName} ${key} ${compareTo} ${GAP} Invalid Operator ${key}\n`;
       NUM_FAILED++;
     }
 

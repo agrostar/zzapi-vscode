@@ -69,7 +69,7 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
 // TODO: add the following function:
 export function getRequestsData(
   document: string,
-  variableFiles: Array<string>
+  variableFiles: Array<string>,
 ): { [name: string]: RequestData } {
   const parsedData = YAML.parse(document);
   if (parsedData === undefined) {

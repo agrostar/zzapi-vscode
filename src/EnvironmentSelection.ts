@@ -5,8 +5,6 @@ import * as path from "path";
 
 import * as YAML from "yaml";
 
-import { loadVariables } from "./core/variableReplacement";
-
 const VAR_FILE_NAME = "zz-envs.yaml";
 
 let CURRENT_ENVIRONMENT: string = "";
@@ -121,7 +119,7 @@ export function getVariableFiles(): Array<string> {
       filesToLoad.push(path.join(CURR_DIR_PATH, fileName));
     });
   }
-  
+
   return filesToLoad;
 }
 

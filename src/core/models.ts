@@ -17,8 +17,8 @@ export interface Tests {
 }
 
 export interface Captures {
-  json?: { [key: string]: any }; 
-  body?: { [key: string]: any } | string; 
+  json?: { [key: string]: any };
+  body?: { [key: string]: any } | string;
   status?: number;
   headers?: { [key: string]: any };
 }
@@ -66,7 +66,8 @@ export interface ResponseData {
   executionTime: number | string;
   status?: number | string; // TODO: not optional, cannot be empty.
   body?: string; // TODO: not optional, cannot be empty.
-  headers?: string; // TODO: not optional, cannot be empty. Rename as rawHeaders
+  rawHeaders?: string; // TODO: not optional, cannot be empty. Rename as rawHeaders
+  headers?: { [key: string]: string };
 
   // TODO: let us have parsed body and headers also, like this:
   // json?: any;

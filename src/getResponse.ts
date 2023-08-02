@@ -2,16 +2,15 @@ import { window, ProgressLocation } from "vscode";
 
 import { ResponseData, RequestData } from "./core/models";
 import { constructRequest, executeHttpRequest } from "./core/executeRequest";
-import { getStrictStringValue } from "./core/variableReplacement";
 
 export async function individualRequestWithProgress(
   requestData: RequestData,
-): Promise<[boolean, ResponseData, { [key: string]: string } | undefined]> {
+): Promise<[boolean, ResponseData]> {
   let seconds = 0;
 
   const paramsForUrl = requestData.paramsForUrl;
 
-  const [cancelled, response, headers] = await window.withProgress(
+  const [cancelled, response] = await window.withProgress(
     {
       location: ProgressLocation.Window,
       cancellable: true,
@@ -49,15 +48,26 @@ export async function individualRequestWithProgress(
         status: httpResponse.statusCode,
         // statusText: httpResponse.statusMessage,
         body: httpResponse.body,
-        headers: getHeadersAsString(httpResponse.rawHeaders),
+        rawHeaders: getHeadersAsString(httpResponse.rawHeaders),
+        headers: httpResponse.headers,
         // httpVersion: httpResponse.httpVersion,
       };
 
-      return [cancelled, response, httpResponse.headers];
+      return [cancelled, response];
     },
   );
 
-  return [cancelled, response, headers];
+  return [cancelled, response];
+}
+
+function getStrictStringValue(value: any): string {
+  if (value === undefined) {
+    return "undefined";
+  } else if (typeof value === "object") {
+    return JSON.stringify(value);
+  } else {
+    return value.toString();
+  }
 }
 
 function getHeadersAsString(rawHeaders: Array<string>): string {

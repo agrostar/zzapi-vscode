@@ -6,7 +6,7 @@ import { Param } from "./models";
 
 let VARIABLES: { [key: string]: string } = {};
 
-export function getStrictStringValue(value: any): string {
+function getStrictStringValue(value: any): string {
   if (value === undefined) {
     return "undefined";
   } else if (typeof value === "object") {
@@ -20,8 +20,6 @@ export function setVariable(key: any, value: any): void {
   VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
 }
 
-// TODO: Change this to take a parameter for the currentEnvironment.
-// TODO: allEnvironments may not be needed.
 export function loadVariables(filesToLoad: Array<string>): void {
   VARIABLES = {};
 
