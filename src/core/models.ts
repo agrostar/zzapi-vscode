@@ -30,7 +30,7 @@ export interface Common {
   headers?: Array<Header>;
   params?: Array<Param>;
   body?: string; // TODO: not needed
-  options?: { follow?: boolean; verifySSL?: boolean };
+  options?: { follow: boolean; verifySSL: boolean };
   tests?: Tests;
   capture?: Captures;
 }
@@ -42,7 +42,7 @@ export interface Request {
   headers?: Array<Header>;
   params?: Array<Param>;
   body?: string;
-  options?: { follow?: boolean; verifySSL?: boolean /* TODO: not optional */ };
+  options?: { follow: boolean; verifySSL: boolean };
   tests?: Tests;
   capture?: Captures;
 }
@@ -73,4 +73,10 @@ export interface ResponseData {
   // json?: any;
   // headers: { [name: string]: string }
   // lowerCaseHeaders: { [name: string]: string }  // to be used for tests
+}
+
+export interface RequestPosition {
+  name?: string;
+  start: { line: number; col: number };
+  end: { line: number; col: number };
 }

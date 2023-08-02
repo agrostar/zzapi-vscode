@@ -1,16 +1,8 @@
 import * as YAML from "yaml";
-import { Request, RequestData } from "./models";
-import { getRequestData } from "./combineData";
+
+import { Request, RequestData, RequestPosition } from "./models";
+import { getMergedData } from "./combineData";
 import { loadVariables } from "./variableReplacement";
-
-// TODO: move this into core.
-
-// TODO: move this into models.
-interface RequestPosition {
-  name?: string;
-  start: { line: number; col: number };
-  end: { line: number; col: number };
-}
 
 /*
  * Returns an array of requestPosition objects. If the name of a
@@ -66,7 +58,6 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
   return positions;
 }
 
-// TODO: add the following function:
 export function getRequestsData(
   document: string,
   variableFiles: Array<string>,
@@ -86,7 +77,7 @@ export function getRequestsData(
     let request: Request = allRequests[name];
     request.name = name;
 
-    const allData: RequestData = getRequestData(commonData, request);
+    const allData: RequestData = getMergedData(commonData, request);
 
     requests[name] = allData;
   }
@@ -101,6 +92,5 @@ export function getRequestsData(
   // The caller needs to handle errors in the bundle. We cannot assume it is always
   // valid. This includes YAML syntax errors and also schema errors.
 
-  // return the list of requests
   return requests;
 }

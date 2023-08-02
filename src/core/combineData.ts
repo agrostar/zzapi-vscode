@@ -1,7 +1,7 @@
 import { replaceVariablesInObject, replaceVariablesInParams } from "./variableReplacement";
 import { RequestData, Common, Header, Param, Tests, Captures, Request } from "./models";
 
-export function getRequestData(common: Common | undefined, request: Request): RequestData {
+export function getMergedData(common: Common | undefined, request: Request): RequestData {
   // making deep copies of the objects because we will be deleting some data
   let commonData =
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as typeof common);
@@ -51,7 +51,7 @@ function setNameOfHeadersArrayToLowerCase(headers: Array<Header>): Array<Header>
   return newHeaders;
 }
 
-export function setHeadersToLowerCase(
+function setHeadersToLowerCase(
   common: Common | undefined,
   request: Request,
 ): [Common | undefined, Request] {
@@ -115,7 +115,7 @@ function getParamsForUrl(
   return `?${paramString}`;
 }
 
-export function getMergedTestsAndCapture(
+function getMergedTestsAndCapture(
   common: Tests | Captures | undefined,
   request: Tests | Captures | undefined,
 ): Tests | Captures | undefined {
@@ -154,7 +154,7 @@ export function getMergedTestsAndCapture(
   return mergedData;
 }
 
-export function getMergedDataExceptParamsTestsCapture(
+function getMergedDataExceptParamsTestsCapture(
   commonData: Common | undefined,
   requestData: Request,
 ): Omit<RequestData, "paramsForUrl" | "tests" | "capture"> {
@@ -168,10 +168,10 @@ export function getMergedDataExceptParamsTestsCapture(
   delete requestData.tests;
   delete requestData.capture;
 
-  return replaceVariablesInObject(getMergedData(commonData, requestData));
+  return replaceVariablesInObject(getMergedObjectData(commonData, requestData));
 }
 
-function getMergedData(
+function getMergedObjectData(
   commonData: Omit<Common, "params" | "tests" | "capture"> | undefined,
   requestData: Omit<Request, "params" | "tests" | "capture">,
 ): RequestData {
