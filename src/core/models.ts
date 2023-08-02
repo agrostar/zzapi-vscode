@@ -11,17 +11,16 @@ export interface Param {
   encode?: boolean;
 }
 
-// TODO: separate these two for readability, even if it is identical.
 export interface Tests {
   json?: { [key: string]: any }; // TODO: we should have string instead of any in tests.
-  body?: object | string; // TODO: body should be string
+  body?: { [key: string]: any } | string; // TODO: body should be string
   status?: number;
   headers?: { [key: string]: any };
 }
 
 export interface Captures {
   json?: { [key: string]: any }; 
-  body?: object | string; 
+  body?: { [key: string]: any } | string; 
   status?: number;
   headers?: { [key: string]: any };
 }
@@ -29,7 +28,6 @@ export interface Captures {
 export interface CommonData {
   baseUrl?: string;
 
-  url?: string; // TODO: not needed
   method?: string; // TODO: not needed
   headers?: Array<Header>;
   params?: Array<Param>;

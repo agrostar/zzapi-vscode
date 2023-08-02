@@ -5,7 +5,10 @@ import { CombinedData } from "./models";
 // TODO: it is a good practice to define the return value instead of letting typescript
 // figure it out on its own. if by mistake we are returning something else that is not
 // intended, it will get caught instead of TS making it this | that.
-export function constructRequest(allData: CombinedData, paramsForUrl: string | undefined) {
+export function constructRequest(
+  allData: CombinedData,
+  paramsForUrl: string | undefined,
+): CancelableRequest<Response<string>> {
   const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
   const options = {
@@ -39,9 +42,13 @@ export function constructRequest(allData: CombinedData, paramsForUrl: string | u
   }
 }
 
-function getURL(baseUrl: string | undefined, url: string | undefined, paramsForUrl: string | undefined) {
-  // TODO: all this can be done during getRequests itself.  
-  if(paramsForUrl === undefined){
+function getURL(
+  baseUrl: string | undefined,
+  url: string | undefined,
+  paramsForUrl: string | undefined,
+): string {
+  // TODO: all this can be done during getRequests itself.
+  if (paramsForUrl === undefined) {
     paramsForUrl = "";
   }
 
@@ -71,7 +78,9 @@ function getBody(body: any): string | undefined {
   return body.toString();
 }
 
-export async function executeHttpRequest(httpRequest: CancelableRequest<Response<string>>) {
+export async function executeHttpRequest(
+  httpRequest: CancelableRequest<Response<string>>,
+): Promise<{ [key: string]: any }> {
   try {
     return await httpRequest;
   } catch (e: any) {

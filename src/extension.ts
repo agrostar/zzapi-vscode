@@ -29,7 +29,7 @@ export function getRequiredFileEnd(): string {
   return BUNDLE_FILE_NAME_ENDING;
 }
 
-export function activate(context: ExtensionContext) {
+export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && activeEditor.document.uri.fsPath.endsWith(BUNDLE_FILE_NAME_ENDING)) {
     setVarFileAndDirPath(activeEditor);
@@ -73,7 +73,7 @@ export function getOutputChannel(): OutputChannel {
   return OUTPUT_CHANNEL;
 }
 
-export function deactivate() {
+export function deactivate(): void {
   if (DISPOSABLES) {
     DISPOSABLES.forEach((item) => item.dispose());
   }

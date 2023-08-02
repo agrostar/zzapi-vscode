@@ -9,7 +9,7 @@ export function captureVariables(
   capture: Captures | undefined,
   responseData: ResponseData,
   headers: { [key: string]: string } | undefined,
-) {
+): void {
   if (capture === undefined || Object.keys(capture).length === 0) {
     return;
   }

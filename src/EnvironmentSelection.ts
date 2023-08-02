@@ -28,14 +28,17 @@ const DEFAULT_ENVIRONMENT = {
 };
 let ENVIRONMENTS_TO_DISPLAY: Array<{ label: string; description: string }> = [];
 
-export function initialiseStatusBar(context: ExtensionContext, statusBar: StatusBarItem) {
+export function initialiseStatusBar(context: ExtensionContext, statusBar: StatusBarItem): void {
   setDefaultStatusBarValues(statusBar);
   statusBar.command = "extension.clickEnvSelector";
   statusBar.show();
   context.subscriptions.push(statusBar);
 }
 
-export function createEnvironmentSelector(context: ExtensionContext, statusBar: StatusBarItem) {
+export function createEnvironmentSelector(
+  context: ExtensionContext,
+  statusBar: StatusBarItem,
+): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     window
       .showQuickPick(ENVIRONMENTS_TO_DISPLAY, {
@@ -56,7 +59,7 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
   context.subscriptions.push(statusClick);
 }
 
-export function loadEnvironments(statusBar: StatusBarItem) {
+export function loadEnvironments(statusBar: StatusBarItem): void {
   ENVIRONMENTS_TO_DISPLAY = [];
   ALL_ENVIRONMENTS = {};
   setDefaultStatusBarValues(statusBar);

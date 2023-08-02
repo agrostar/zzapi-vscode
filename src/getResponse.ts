@@ -5,13 +5,13 @@ import { constructRequest, executeHttpRequest } from "./core/executeRequest";
 import { getStrictStringValue } from "./core/variableReplacement";
 
 export async function individualRequestWithProgress(
-  requestData: CombinedData
+  requestData: CombinedData,
 ): Promise<[boolean, ResponseData, { [key: string]: string } | undefined]> {
   let seconds = 0;
 
   const paramsForUrl = requestData.paramsForUrl;
 
-  const [cancelled, response, headers]: any = await window.withProgress(
+  const [cancelled, response, headers] = await window.withProgress(
     {
       location: ProgressLocation.Window,
       cancellable: true,
@@ -60,7 +60,7 @@ export async function individualRequestWithProgress(
   return [cancelled, response, headers];
 }
 
-function getHeadersAsString(rawHeaders: Array<string>) {
+function getHeadersAsString(rawHeaders: Array<string>): string {
   let formattedString = "\n";
   if (rawHeaders === undefined) {
     return formattedString;

@@ -9,10 +9,7 @@ import {
   Captures,
 } from "./core/models";
 
-export function getRequestData(
-  common: CommonData | undefined,
-  request: RequestData,
-): CombinedData {
+export function getRequestData(common: CommonData | undefined, request: RequestData): CombinedData {
   // making deep copies of the objects because we will be deleting some data
   let commonData =
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as typeof common);
@@ -41,7 +38,9 @@ export function getRequestData(
   return allData;
 }
 
-function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }) {
+function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }): {
+  [key: string]: string | object;
+} {
   let newObj: { [key: string]: string | object } = {};
   for (const key in headers) {
     newObj[key.toLowerCase()] = headers[key];
@@ -124,8 +123,13 @@ function getParamsForUrl(
   return `?${paramString}`;
 }
 
-export function getMergedTestsAndCapture(common: Tests | undefined, request: Captures | undefined) {
-  let mergedData = replaceVariablesInObject(Object.assign({}, common, request));
+export function getMergedTestsAndCapture(
+  common: Tests | Captures | undefined,
+  request: Tests | Captures | undefined,
+): Tests | Captures | undefined {
+  let mergedData: Tests | Captures = replaceVariablesInObject(
+    Object.assign({}, common === undefined ? {} : common, request),
+  );
 
   for (const test in request) {
     const requestValue = request[test as keyof typeof request];
@@ -151,7 +155,7 @@ export function getMergedTestsAndCapture(common: Tests | undefined, request: Cap
         finalKeyData[key] = value;
       }
 
-      mergedData[test] = finalKeyData;
+      (mergedData as any)[test] = finalKeyData;
     }
   }
 
@@ -161,7 +165,7 @@ export function getMergedTestsAndCapture(common: Tests | undefined, request: Cap
 export function getMergedDataExceptParamsTestsCapture(
   commonData: CommonData | undefined,
   requestData: RequestData,
-): any {
+): Omit<CombinedData, "paramsForUrl" | "tests" | "capture"> {
   if (commonData !== undefined) {
     delete commonData.params;
     delete commonData.tests;
@@ -178,7 +182,7 @@ export function getMergedDataExceptParamsTestsCapture(
 function getMergedData(
   commonData: Omit<CommonData, "params" | "tests" | "capture"> | undefined,
   requestData: Omit<RequestData, "params" | "tests" | "capture">,
-) {
+): CombinedData {
   const mergedHeaders = getMergedHeaders(commonData, requestData);
 
   delete requestData.headers;
@@ -214,7 +218,11 @@ function getMergedHeaders(
   return mergedHeaders;
 }
 
-function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }> | undefined) {
+function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }> | undefined):
+  | {
+      [key: string]: any;
+    }
+  | undefined {
   if (objectSet === undefined) {
     return undefined;
   }

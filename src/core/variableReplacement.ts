@@ -24,13 +24,13 @@ export function getStrictStringValue(value: any): string {
   }
 }
 
-export function setVariable(key: any, value: any) {
+export function setVariable(key: any, value: any): void {
   VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
 }
 
 // TODO: Change this to take a parameter for the currentEnvironment.
 // TODO: allEnvironments may not be needed.
-export function loadVariables() {
+export function loadVariables(): void {
   VARIABLES = {};
 
   const dirPath = getCurrDirPath();
@@ -55,22 +55,22 @@ export function loadVariables() {
   });
 }
 
-export function replaceVariablesInObject(objectData: any): any {
+export function replaceVariablesInObject<Type>(objectData: Type): Type {
   if (objectData === undefined) {
-    return undefined;
+    return undefined as Type;
   }
 
   for (const key in objectData) {
     if (typeof objectData[key] === "object") {
       objectData[key] = replaceVariablesInObject(objectData[key]);
     } else if (typeof objectData[key] === "string") {
-      objectData[key] = replaceVariables(objectData[key]);
+      (objectData as any)[key] = replaceVariables(objectData[key] as string);
     }
   }
   return objectData;
 }
 
-function replaceVariablesInSelf() {
+function replaceVariablesInSelf(): void {
   VARIABLES = replaceVariablesInObject(VARIABLES);
 }
 

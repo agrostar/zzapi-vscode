@@ -26,7 +26,7 @@ export function runAllTests(
   tests: Tests | undefined,
   responseData: ResponseData,
   headers: { [key: string]: string } | undefined,
-) {
+): void {
   if (tests === undefined || Object.keys(tests).length === 0) {
     return;
   }
@@ -126,7 +126,7 @@ export function runAllTests(
   OUTPUT_CHANNEL.appendLine("--------------------------------------");
 }
 
-function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object) {
+function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object): void {
   OUTPUT_CHANNEL.appendLine("JSON:");
   for (const key in jsonTests) {
     let required = jsonTests[key];
@@ -150,7 +150,7 @@ function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object
   }
 }
 
-function getValueForJSONTests(responseContent: object, key: string) {
+function getValueForJSONTests(responseContent: object, key: string): any {
   try {
     return jp.value(responseContent, key);
   } catch (err: any) {
@@ -162,7 +162,7 @@ function getValueForJSONTests(responseContent: object, key: string) {
 }
 
 //if RHS is an object
-function runObjectTests(required: { [key: string]: any }, received: any, keyName: string) {
+function runObjectTests(required: { [key: string]: any }, received: any, keyName: string): any {
   let regexRan = false;
 
   for (const key in required) {

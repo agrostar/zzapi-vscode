@@ -5,14 +5,17 @@ import { ResponseData } from "./core/models";
 
 const KEYS_IN_BODY = ["body"];
 
-export async function openEditorForIndividualReq(responseData: ResponseData, name: string) {
+export async function openEditorForIndividualReq(
+  responseData: ResponseData,
+  name: string,
+): Promise<void> {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);
   await showContent(contentData, headersData);
 }
 
 export async function openEditorForAllRequests(
   responses: Array<{ response: ResponseData; name: string }>,
-) {
+): Promise<void> {
   const numResponses = responses.length;
   let formattedContent = "";
   let formattedHeaders = "";
@@ -57,7 +60,7 @@ function getDataOfIndReqAsString(
   return [contentData, headersData];
 }
 
-async function openDocument(content: string) {
+async function openDocument(content: string): Promise<void> {
   await workspace.openTextDocument({ content: content }).then((document) => {
     window.showTextDocument(document, {
       preserveFocus: false,
@@ -65,7 +68,7 @@ async function openDocument(content: string) {
   });
 }
 
-async function showContent(bodyContent: string, headersContent: string) {
+async function showContent(bodyContent: string, headersContent: string): Promise<void> {
   // insert a new group to the right, insert the content
   commands.executeCommand("workbench.action.newGroupRight");
   await openDocument(bodyContent);
