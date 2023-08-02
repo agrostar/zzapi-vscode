@@ -1,6 +1,7 @@
 import * as YAML from "yaml";
 import { Request, RequestData } from "./models";
 import { getRequestData } from "./combineData";
+import { loadVariables } from "./variableReplacement";
 
 // TODO: move this into core.
 
@@ -66,8 +67,9 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
 }
 
 // TODO: add the following function:
-export function getRequests(
-  document: string
+export function getRequestsData(
+  document: string,
+  variableFiles: Array<string>
 ): { [name: string]: RequestData } {
   const parsedData = YAML.parse(document);
   if (parsedData === undefined) {
@@ -79,6 +81,7 @@ export function getRequests(
   const commonData = parsedData.common;
   const allRequests = parsedData.requests;
 
+  loadVariables(variableFiles);
   for (const name in allRequests) {
     let request: Request = allRequests[name];
     request.name = name;
