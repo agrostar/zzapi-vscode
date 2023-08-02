@@ -24,14 +24,9 @@ import {
 let DISPOSABLES: Disposable[] = [];
 
 const BUNDLE_FILE_NAME_ENDING = ".zz-bundle.yaml";
-const VAR_FILE_NAME = "zz-envs.yaml";
 
 export function getRequiredFileEnd(): string {
   return BUNDLE_FILE_NAME_ENDING;
-}
-
-export function getRequiredVarFileName(): string {
-  return VAR_FILE_NAME;
 }
 
 export function activate(context: ExtensionContext) {

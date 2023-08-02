@@ -5,8 +5,9 @@ import * as path from "path";
 
 import * as YAML from "yaml";
 
-import { getRequiredVarFileName } from "./extension";
 import { loadVariables } from "./core/variableReplacement";
+
+const VAR_FILE_NAME = "zz-envs.yaml";
 
 let CURRENT_ENVIRONMENT: string = "";
 let ALL_ENVIRONMENTS: { [key: string]: Array<string> };
@@ -91,7 +92,7 @@ export function loadEnvironments(statusBar: StatusBarItem) {
 
 export function setVarFileAndDirPath(activeEditor: TextEditor): void {
   CURR_DIR_PATH = getWorkingDirectoryPath(activeEditor);
-  CURR_VARIABLES_FILE_PATH = path.join(CURR_DIR_PATH, getRequiredVarFileName());
+  CURR_VARIABLES_FILE_PATH = path.join(CURR_DIR_PATH, VAR_FILE_NAME);
 }
 
 export function getWorkingDirectoryPath(activeEditor: TextEditor): string {

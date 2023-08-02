@@ -2,11 +2,11 @@ import { window, ProgressLocation } from "vscode";
 
 import got, {CancelableRequest, Response} from "got";
 
-import { ResponseData, CombinedData } from "../models";
+import { ResponseData, SplitCombinedData } from "../models";
 import { getStrictStringValue } from "./variableReplacement";
 
 export async function individualRequestWithProgress(
-  requestData: CombinedData,
+  requestData: SplitCombinedData,
   paramsForUrl: string,
 ): Promise<[boolean, ResponseData, { [key: string]: string } | undefined]> {
   let seconds = 0;
@@ -71,12 +71,12 @@ export function getHeadersAsString(rawHeaders: Array<string>) {
   return `\n\t${formattedString}`;
 }
 
-function constructRequest(allData: CombinedData, paramsForUrl: string) {
+function constructRequest(allData: SplitCombinedData, paramsForUrl: string) {
   const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
   const options = {
     body: getAsStringIfDefined(allData.body),
-    headers: getHeadersAsJSON(allData.headers),
+    headers: (allData.headers),
     followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
 
     https: {
@@ -129,45 +129,6 @@ export function getAsStringIfDefined(body: any) {
   }
 
   return body.toString();
-}
-
-/**
- * @param objectSet May be an array of type {name: "name",  value: "value"}, or a JSON
- *  object, or may remain undefined.
- * @returns a JSON version of type {"name": "value", ....} that can be passed
- *  as an option in got.
- * If headers are defined in both the request itself as well as in "common",
- *  then the objectSet may already be converted by the
- *  @function getMergedDataExceptParamsAndTests, which is why we pass it back if it
- *  it not an array. Else, we call @function getObjectSetAsJSON to perform the above
- *  stated operation.
- * If headers are not defined, then we do not want it as an option in got, so we
- *  simply return undefined, as before.
- */
-export function getHeadersAsJSON(
-  objectSet: { [key: string]: string } | Array<{ name: string; value: string }> | undefined,
-) {
-  if (objectSet === undefined || !Array.isArray(objectSet)) {
-    return objectSet;
-  }
-
-  return getObjectSetAsJSON(objectSet);
-
-  function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }>) {
-    let finalObject: { [key: string]: any } = {};
-
-    const numElements = objectSet.length;
-    for (let i = 0; i < numElements; i++) {
-      const currObj: { name: string; value: any } = objectSet[i];
-
-      const key = currObj.name;
-      const value = currObj.value;
-
-      finalObject[key] = value;
-    }
-
-    return finalObject;
-  }
 }
 
 async function executeHttpRequest(httpRequest: CancelableRequest<Response<string>>) {

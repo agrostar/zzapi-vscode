@@ -17,16 +17,16 @@ export interface TestsAndCaptures {
 }
 
 export interface CommonData {
-  "baseUrl"?: string;
+  baseUrl?: string;
 
-  "url"?: string;
-  "method"?: string;
-  "headers"?: Array<Header>;
-  "params"?: Array<Param>;
-  "body"?: string;
-  "options"?: { follow?: boolean; verifySSL?: boolean };
-  "tests"?: TestsAndCaptures;
-  "capture"?: TestsAndCaptures;
+  url?: string;
+  method?: string;
+  headers?: Array<Header>;
+  params?: Array<Param>;
+  body?: string;
+  options?: { follow?: boolean; verifySSL?: boolean };
+  tests?: TestsAndCaptures;
+  capture?: TestsAndCaptures;
 }
 export interface RequestData {
   name: string;
@@ -42,13 +42,13 @@ export interface RequestData {
 }
 
 //combined data apart from params, tests, captures
-export interface CombinedData {
+export interface SplitCombinedData {
   name: string;
   baseUrl?: string;
 
   url?: string;
   method?: string;
-  headers?: Array<Header>;
+  headers?: {[key: string]: string};
   body?: string;
   options?: { follow?: boolean; verifySSL?: boolean };
 }

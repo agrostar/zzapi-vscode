@@ -13,10 +13,10 @@ export async function runIndividualRequest(text: string, name: string): Promise<
   const parsedData = YAML.parse(text);
 
   const commonData = parsedData.common;
-  let requestData = parsedData.requests[name];
-  requestData.name = name;
+  let request = parsedData.requests[name];
+  request.name = name;
 
-  const [params, tests, capture, allData] = splitParsedData(commonData, requestData);
+  const [params, tests, capture, allData] = splitParsedData(commonData, request);
   const [cancelled, responseData, headers] = await individualRequestWithProgress(allData, params);
 
   if (!cancelled) {

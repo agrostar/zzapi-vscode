@@ -1,10 +1,22 @@
 import { replaceVariablesInObject, replaceVariablesInParams } from "./core/variableReplacement";
-import { CombinedData, CommonData, Header, Param, RequestData, TestsAndCaptures } from "./models";
+import {
+  SplitCombinedData,
+  CommonData,
+  Header,
+  Param,
+  RequestData,
+  TestsAndCaptures,
+} from "./models";
 
 export function splitParsedData(
   common: CommonData | undefined,
   request: RequestData,
-): [params: string, tests: TestsAndCaptures, capture: TestsAndCaptures, allData: CombinedData] {
+): [
+  params: string,
+  tests: TestsAndCaptures,
+  capture: TestsAndCaptures,
+  allData: SplitCombinedData,
+] {
   // making deep copies of the objects because we will be deleting some data
   let commonData =
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as typeof common);
@@ -165,44 +177,63 @@ export function getMergedDataExceptParamsTestsCapture(
   delete requestData.capture;
 
   return replaceVariablesInObject(getMergedData(commonData, requestData));
+}
 
-  function getMergedData(commonData: any, requestData: any) {
-    let mergedData = Object.assign({}, commonData === undefined ? {} : commonData, requestData);
+function getMergedData(
+  commonData: Omit<CommonData, "params" | "tests" | "capture"> | undefined,
+  requestData: Omit<RequestData, "params" | "tests" | "capture">,
+) {
+  const mergedHeaders = getMergedHeaders(commonData, requestData);
 
-    for (const key in requestData) {
-      if (
-        commonData !== undefined &&
-        commonData.hasOwnProperty(key) &&
-        Array.isArray(requestData[key])
-      ) {
-        let finalKeyData: { [key: string]: any } = {};
-
-        let currProp: any;
-
-        //idea: set value for each key for commonData, and then for requestData,
-        //  thus, if there is a common key, then the requestData value will overwrite
-        if (Array.isArray(commonData[key])) {
-          currProp = commonData[key];
-
-          currProp.forEach((obj: { name: string; value: string }) => {
-            const key = obj.name;
-            const value = obj.value;
-            finalKeyData[key] = value;
-          });
-        }
-
-        currProp = requestData[key];
-
-        currProp.forEach((obj: { name: string; value: string }) => {
-          const key = obj.name;
-          const value = obj.value;
-          finalKeyData[key] = value;
-        });
-
-        mergedData[key] = finalKeyData;
-      }
-    }
-
-    return mergedData;
+  delete requestData.headers;
+  if (commonData !== undefined) {
+    delete commonData.headers;
   }
+
+  let mergedData: SplitCombinedData = Object.assign(
+    {},
+    commonData === undefined ? {} : (commonData as Omit<typeof commonData, "headers">),
+    requestData as Omit<typeof requestData, "headers">,
+  );
+
+  mergedData.headers = mergedHeaders;
+
+  return mergedData;
+}
+
+function getMergedHeaders(
+  commonData: CommonData | undefined,
+  requestData: RequestData,
+): { [key: string]: string } {
+  const requestHeaders = getObjectSetAsJSON(requestData.headers);
+  const commonHeaders = getObjectSetAsJSON(
+    commonData === undefined ? undefined : commonData.headers,
+  );
+
+  let mergedHeaders: { [key: string]: string } = commonHeaders === undefined ? {} : commonHeaders;
+  for (const headerName in requestHeaders) {
+    mergedHeaders[headerName] = requestHeaders[headerName];
+  }
+
+  return mergedHeaders;
+}
+
+function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }> | undefined) {
+  if (objectSet === undefined) {
+    return undefined;
+  }
+
+  let finalObject: { [key: string]: any } = {};
+
+  const numElements = objectSet.length;
+  for (let i = 0; i < numElements; i++) {
+    const currObj: { name: string; value: any } = objectSet[i];
+
+    const key = currObj.name;
+    const value = currObj.value;
+
+    finalObject[key] = value;
+  }
+
+  return finalObject;
 }
