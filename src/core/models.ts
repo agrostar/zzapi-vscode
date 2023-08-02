@@ -1,5 +1,3 @@
-// TODO: move this into core.
-
 export interface Header {
   name: string;
   value: string;
@@ -25,7 +23,7 @@ export interface Captures {
   headers?: { [key: string]: any };
 }
 
-export interface CommonData {
+export interface Common {
   baseUrl?: string;
 
   method?: string; // TODO: not needed
@@ -36,7 +34,7 @@ export interface CommonData {
   tests?: Tests;
   capture?: Captures;
 }
-export interface RequestData {
+export interface Request {
   name: string;
 
   url?: string; // TODO: not optional
@@ -50,7 +48,7 @@ export interface RequestData {
 }
 
 // TODO: try and not have this.
-export interface CombinedData {
+export interface RequestData {
   name: string;
   baseUrl?: string;
 

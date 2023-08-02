@@ -1,15 +1,7 @@
-// TODO: the good practice is to order the imports in the order of generalization.
-// 1. import fs (JavaScript builtin)
-// 2. import yaml (installed library)
-// 3. models, extension (our own modules)
-
 import * as fs from "fs";
-import * as path from "path";
 
 import * as YAML from "yaml";
 
-// TODO: should not have any imports from ../
-import { getCurrDirPath, getEnvDetails } from "../EnvironmentSelection";
 import { Param } from "./models";
 
 let VARIABLES: { [key: string]: string } = {};
@@ -30,19 +22,10 @@ export function setVariable(key: any, value: any): void {
 
 // TODO: Change this to take a parameter for the currentEnvironment.
 // TODO: allEnvironments may not be needed.
-export function loadVariables(): void {
+export function loadVariables(filesToLoad: Array<string>): void {
   VARIABLES = {};
 
-  const dirPath = getCurrDirPath();
-  const [currentEnvironment, allEnvironments] = getEnvDetails();
-
-  const filesToLoad: Array<string> = allEnvironments[currentEnvironment];
-  if (filesToLoad === undefined) {
-    return;
-  }
-
-  filesToLoad.forEach((file) => {
-    let filePath = path.join(dirPath, file);
+  filesToLoad.forEach((filePath) => {
     if (fs.existsSync(filePath)) {
       let fileData = fs.readFileSync(filePath, "utf-8");
       let parsedVariables = YAML.parse(fileData);

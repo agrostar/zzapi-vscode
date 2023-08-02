@@ -1,7 +1,6 @@
 import jp from "jsonpath";
 
 import { setVariable } from "./variableReplacement";
-import { getOutputChannel } from "../extension";
 import { ResponseData, Captures } from "./models";
 
 export function captureVariables(
@@ -9,23 +8,24 @@ export function captureVariables(
   capture: Captures | undefined,
   responseData: ResponseData,
   headers: { [key: string]: string } | undefined,
-): void {
+): string {
   if (capture === undefined || Object.keys(capture).length === 0) {
-    return;
+    return "";
   }
 
-  const outputChannel = getOutputChannel();
-  outputChannel.appendLine(`Running captures of '${name}':`);
+  let captureOutput = "";
+
+  captureOutput += `Running captures of '${name}':\n`;
 
   for (const test in capture) {
     if (test === "json") {
-      outputChannel.appendLine("JSON:");
+      captureOutput += "JSON:\n";
 
       let errorInParsing = false;
       let body: object = {};
 
       if (responseData.body === undefined) {
-        outputChannel.appendLine(`\tJSON capture not evaluated, body not defined`);
+        captureOutput += `\tJSON capture not evaluated, body not defined\n`;
         errorInParsing = true;
       }
 
@@ -33,9 +33,8 @@ export function captureVariables(
         try {
           body = JSON.parse(responseData.body as string);
         } catch (err) {
-          outputChannel.appendLine(
-            `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}`,
-          );
+          captureOutput += 
+            `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}\n`;
           errorInParsing = true;
         }
       }
@@ -57,15 +56,15 @@ export function captureVariables(
           }
 
           if (errorInJP !== undefined) {
-            outputChannel.appendLine(`\tCould not set "${key}", error: ${errorInJP}`);
+            captureOutput += `\tCould not set "${key}", error: ${errorInJP}\n`;
           } else {
             setVariable(key, value);
-            outputChannel.appendLine(`\tVariable Set : "${key}" = "${value}"`);
+            captureOutput += `\tVariable Set : "${key}" = "${value}"\n`;
           }
         }
       }
     } else if (test === "headers") {
-      outputChannel.appendLine("HEADERS: ");
+      captureOutput += "HEADERS: \n";
       const headerCaptures = capture[test];
 
       for (const headerName in headerCaptures) {
@@ -73,15 +72,17 @@ export function captureVariables(
         const key = headerCaptures[headerName];
 
         setVariable(key, value);
-        outputChannel.appendLine(`\tVariable Set : "${key}" = "${value}"`);
+        captureOutput += `\tVariable Set : "${key}" = "${value}"\n`;
       }
     } else {
       const value = test;
       const key = capture[test as keyof Captures];
 
       setVariable(key, value);
-      outputChannel.appendLine(`Variable Set : "${key}" = "${value}"`);
+      captureOutput += `Variable Set : "${key}" = "${value}"\n`;
     }
   }
-  outputChannel.appendLine("--------------------------------------");
+  captureOutput += "--------------------------------------\n";
+
+  return captureOutput;
 }

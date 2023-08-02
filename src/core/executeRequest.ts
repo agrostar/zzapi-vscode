@@ -1,12 +1,9 @@
 import got, { CancelableRequest, Response } from "got";
 
-import { CombinedData } from "./models";
+import { RequestData } from "./models";
 
-// TODO: it is a good practice to define the return value instead of letting typescript
-// figure it out on its own. if by mistake we are returning something else that is not
-// intended, it will get caught instead of TS making it this | that.
 export function constructRequest(
-  allData: CombinedData,
+  allData: RequestData,
   paramsForUrl: string | undefined,
 ): CancelableRequest<Response<string>> {
   const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);

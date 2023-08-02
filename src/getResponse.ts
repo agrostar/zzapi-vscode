@@ -1,11 +1,11 @@
 import { window, ProgressLocation } from "vscode";
 
-import { ResponseData, CombinedData } from "./core/models";
+import { ResponseData, RequestData } from "./core/models";
 import { constructRequest, executeHttpRequest } from "./core/executeRequest";
 import { getStrictStringValue } from "./core/variableReplacement";
 
 export async function individualRequestWithProgress(
-  requestData: CombinedData,
+  requestData: RequestData,
 ): Promise<[boolean, ResponseData, { [key: string]: string } | undefined]> {
   let seconds = 0;
 

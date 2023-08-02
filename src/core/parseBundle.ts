@@ -1,5 +1,6 @@
 import * as YAML from "yaml";
-import { RequestData } from "./core/models";
+import { Request, RequestData } from "./models";
+import { getRequestData } from "./combineData";
 
 // TODO: move this into core.
 
@@ -66,12 +67,27 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
 
 // TODO: add the following function:
 export function getRequests(
-  document: string,
-  variables: { [key: string]: string },
+  document: string
 ): { [name: string]: RequestData } {
-  // const parsed = YAML.parse(document);
+  const parsedData = YAML.parse(document);
+  if (parsedData === undefined) {
+    return {};
+  }
 
   const requests: { [name: string]: RequestData } = {};
+
+  const commonData = parsedData.common;
+  const allRequests = parsedData.requests;
+
+  for (const name in allRequests) {
+    let request: Request = allRequests[name];
+    request.name = name;
+
+    const allData: RequestData = getRequestData(commonData, request);
+
+    requests[name] = allData;
+  }
+
   // Do all the merging etc here. Depending on how we do the merge, we may not need
   // the CommonData model at all. We can also replace the variables here itself.
   // The returned set of requestData is then ready to be executed.

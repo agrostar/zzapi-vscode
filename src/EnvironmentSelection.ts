@@ -113,7 +113,13 @@ export function setEnvironment(statusBar: StatusBarItem, environment: string): v
   statusBar.text = `Current Environment: ${CURRENT_ENVIRONMENT}`;
   statusBar.backgroundColor = undefined;
 
-  loadVariables();
+  let filesToLoad: Array<string> = [];
+  if(ALL_ENVIRONMENTS.hasOwnProperty(CURRENT_ENVIRONMENT)){
+    ALL_ENVIRONMENTS[CURRENT_ENVIRONMENT].forEach((fileName) => {
+      filesToLoad.push(path.join(CURR_DIR_PATH, fileName));
+    });
+  }
+  loadVariables(filesToLoad);
 }
 
 export function getEnvDetails(): [string, { [key: string]: Array<string> }] {

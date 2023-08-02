@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { getRequestPositions } from "./parseBundle";
+import { getRequestPositions } from "./core/parseBundle";
 import { getRequiredFileEnd } from "./extension";
 
 export class CodeLensProvider implements vscode.CodeLensProvider {

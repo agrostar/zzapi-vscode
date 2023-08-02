@@ -1,5 +1,4 @@
 import { window } from "vscode";
-
 import { runIndividualRequest, runAllRequests } from "./runRequests";
 
 export async function registerRunRequest(name: string): Promise<void> {

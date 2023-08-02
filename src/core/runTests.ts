@@ -1,11 +1,7 @@
-import { OutputChannel } from "vscode";
-
 import jp from "jsonpath";
 
-import { getOutputChannel } from "../extension";
 import { ResponseData, Tests } from "./models";
 
-let OUTPUT_CHANNEL: OutputChannel;
 const GAP = "\t|";
 const FAIL = "❌";
 const PASS = "✅";
@@ -26,19 +22,18 @@ export function runAllTests(
   tests: Tests | undefined,
   responseData: ResponseData,
   headers: { [key: string]: string } | undefined,
-): void {
+): string {
   if (tests === undefined || Object.keys(tests).length === 0) {
-    return;
+    return "";
   }
 
-  OUTPUT_CHANNEL = getOutputChannel();
-  OUTPUT_CHANNEL.show();
+  let testOutput: string = "";
 
   NUM_FAILED = 0;
   NUM_TESTS = 0;
 
-  OUTPUT_CHANNEL.appendLine("--------------------------------------");
-  OUTPUT_CHANNEL.appendLine(`Running Request '${name}'\n`);
+  testOutput += "--------------------------------------\n";
+  testOutput += `Running Request '${name}'\n\n`;
   for (const test in tests) {
     if (test === "json") {
       if (tests.json === undefined) {
@@ -49,28 +44,24 @@ export function runAllTests(
       let jsonBody: object = {};
 
       if (responseData.body === undefined) {
-        OUTPUT_CHANNEL.appendLine("JSON:");
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} JSON tests not evaluated due body being undefined`,
-        );
+        testOutput += "JSON:\n";
+        testOutput += `\t${FAIL} ${GAP} JSON tests not evaluated due body being undefined\n`;
         parseError = true;
       } else {
         try {
           jsonBody = JSON.parse(responseData.body);
         } catch (err) {
-          OUTPUT_CHANNEL.appendLine("JSON:");
-          OUTPUT_CHANNEL.appendLine(
-            `\t${FAIL} ${GAP} JSON tests not evaluated due to error in parsing: \n\t\t${err}`,
-          );
+          testOutput += "JSON:\n";
+          testOutput += `\t${FAIL} ${GAP} JSON tests not evaluated due to error in parsing: \n\t\t${err}\n`;
           parseError = true;
         }
       }
 
       if (!parseError) {
-        runJSONTests(tests.json, jsonBody);
+        testOutput += runJSONTests(tests.json, jsonBody);
       }
     } else if (test === "headers") {
-      OUTPUT_CHANNEL.appendLine("Headers");
+      testOutput += "Headers\n";
 
       const headerTests = tests[test];
       for (const headerTest in headerTests) {
@@ -81,16 +72,14 @@ export function runAllTests(
           required = getStringIfNotScalar(required);
           received = getStringIfNotScalar(received);
           if (received === required) {
-            OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${headerTest} : ${required}`);
+            testOutput += `\t${PASS} ${GAP} ${headerTest} : ${required}\n`;
           } else {
-            OUTPUT_CHANNEL.appendLine(
-              `\t${FAIL} ${GAP} ${headerTest} : ${required} ${GAP} Received ${received}`,
-            );
+            testOutput += `\t${FAIL} ${GAP} ${headerTest} : ${required} ${GAP} Received ${received}\n`;
             NUM_FAILED++;
           }
           NUM_TESTS++;
         } else {
-          runObjectTests(required, received, test);
+          testOutput += runObjectTests(required, received, test);
         }
       }
     } else {
@@ -101,33 +90,33 @@ export function runAllTests(
         required = getStringIfNotScalar(required);
         received = getStringIfNotScalar(received);
         if (received === required) {
-          OUTPUT_CHANNEL.appendLine(`${PASS} ${GAP} ${test} : ${required}`);
+          testOutput += `${PASS} ${GAP} ${test} : ${required}\n`;
         } else {
-          OUTPUT_CHANNEL.appendLine(
-            `${FAIL} ${GAP} ${test} : ${required} ${GAP} Received ${received}`,
-          );
+          testOutput += `${FAIL} ${GAP} ${test} : ${required} ${GAP} Received ${received}\n`;
           NUM_FAILED++;
         }
         NUM_TESTS++;
       } else {
-        runObjectTests(required, received, test);
+        testOutput += runObjectTests(required, received, test);
       }
     }
   }
 
   const numPassed = NUM_TESTS - NUM_FAILED;
   if (NUM_FAILED > 0) {
-    OUTPUT_CHANNEL.appendLine(
-      `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\t\t${PASS} PASSED: ${numPassed}/${NUM_TESTS}`,
-    );
+    testOutput += `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\t\t${PASS} PASSED: ${numPassed}/${NUM_TESTS}\n`;
   } else {
-    OUTPUT_CHANNEL.appendLine(`\n${PASS} PASSED: ${numPassed}/${NUM_TESTS}`);
+    testOutput += `\n${PASS} PASSED: ${numPassed}/${NUM_TESTS}\n`;
   }
-  OUTPUT_CHANNEL.appendLine("--------------------------------------");
+  testOutput += "--------------------------------------\n";
+
+  return testOutput;
 }
 
-function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object): void {
-  OUTPUT_CHANNEL.appendLine("JSON:");
+function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object): string {
+  let testOutput = "";
+
+  testOutput += "JSON:\n";
   for (const key in jsonTests) {
     let required = jsonTests[key];
     let received = getValueForJSONTests(responseContent, key);
@@ -136,18 +125,18 @@ function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object
       required = getStringIfNotScalar(required);
       received = getStringIfNotScalar(received);
       if (received === required) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${key} : ${required}`);
+        testOutput += `\t${PASS} ${GAP} ${key} : ${required}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${key} : ${required} ${GAP} Received ${received}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} ${key} : ${required} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
       NUM_TESTS++;
     } else {
-      runObjectTests(required, received, key);
+      testOutput += runObjectTests(required, received, key);
     }
   }
+
+  return testOutput;
 }
 
 function getValueForJSONTests(responseContent: object, key: string): any {
@@ -162,7 +151,9 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 }
 
 //if RHS is an object
-function runObjectTests(required: { [key: string]: any }, received: any, keyName: string): any {
+function runObjectTests(required: { [key: string]: any }, received: any, keyName: string): string {
+  let testOutput = "";
+
   let regexRan = false;
 
   for (const key in required) {
@@ -172,11 +163,9 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       const receivedData = getStringIfNotScalar(received);
 
       if (receivedData === compareTo) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} == ${compareTo} `);
+        testOutput += `\t${PASS} ${GAP} ${keyName} == ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${keyName} == ${compareTo} ${GAP} Received ${received}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} ${keyName} == ${compareTo} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$ne") {
@@ -184,47 +173,37 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       const receivedData = getStringIfNotScalar(received);
 
       if (receivedData !== compareTo) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} != ${compareTo} `);
+        testOutput += `\t${PASS} ${GAP} ${keyName} != ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${keyName} != ${compareTo} ${GAP} Received ${received}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} ${keyName} != ${compareTo} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$lt") {
       if (received < compareTo) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} < ${compareTo} `);
+        testOutput += `\t${PASS} ${GAP} ${keyName} < ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${keyName} < ${compareTo} ${GAP} Received ${received}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} ${keyName} < ${compareTo} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$gt") {
       if (received > compareTo) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} > ${compareTo}  `);
+        testOutput += `\t${PASS} ${GAP} ${keyName} > ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${keyName} > ${compareTo} ${GAP} Received ${received}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} ${keyName} > ${compareTo} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$lte") {
       if (received <= compareTo) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} <= ${compareTo}  `);
+        testOutput += `\t${PASS} ${GAP} ${keyName} <= ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${keyName} <= ${compareTo} ${GAP} Received ${received}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} ${keyName} <= ${compareTo} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$gte") {
       if (received >= compareTo) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} >= ${compareTo} `);
+        testOutput += `\t${PASS} ${GAP} ${keyName} >= ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${keyName} >= ${compareTo} ${GAP} Received ${received}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} ${keyName} >= ${compareTo} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$size") {
@@ -236,9 +215,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (!canBeInteger(compareTo)) {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not an integer`,
-        );
+        testOutput += `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not an integer\n`;
         NUM_FAILED++;
         NUM_TESTS++;
 
@@ -246,18 +223,15 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (receivedLen === parseInt(compareTo)) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} size of ${keyName} == ${compareTo} `);
+        testOutput += `\t${PASS} ${GAP} size of ${keyName} == ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} Received ${received} of size ${receivedLen}`,
-        );
+        testOutput += `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} Received ${received} of size ${receivedLen}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$exists") {
       if (typeof compareTo !== "boolean") {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} ${keyName} exists ${GAP} ${compareTo} is not a boolean`,
-        );
+        testOutput += 
+          `\t${FAIL} ${GAP} ${keyName} exists ${GAP} ${compareTo} is not a boolean\n`;
         NUM_FAILED++;
         NUM_TESTS++;
 
@@ -265,9 +239,9 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if ((received !== undefined) === compareTo) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} ${keyName} exists`);
+        testOutput += `\t${PASS} ${GAP} ${keyName} exists\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(`\t${FAIL} ${GAP} ${keyName} does not exist`);
+        testOutput += `\t${FAIL} ${GAP} ${keyName} does not exist\n`;
         NUM_FAILED++;
       }
     } else if (key === "$type") {
@@ -281,11 +255,10 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
             typeof received === compareTo.toLowerCase())) ||
         (compareTo === null && received === null)
       ) {
-        OUTPUT_CHANNEL.appendLine(`\t${PASS} ${GAP} type of ${keyName} is ${compareTo}`);
+        testOutput += `\t${PASS} ${GAP} type of ${keyName} is ${compareTo}\n`;
       } else {
-        OUTPUT_CHANNEL.appendLine(
-          `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${typeof received}`,
-        );
+        testOutput += 
+          `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${typeof received}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$regex" || key === "$options") {
@@ -308,7 +281,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (regexTest === undefined) {
-        OUTPUT_CHANNEL.appendLine(`\t${FAIL} ${GAP} Regex ${regexTest} is not specified`);
+        testOutput += `\t${FAIL} ${GAP} Regex ${regexTest} is not specified\n`;
         NUM_FAILED++;
       } else {
         let regexStr = getStringIfNotScalar(regexTest);
@@ -320,7 +293,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         try {
           result = regex.test(receivedData as string);
         } catch (err: any) {
-          OUTPUT_CHANNEL.appendLine(`\t${FAIL} ${GAP} Regex ${regexTest} ${GAP} Error: ${err}`);
+          testOutput += `\t${FAIL} ${GAP} Regex ${regexTest} ${GAP} Error: ${err}\n`;
           NUM_FAILED++;
           NUM_TESTS++;
 
@@ -328,21 +301,22 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         }
 
         if (result) {
-          OUTPUT_CHANNEL.appendLine(`\t${PASS} Regex ${regexTest} on ${received} is succesful`);
+          testOutput += `\t${PASS} Regex ${regexTest} on ${received} is succesful\n`;
         } else {
-          OUTPUT_CHANNEL.appendLine(`\t${PASS} Regex ${regexTest} on ${received} is unsuccesul`);
+          testOutput += `\t${PASS} Regex ${regexTest} on ${received} is unsuccesul\n`;
           NUM_FAILED++;
         }
       }
     } else {
-      OUTPUT_CHANNEL.appendLine(
-        `\t${FAIL} ${GAP} ${keyName} ${key} ${compareTo} ${GAP} Invalid Operator ${key}`,
-      );
+      testOutput += 
+        `\t${FAIL} ${GAP} ${keyName} ${key} ${compareTo} ${GAP} Invalid Operator ${key}\n`;
       NUM_FAILED++;
     }
 
     NUM_TESTS++;
   }
+
+  return testOutput;
 }
 
 function canBeInteger(input: any): boolean {

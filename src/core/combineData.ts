@@ -1,15 +1,7 @@
-import { replaceVariablesInObject, replaceVariablesInParams } from "./core/variableReplacement";
-import {
-  CombinedData,
-  CommonData,
-  Header,
-  Param,
-  RequestData,
-  Tests,
-  Captures,
-} from "./core/models";
+import { replaceVariablesInObject, replaceVariablesInParams } from "./variableReplacement";
+import { RequestData, Common, Header, Param, Tests, Captures, Request } from "./models";
 
-export function getRequestData(common: CommonData | undefined, request: RequestData): CombinedData {
+export function getRequestData(common: Common | undefined, request: Request): RequestData {
   // making deep copies of the objects because we will be deleting some data
   let commonData =
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as typeof common);
@@ -30,7 +22,7 @@ export function getRequestData(common: CommonData | undefined, request: RequestD
     requestData.capture,
   );
 
-  const allData: CombinedData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
+  const allData: RequestData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
   allData.paramsForUrl = params;
   allData.tests = tests;
   allData.captures = capture;
@@ -60,9 +52,9 @@ function setNameOfHeadersArrayToLowerCase(headers: Array<Header>): Array<Header>
 }
 
 export function setHeadersToLowerCase(
-  common: CommonData | undefined,
-  request: RequestData,
-): [CommonData | undefined, RequestData] {
+  common: Common | undefined,
+  request: Request,
+): [Common | undefined, Request] {
   if (common !== undefined) {
     if (common.headers !== undefined) {
       common.headers = setNameOfHeadersArrayToLowerCase(common.headers);
@@ -140,7 +132,7 @@ export function getMergedTestsAndCapture(
       //  thus, if there is a common key, then the requestTests value will overwrite
       const commonValue = common[test as keyof typeof common];
       if (typeof commonValue === "object") {
-        for (const cTest in commonValue as CommonData) {
+        for (const cTest in commonValue as Common) {
           if (commonValue !== undefined) {
             const key = cTest;
             const value = commonValue[cTest as keyof typeof commonValue];
@@ -163,9 +155,9 @@ export function getMergedTestsAndCapture(
 }
 
 export function getMergedDataExceptParamsTestsCapture(
-  commonData: CommonData | undefined,
-  requestData: RequestData,
-): Omit<CombinedData, "paramsForUrl" | "tests" | "capture"> {
+  commonData: Common | undefined,
+  requestData: Request,
+): Omit<RequestData, "paramsForUrl" | "tests" | "capture"> {
   if (commonData !== undefined) {
     delete commonData.params;
     delete commonData.tests;
@@ -180,9 +172,9 @@ export function getMergedDataExceptParamsTestsCapture(
 }
 
 function getMergedData(
-  commonData: Omit<CommonData, "params" | "tests" | "capture"> | undefined,
-  requestData: Omit<RequestData, "params" | "tests" | "capture">,
-): CombinedData {
+  commonData: Omit<Common, "params" | "tests" | "capture"> | undefined,
+  requestData: Omit<Request, "params" | "tests" | "capture">,
+): RequestData {
   const mergedHeaders = getMergedHeaders(commonData, requestData);
 
   delete requestData.headers;
@@ -190,7 +182,7 @@ function getMergedData(
     delete commonData.headers;
   }
 
-  let mergedData: CombinedData = Object.assign(
+  let mergedData: RequestData = Object.assign(
     {},
     commonData === undefined ? {} : (commonData as Omit<typeof commonData, "headers">),
     requestData as Omit<typeof requestData, "headers">,
@@ -202,8 +194,8 @@ function getMergedData(
 }
 
 function getMergedHeaders(
-  commonData: CommonData | undefined,
-  requestData: RequestData,
+  commonData: Common | undefined,
+  requestData: Request,
 ): { [key: string]: string } {
   const requestHeaders = getObjectSetAsJSON(requestData.headers);
   const commonHeaders = getObjectSetAsJSON(
