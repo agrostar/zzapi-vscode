@@ -51,18 +51,18 @@ export async function individualRequestWithProgress(
         headers: httpResponse.headers,
       };
 
-      if(!cancelled){
+      if (!cancelled) {
         const outputChannel = getOutputChannel();
 
-          const testOutput = runAllTests(requestData.name, requestData.tests, response);
-          outputChannel.append(testOutput);
+        const testOutput = runAllTests(requestData.name, requestData.tests, response);
+        outputChannel.append(testOutput);
 
-          const captureOutput = captureVariables(requestData.name, requestData.captures, response);
-          outputChannel.append(captureOutput);
+        const captureOutput = captureVariables(requestData.name, requestData.captures, response);
+        outputChannel.append(captureOutput);
 
-          if (testOutput != "" || captureOutput != "") {
-            outputChannel.show();
-          }
+        if (testOutput != "" || captureOutput != "") {
+          outputChannel.show();
+        }
       }
 
       return [cancelled, response];

@@ -2,13 +2,11 @@ import got from "got";
 
 import { GotRequest, RequestData } from "./models";
 
-export function constructRequest(
-  allData: RequestData,
-): GotRequest {
-  const paramsForUrl = allData.paramsForUrl;
-  const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
+export function constructRequest(allData: RequestData): GotRequest {
+  const completeUrl = getURL(allData.baseUrl, allData.url, allData.paramsForUrl);
 
   const options = {
+    method: allData.method,
     body: getBody(allData.body),
     headers: allData.headers,
     followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
@@ -16,28 +14,7 @@ export function constructRequest(
     https: {
       rejectUnauthorized: allData.options !== undefined ? allData.options.verifySSL : undefined,
     },
-    method: allData.method
   };
-
-  // if (typeof allData.method !== "string") {
-  //   return got.get(completeUrl, options);
-  // }
-
-  // TODO: can we just use got() instead of got.get() etc?
-  // const method = (allData.method as string).toUpperCase();
-  // if (method === "post") {
-  //   return got.post(completeUrl, options);
-  // } else if (method === "head") {
-  //   return got.head(completeUrl, options);
-  // } else if (method === "put") {
-  //   return got.put(completeUrl, options);
-  // } else if (method === "delete") {
-  //   return got.delete(completeUrl, options);
-  // } else if (method === "patch") {
-  //   return got.patch(completeUrl, options);
-  // } else {
-  //   return got.get(completeUrl, options);
-  // }
 
   return got(completeUrl, options);
 }
