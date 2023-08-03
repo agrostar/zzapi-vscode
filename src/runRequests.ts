@@ -10,7 +10,7 @@ import { getOutputChannel } from "./extension";
 import { getVariableFiles } from "./EnvironmentSelection";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
-  const allData: RequestData = getRequestsData(text, getVariableFiles())[name];
+  const allData: RequestData = getRequestsData(text, getVariableFiles(), name)[name];
   const [cancelled, responseData] = await individualRequestWithProgress(allData);
 
   if (!cancelled) {

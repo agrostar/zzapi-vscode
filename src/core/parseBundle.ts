@@ -58,9 +58,15 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
   return positions;
 }
 
+/**
+ * If name is specified, then it will return an object with just one RequestData value,
+ *  that has the required name. Else it will return them all. This is to save on
+ *  computation time.
+ */
 export function getRequestsData(
   document: string,
   variableFiles: Array<string>,
+  name?: string,
 ): { [name: string]: RequestData } {
   const parsedData = YAML.parse(document);
   if (parsedData === undefined) {
@@ -73,12 +79,21 @@ export function getRequestsData(
   const allRequests = parsedData.requests;
 
   loadVariables(variableFiles);
-  for (const name in allRequests) {
+
+  if (name === undefined) {
+    for (const name in allRequests) {
+      let request: Request = allRequests[name];
+      request.name = name;
+
+      const allData: RequestData = getMergedData(commonData, request);
+
+      requests[name] = allData;
+    }
+  } else {
     let request: Request = allRequests[name];
     request.name = name;
 
     const allData: RequestData = getMergedData(commonData, request);
-
     requests[name] = allData;
   }
 
