@@ -1,3 +1,9 @@
+/**
+ * FUNCTIONS PROVIDED TO CALLER
+ * @function constructRequest
+ * @function executeHttpRequest
+ */
+
 import got from "got";
 
 import { GotRequest, RequestData } from "./models";

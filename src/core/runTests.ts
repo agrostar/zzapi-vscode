@@ -1,6 +1,11 @@
+/**
+ * FUNCTIONS PROVIDED TO CALLER
+ * @function runAllTests
+ */
+
 import jp from "jsonpath";
 
-import { ResponseData, Tests } from "./models";
+import { RequestData, ResponseData, Tests } from "./models";
 
 const GAP = "\t|";
 const FAIL = "❌";
@@ -18,10 +23,11 @@ function getStringIfNotScalar(data: any) {
 }
 
 export function runAllTests(
-  name: string,
-  tests: Tests | undefined,
+  requestData: RequestData,
   responseData: ResponseData,
 ): string {
+  const name = requestData.name;
+  const tests = requestData.tests;
   if (tests === undefined || Object.keys(tests).length === 0) {
     return "";
   }

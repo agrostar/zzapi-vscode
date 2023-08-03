@@ -1,4 +1,4 @@
-import { replaceVariablesInObject, replaceVariablesInParams } from "./variableReplacement";
+import { replaceVariablesInObject, replaceVariablesInParams } from "./variables";
 import { RequestData, Common, Header, Param, Tests, Captures, Request } from "./models";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {

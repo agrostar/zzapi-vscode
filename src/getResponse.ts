@@ -1,8 +1,8 @@
 import { window, ProgressLocation } from "vscode";
 
+import { getOutputChannel } from "./extension";
 import { ResponseData, RequestData, GotRequest } from "./core/models";
 import { constructRequest, executeHttpRequest } from "./core/executeRequest";
-import { getOutputChannel } from "./extension";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 
@@ -22,12 +22,7 @@ export async function individualRequestWithProgress(
         progress.report({ message: `${++seconds} sec` });
       }, 1000);
 
-      // TODO: construct neeed not be a separate function. We could make it
-      // part of execute itself.
-      const httpRequest = constructRequest(requestData);
-
       let cancelled = false;
-
       token.onCancellationRequested(() => {
         window.showInformationMessage(`Request ${requestData.name} was cancelled`);
         httpRequest.cancel();
@@ -35,6 +30,10 @@ export async function individualRequestWithProgress(
 
         clearInterval(interval);
       });
+
+      // TODO: construct neeed not be a separate function. We could make it
+      // part of execute itself.
+      const httpRequest = constructRequest(requestData);
 
       const startTime = new Date().getTime();
       // TODO: change execut3eHttpRequest to take in RequestData and return the exec time in addition
@@ -54,10 +53,10 @@ export async function individualRequestWithProgress(
       if (!cancelled) {
         const outputChannel = getOutputChannel();
 
-        const testOutput = runAllTests(requestData.name, requestData.tests, response);
+        const testOutput = runAllTests(requestData, response);
         outputChannel.append(testOutput);
 
-        const captureOutput = captureVariables(requestData.name, requestData.captures, response);
+        const captureOutput = captureVariables(requestData, response);
         outputChannel.append(captureOutput);
 
         if (testOutput != "" || captureOutput != "") {
@@ -91,7 +90,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
       }, 1000);
 
       token.onCancellationRequested(() => {
-        window.showInformationMessage("Running All Requests: Cancelled");
+        window.showInformationMessage("Cancelled Run All Requests");
         currHttpRequest.cancel();
         cancelled = true;
 
@@ -121,10 +120,10 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (!cancelled) {
           const outputChannel = getOutputChannel();
 
-          const testOutput = runAllTests(requestData.name, requestData.tests, response);
+          const testOutput = runAllTests(requestData, response);
           outputChannel.append(testOutput);
 
-          const captureOutput = captureVariables(requestData.name, requestData.captures, response);
+          const captureOutput = captureVariables(requestData, response);
           outputChannel.append(captureOutput);
 
           if (testOutput != "" || captureOutput != "") {

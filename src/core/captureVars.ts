@@ -1,13 +1,20 @@
+/**
+ * FUNCTIONS PROVIDED TO CALLER
+ * @function captureVariables
+ */
+
 import jp from "jsonpath";
 
-import { setVariable } from "./variableReplacement";
-import { ResponseData, Captures } from "./models";
+import { setVariable } from "./variables";
+import { ResponseData, Captures, RequestData } from "./models";
 
 export function captureVariables(
-  name: string,
-  capture: Captures | undefined,
+  requestData: RequestData,
   responseData: ResponseData,
 ): string {
+  const name = requestData.name;
+  const capture = requestData.captures;
+
   if (capture === undefined || Object.keys(capture).length === 0) {
     return "";
   }

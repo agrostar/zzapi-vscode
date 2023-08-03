@@ -4,6 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import * as YAML from "yaml";
+import { loadVariables } from "./core/variables";
 
 const VAR_FILE_NAME = "zz-envs.yaml";
 
@@ -110,9 +111,11 @@ export function setEnvironment(statusBar: StatusBarItem, environment: string): v
   CURRENT_ENVIRONMENT = environment;
   statusBar.text = `Current Environment: ${CURRENT_ENVIRONMENT}`;
   statusBar.backgroundColor = undefined;
+
+  loadVariables(getVariableFiles());
 }
 
-export function getVariableFiles(): Array<string> {
+function getVariableFiles(): Array<string> {
   let filesToLoad: Array<string> = [];
   if (ALL_ENVIRONMENTS.hasOwnProperty(CURRENT_ENVIRONMENT)) {
     ALL_ENVIRONMENTS[CURRENT_ENVIRONMENT].forEach((fileName) => {

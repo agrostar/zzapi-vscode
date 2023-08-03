@@ -1,8 +1,13 @@
+/**
+ * FUNCTIONS PROVIDED TO CALLER
+ * @function getRequestPositions
+ * @function getRequestsData
+ */
+
 import * as YAML from "yaml";
 
 import { Request, RequestData, RequestPosition } from "./models";
 import { getMergedData } from "./combineData";
-import { loadVariables } from "./variableReplacement";
 
 /*
  * Returns an array of requestPosition objects. If the name of a
@@ -59,15 +64,12 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
 }
 
 /**
- * If name is specified, then it will return an object with just one RequestData value,
- *  that has the required name. Else it will return them all. This is to save on
- *  computation time.
+ * @param document the yaml document to parse to form the requests
+ * @param name optional parameter. If specified, we only store the RequestData of this request
+ * @returns An object of type { [name: string]: RequestData } where each value is the data
+ *  of a request of the name key
  */
-export function getRequestsData(
-  document: string,
-  variableFiles: Array<string>,
-  name?: string,
-): { [name: string]: RequestData } {
+export function getRequestsData(document: string, name?: string): { [name: string]: RequestData } {
   const parsedData = YAML.parse(document);
   if (parsedData === undefined) {
     return {};
@@ -78,23 +80,21 @@ export function getRequestsData(
   const commonData = parsedData.common;
   const allRequests = parsedData.requests;
 
-  loadVariables(variableFiles);
-
-  if (name === undefined) {
-    for (const name in allRequests) {
-      let request: Request = allRequests[name];
-      request.name = name;
-
-      const allData: RequestData = getMergedData(commonData, request);
-
-      requests[name] = allData;
-    }
-  } else {
+  function getAllData(name: string) {
     let request: Request = allRequests[name];
     request.name = name;
 
     const allData: RequestData = getMergedData(commonData, request);
+
     requests[name] = allData;
+  }
+
+  if (name === undefined) {
+    for (const reqName in allRequests) {
+      getAllData(reqName);
+    }
+  } else {
+    getAllData(name);
   }
 
   // Do all the merging etc here. Depending on how we do the merge, we may not need

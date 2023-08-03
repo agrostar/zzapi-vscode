@@ -1,10 +1,14 @@
+/**
+ * FUNCTIONS PROVIDED TO CALLER
+ * @function loadVariables
+ */
+
 import * as fs from "fs";
 
 import * as YAML from "yaml";
 
 import { Param } from "./models";
 
-let CAPTURED_VARIABLES: { [key: string]: string } = {};
 let VARIABLES: { [key: string]: string } = {};
 
 function getStrictStringValue(value: any): string {
@@ -18,7 +22,6 @@ function getStrictStringValue(value: any): string {
 }
 
 export function setVariable(key: any, value: any): void {
-  CAPTURED_VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
   VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
 }
 
@@ -36,8 +39,6 @@ export function loadVariables(filesToLoad: Array<string>): void {
       }
     }
   });
-
-  VARIABLES = Object.assign({}, VARIABLES, CAPTURED_VARIABLES);
 }
 
 export function replaceVariablesInObject<Type>(objectData: Type): Type {

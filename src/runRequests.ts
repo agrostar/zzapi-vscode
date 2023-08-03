@@ -4,10 +4,9 @@ import { openEditorForAllRequests, openEditorForIndividualReq } from "./showInEd
 import { RequestData, ResponseData } from "./core/models";
 import { allRequestsWithProgress, individualRequestWithProgress } from "./getResponse";
 import { getRequestsData } from "./core/parseBundle";
-import { getVariableFiles } from "./EnvironmentSelection";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
-  const allData: RequestData = getRequestsData(text, getVariableFiles(), name)[name];
+  const allData: RequestData = getRequestsData(text, name)[name];
   const [cancelled, responseData] = await individualRequestWithProgress(allData);
 
   if (!cancelled) {
@@ -16,7 +15,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
 }
 
 export async function runAllRequests(text: string): Promise<void> {
-  const allRequests = getRequestsData(text, getVariableFiles());
+  const allRequests = getRequestsData(text);
   const allResponses = await allRequestsWithProgress(allRequests);
 
   let atleastOneExecuted = false;
