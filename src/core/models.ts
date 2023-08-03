@@ -1,4 +1,4 @@
-import { CancelableRequest, Response } from "got";
+import { CancelableRequest, Method, Response } from "got";
 
 export interface Header {
   name: string;
@@ -28,7 +28,7 @@ export interface Captures {
 export interface Common {
   baseUrl?: string;
 
-  method?: string; // TODO: not needed
+  method?: Method; // TODO: not needed
   headers?: Array<Header>;
   params?: Array<Param>;
   body?: string; // TODO: not needed
@@ -40,7 +40,7 @@ export interface Request {
   name: string;
 
   url?: string; // TODO: not optional
-  method?: string; // TODO: not optional
+  method?: Method; // TODO: not optional
   headers?: Array<Header>;
   params?: Array<Param>;
   body?: string;
@@ -55,7 +55,7 @@ export interface RequestData {
   baseUrl?: string;
 
   url?: string;
-  method?: string;
+  method?: Method;
   headers?: { [key: string]: string };
   body?: string;
   options?: { follow?: boolean; verifySSL?: boolean };

@@ -16,27 +16,30 @@ export function constructRequest(
     https: {
       rejectUnauthorized: allData.options !== undefined ? allData.options.verifySSL : undefined,
     },
+    method: allData.method
   };
 
-  if (typeof allData.method !== "string") {
-    return got.get(completeUrl, options);
-  }
+  // if (typeof allData.method !== "string") {
+  //   return got.get(completeUrl, options);
+  // }
 
   // TODO: can we just use got() instead of got.get() etc?
-  const method = (allData.method as string).toLowerCase();
-  if (method === "post") {
-    return got.post(completeUrl, options);
-  } else if (method === "head") {
-    return got.head(completeUrl, options);
-  } else if (method === "put") {
-    return got.put(completeUrl, options);
-  } else if (method === "delete") {
-    return got.delete(completeUrl, options);
-  } else if (method === "patch") {
-    return got.patch(completeUrl, options);
-  } else {
-    return got.get(completeUrl, options);
-  }
+  // const method = (allData.method as string).toUpperCase();
+  // if (method === "post") {
+  //   return got.post(completeUrl, options);
+  // } else if (method === "head") {
+  //   return got.head(completeUrl, options);
+  // } else if (method === "put") {
+  //   return got.put(completeUrl, options);
+  // } else if (method === "delete") {
+  //   return got.delete(completeUrl, options);
+  // } else if (method === "patch") {
+  //   return got.patch(completeUrl, options);
+  // } else {
+  //   return got.get(completeUrl, options);
+  // }
+
+  return got(completeUrl, options);
 }
 
 function getURL(
