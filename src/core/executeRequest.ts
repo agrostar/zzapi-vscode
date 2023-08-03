@@ -1,11 +1,11 @@
-import got, { CancelableRequest, Response } from "got";
+import got from "got";
 
-import { RequestData } from "./models";
+import { GotRequest, RequestData } from "./models";
 
 export function constructRequest(
   allData: RequestData,
-  paramsForUrl: string | undefined,
-): CancelableRequest<Response<string>> {
+): GotRequest {
+  const paramsForUrl = allData.paramsForUrl;
   const completeUrl = getURL(allData.baseUrl, allData.url, paramsForUrl);
 
   const options = {
@@ -75,9 +75,7 @@ function getBody(body: any): string | undefined {
   return body.toString();
 }
 
-export async function executeHttpRequest(
-  httpRequest: CancelableRequest<Response<string>>,
-): Promise<{ [key: string]: any }> {
+export async function executeHttpRequest(httpRequest: GotRequest): Promise<{ [key: string]: any }> {
   try {
     return await httpRequest;
   } catch (e: any) {

@@ -1,14 +1,15 @@
 import { window, ProgressLocation } from "vscode";
 
-import { ResponseData, RequestData } from "./core/models";
+import { ResponseData, RequestData, GotRequest } from "./core/models";
 import { constructRequest, executeHttpRequest } from "./core/executeRequest";
+import { getOutputChannel } from "./extension";
+import { runAllTests } from "./core/runTests";
+import { captureVariables } from "./core/captureVars";
 
 export async function individualRequestWithProgress(
   requestData: RequestData,
 ): Promise<[boolean, ResponseData]> {
   let seconds = 0;
-
-  const paramsForUrl = requestData.paramsForUrl;
 
   const [cancelled, response] = await window.withProgress(
     {
@@ -23,15 +24,16 @@ export async function individualRequestWithProgress(
 
       // TODO: construct neeed not be a separate function. We could make it
       // part of execute itself.
-      const httpRequest = constructRequest(requestData, paramsForUrl);
+      const httpRequest = constructRequest(requestData);
 
-      let response: any;
       let cancelled = false;
 
       token.onCancellationRequested(() => {
         window.showInformationMessage(`Request ${requestData.name} was cancelled`);
         httpRequest.cancel();
         cancelled = true;
+
+        clearInterval(interval);
       });
 
       const startTime = new Date().getTime();
@@ -40,24 +42,102 @@ export async function individualRequestWithProgress(
       const httpResponse = await executeHttpRequest(httpRequest);
       const executionTime = new Date().getTime() - startTime;
 
-      clearInterval(interval);
-
       // displaying rawHeaders, testing against headers
-      response = {
+      const response = {
         executionTime: executionTime + " ms",
         status: httpResponse.statusCode,
-        // statusText: httpResponse.statusMessage,
         body: httpResponse.body,
         rawHeaders: getHeadersAsString(httpResponse.rawHeaders),
         headers: httpResponse.headers,
-        // httpVersion: httpResponse.httpVersion,
       };
+
+      if(!cancelled){
+        const outputChannel = getOutputChannel();
+
+          const testOutput = runAllTests(requestData.name, requestData.tests, response);
+          outputChannel.append(testOutput);
+
+          const captureOutput = captureVariables(requestData.name, requestData.captures, response);
+          outputChannel.append(captureOutput);
+
+          if (testOutput != "" || captureOutput != "") {
+            outputChannel.show();
+          }
+      }
 
       return [cancelled, response];
     },
   );
 
   return [cancelled, response];
+}
+
+export async function allRequestsWithProgress(allRequests: { [name: string]: RequestData }) {
+  let currHttpRequest: GotRequest;
+
+  let responses: Array<{ cancelled: boolean; name: string; response: ResponseData }> = [];
+
+  let cancelled = false;
+  let seconds = 0;
+  await window.withProgress(
+    {
+      location: ProgressLocation.Window,
+      cancellable: true,
+      title: `Running All Requests, click to cancel`,
+    },
+    async (progress, token) => {
+      const interval = setInterval(() => {
+        progress.report({ message: `${++seconds} sec` });
+      }, 1000);
+
+      token.onCancellationRequested(() => {
+        window.showInformationMessage("Running All Requests: Cancelled");
+        currHttpRequest.cancel();
+        cancelled = true;
+
+        clearInterval(interval);
+      });
+
+      for (const name in allRequests) {
+        if (cancelled) {
+          continue;
+        }
+
+        const requestData = allRequests[name];
+        currHttpRequest = constructRequest(requestData);
+
+        const startTime = new Date().getTime();
+        const httpResponse = await executeHttpRequest(currHttpRequest);
+        const executionTime = new Date().getTime() - startTime;
+
+        const response = {
+          executionTime: executionTime + " ms",
+          status: httpResponse.statusCode,
+          body: httpResponse.body,
+          rawHeaders: getHeadersAsString(httpResponse.rawHeaders),
+          headers: httpResponse.headers,
+        };
+
+        if (!cancelled) {
+          const outputChannel = getOutputChannel();
+
+          const testOutput = runAllTests(requestData.name, requestData.tests, response);
+          outputChannel.append(testOutput);
+
+          const captureOutput = captureVariables(requestData.name, requestData.captures, response);
+          outputChannel.append(captureOutput);
+
+          if (testOutput != "" || captureOutput != "") {
+            outputChannel.show();
+          }
+        }
+
+        responses.push({ cancelled: cancelled, name: name, response: response });
+      }
+    },
+  );
+
+  return responses;
 }
 
 function getStrictStringValue(value: any): string {

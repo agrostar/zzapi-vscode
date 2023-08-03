@@ -1,3 +1,5 @@
+import { CancelableRequest, Response } from "got";
+
 export interface Header {
   name: string;
   value: string;
@@ -80,3 +82,5 @@ export interface RequestPosition {
   start: { line: number; col: number };
   end: { line: number; col: number };
 }
+
+export type GotRequest = CancelableRequest<Response<string>>;
