@@ -56,8 +56,8 @@ export interface Request {
 export interface RequestData {
   name: string;
   completeUrl: string;
-  
-  method?: Method;
+
+  method: Method;
   headers?: { [key: string]: string };
   body?: string;
   options?: { follow?: boolean; verifySSL?: boolean };
