@@ -1,6 +1,6 @@
 import { window } from "vscode";
 
-import { openEditorForAllRequests, openEditorForIndividualReq } from "./showInEditor";
+import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import { RequestData, ResponseData } from "./core/models";
 import { allRequestsWithProgress, individualRequestWithProgress } from "./getResponse";
 import { getRequestsData } from "./core/parseBundle";

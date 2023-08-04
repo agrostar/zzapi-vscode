@@ -6,7 +6,7 @@
 import jp from "jsonpath";
 
 import { setVariable } from "./variables";
-import { ResponseData, Captures, RequestData } from "./models";
+import { ResponseData, RequestData, Captures } from "./models";
 
 export function captureVariables(requestData: RequestData, responseData: ResponseData): string {
   const name = requestData.name;

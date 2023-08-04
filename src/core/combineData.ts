@@ -1,5 +1,5 @@
 import { replaceVariablesInObject, replaceVariablesInParams, replaceVariables } from "./variables";
-import { RequestData, Common, Header, Param, Tests, Captures, Request } from "./models";
+import { RequestData, Request, Common, Header, Param, Tests, Captures } from "./models";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {
   // making deep copies of the objects because we will be deleting some data

@@ -2,7 +2,7 @@ import { window, ProgressLocation } from "vscode";
 
 import { getOutputChannel } from "./extension";
 import { ResponseData, RequestData, GotRequest } from "./core/models";
-import { constructGotRequest, executeGotRequest } from "./core/executeRequest";
+import { cancelGotRequest, constructGotRequest, executeGotRequest } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 
@@ -25,21 +25,15 @@ export async function individualRequestWithProgress(
       let cancelled = false;
       token.onCancellationRequested(() => {
         window.showInformationMessage(`Request ${requestData.name} was cancelled`);
-        httpRequest.cancel();
+        cancelGotRequest(httpRequest);
         cancelled = true;
 
         clearInterval(interval);
       });
 
-      // TODO: construct need not be a separate function. We could make it
-      // part of execute itself.
       const httpRequest = constructGotRequest(requestData);
 
-      const startTime = new Date().getTime();
-      // TODO: change execut3eHttpRequest to take in RequestData and return the exec time in addition
-      // to the response.
-      const httpResponse = await executeGotRequest(httpRequest);
-      const executionTime = new Date().getTime() - startTime;
+      const [httpResponse, executionTime] = await executeGotRequest(httpRequest);
 
       // displaying rawHeaders, testing against headers
       const response = {
@@ -92,7 +86,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
       token.onCancellationRequested(() => {
         window.showInformationMessage("Cancelled Run All Requests");
-        currHttpRequest.cancel();
+        cancelGotRequest(currHttpRequest);
         cancelled = true;
 
         clearInterval(interval);
@@ -108,9 +102,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         const requestData = allRequests[name];
         currHttpRequest = constructGotRequest(requestData);
 
-        const startTime = new Date().getTime();
-        const httpResponse = await executeGotRequest(currHttpRequest);
-        const executionTime = new Date().getTime() - startTime;
+        const [httpResponse, executionTime] = await executeGotRequest(currHttpRequest);
 
         const response = {
           executionTime: executionTime + " ms",

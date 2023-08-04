@@ -49,6 +49,7 @@ export function createEnvironmentSelector(
         if (selectedEnvironment) {
           if (selectedEnvironment === DEFAULT_ENVIRONMENT) {
             setDefaultStatusBarValues(statusBar);
+            loadEnvironmentVariables(getVariableFiles());
           } else {
             setEnvironment(statusBar, selectedEnvironment.label);
           }

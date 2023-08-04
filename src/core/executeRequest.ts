@@ -1,6 +1,7 @@
 /**
  * FUNCTIONS PROVIDED TO CALLER
  * @function constructGotRequest
+ * @function cancelGotRequest
  * @function executeGotRequest
  */
 
@@ -36,16 +37,26 @@ function getBody(body: any): string | undefined {
   return body.toString();
 }
 
-export async function executeGotRequest(httpRequest: GotRequest): Promise<{ [key: string]: any }> {
+export async function executeGotRequest(
+  httpRequest: GotRequest,
+): Promise<[{ [key: string]: any }, number]> {
+  const startTime = new Date().getTime();
+  let responseObject: { [key: string]: any };
   try {
-    return await httpRequest;
+    responseObject = await httpRequest;
   } catch (e: any) {
     const res = e.response;
     if (res) {
-      return res;
+      responseObject = res;
+    } else {
+      const message = e.name === "CancelError" ? "Cancelled" : e.message;
+      responseObject = { statusCode: e.name, body: message as string };
     }
-
-    const message = e.name === "CancelError" ? "Cancelled" : e.message;
-    return { statusCode: e.name, body: message as string };
   }
+  const executionTime = new Date().getTime() - startTime;
+  return [responseObject, executionTime];
+}
+
+export function cancelGotRequest(httpRequest: GotRequest) {
+  httpRequest.cancel();
 }

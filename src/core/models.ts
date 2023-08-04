@@ -3,7 +3,7 @@
  * @interface RequestData
  */
 
-import { CancelableRequest, Method, Response } from "got";
+import { CancelableRequest, Response, Method } from "got";
 
 export interface Header {
   name: string;
