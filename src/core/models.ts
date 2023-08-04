@@ -1,6 +1,7 @@
 /**
  * MODELS PROVIDED TO CALLER
  * @interface RequestData
+ * @type GotRequest
  */
 
 import { CancelableRequest, Response, Method } from "got";

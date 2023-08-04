@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import * as YAML from "yaml";
-import { loadEnvironmentVariables } from "./core/variables";
+import { setEnvironmentVariables } from "./core/variables";
 
 const VAR_FILE_NAME = "zz-envs.yaml";
 
@@ -49,7 +49,7 @@ export function createEnvironmentSelector(
         if (selectedEnvironment) {
           if (selectedEnvironment === DEFAULT_ENVIRONMENT) {
             setDefaultStatusBarValues(statusBar);
-            loadEnvironmentVariables(getVariableFiles());
+            setEnvironmentVariables(getVariableFiles());
           } else {
             setEnvironment(statusBar, selectedEnvironment.label);
           }
@@ -113,7 +113,7 @@ export function setEnvironment(statusBar: StatusBarItem, environment: string): v
   statusBar.text = `Current Environment: ${CURRENT_ENVIRONMENT}`;
   statusBar.backgroundColor = undefined;
 
-  loadEnvironmentVariables(getVariableFiles());
+  setEnvironmentVariables(getVariableFiles());
 }
 
 function getVariableFiles(): Array<string> {

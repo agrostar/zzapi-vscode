@@ -234,7 +234,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
     } else if (key === "$exists") {
       if (typeof compareTo !== "boolean") {
-        testOutput += `\t${FAIL} ${GAP} ${keyName} exists ${GAP} ${compareTo} is not a boolean\n`;
+        testOutput += `\t${FAIL} ${GAP} item exists ${GAP} ${compareTo} is not a boolean\n`;
         NUM_FAILED++;
         NUM_TESTS++;
 

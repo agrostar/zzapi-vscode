@@ -25,7 +25,7 @@ export function setVariable(key: any, value: any): void {
   VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
 }
 
-export function loadEnvironmentVariables(filesToLoad: Array<string>): void {
+export function setEnvironmentVariables(filesToLoad: Array<string>): void {
   VARIABLES = {};
 
   filesToLoad.forEach((filePath) => {

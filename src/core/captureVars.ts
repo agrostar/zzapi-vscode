@@ -19,7 +19,6 @@ export function captureVariables(requestData: RequestData, responseData: Respons
   const headers = responseData.headers;
 
   let captureOutput = "";
-
   captureOutput += `Running captures of '${name}':\n`;
 
   for (const test in capture) {

@@ -237,12 +237,7 @@ function getMergedHeaders(
     commonData === undefined ? undefined : commonData.headers,
   );
 
-  let mergedHeaders: { [key: string]: string } = commonHeaders === undefined ? {} : commonHeaders;
-  for (const headerName in requestHeaders) {
-    mergedHeaders[headerName] = requestHeaders[headerName];
-  }
-
-  return mergedHeaders;
+  return Object.assign({}, commonHeaders === undefined ? {} : commonHeaders, requestHeaders);
 }
 
 function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }> | undefined):

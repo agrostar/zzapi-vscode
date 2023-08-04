@@ -39,7 +39,7 @@ function getBody(body: any): string | undefined {
 
 export async function executeGotRequest(
   httpRequest: GotRequest,
-): Promise<[{ [key: string]: any }, number]> {
+): Promise<[response: { [key: string]: any }, executionTime: number]> {
   const startTime = new Date().getTime();
   let responseObject: { [key: string]: any };
   try {
@@ -57,6 +57,6 @@ export async function executeGotRequest(
   return [responseObject, executionTime];
 }
 
-export function cancelGotRequest(httpRequest: GotRequest) {
+export function cancelGotRequest(httpRequest: GotRequest): void {
   httpRequest.cancel();
 }
