@@ -154,12 +154,12 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
   delete requestData.tests;
   delete requestData.capture;
 
-  let mergedData: RequestData = replaceVariablesInObject(
-    getMergedDataExceptTestsAndCaptures(commonData, requestData),
+  let mergedData: RequestData = Object.assign(
+    {},
+    replaceVariablesInObject(getMergedDataExceptTestsAndCaptures(commonData, requestData)),
+    { tests: tests },
+    { capture: capture },
   );
-
-  mergedData.tests = tests;
-  mergedData.captures = capture;
 
   return mergedData;
 }
