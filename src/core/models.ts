@@ -1,3 +1,8 @@
+/**
+ * MODELS PROVIDED TO CALLER
+ * RequestData
+ */
+
 import { CancelableRequest, Method, Response } from "got";
 
 export interface Header {
@@ -28,10 +33,8 @@ export interface Captures {
 export interface Common {
   baseUrl?: string;
 
-  method?: Method; // TODO: not needed
   headers?: Array<Header>;
   params?: Array<Param>;
-  body?: string; // TODO: not needed
   options?: { follow: boolean; verifySSL: boolean };
   tests?: Tests;
   capture?: Captures;
@@ -39,8 +42,8 @@ export interface Common {
 export interface Request {
   name: string;
 
-  url?: string; // TODO: not optional
-  method?: Method; // TODO: not optional
+  url: string;
+  method: Method;
   headers?: Array<Header>;
   params?: Array<Param>;
   body?: string;
@@ -49,7 +52,7 @@ export interface Request {
   capture?: Captures;
 }
 
-// TODO: try and not have this.
+// the combined data that completely defines any request
 export interface RequestData {
   name: string;
   baseUrl?: string;
@@ -66,15 +69,10 @@ export interface RequestData {
 
 export interface ResponseData {
   executionTime: number | string;
-  status?: number | string; // TODO: not optional, cannot be empty.
-  body?: string; // TODO: not optional, cannot be empty.
-  rawHeaders?: string; // TODO: not optional, cannot be empty. Rename as rawHeaders
-  headers?: { [key: string]: string };
-
-  // TODO: let us have parsed body and headers also, like this:
-  // json?: any;
-  // headers: { [name: string]: string }
-  // lowerCaseHeaders: { [name: string]: string }  // to be used for tests
+  status: number | string;
+  body: string;
+  rawHeaders: string;
+  headers: { [key: string]: string };
 }
 
 export interface RequestPosition {

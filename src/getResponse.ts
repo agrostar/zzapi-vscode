@@ -15,11 +15,11 @@ export async function individualRequestWithProgress(
     {
       location: ProgressLocation.Window,
       cancellable: true,
-      title: `Running ${requestData.name}, click to cancel`,
+      title: `Running ${requestData.name}, Click to Cancel`,
     },
     async (progress, token) => {
       const interval = setInterval(() => {
-        progress.report({ message: `${++seconds} sec` });
+        progress.report({ message: `${++seconds} seconds` });
       }, 1000);
 
       let cancelled = false;
@@ -31,7 +31,7 @@ export async function individualRequestWithProgress(
         clearInterval(interval);
       });
 
-      // TODO: construct neeed not be a separate function. We could make it
+      // TODO: construct need not be a separate function. We could make it
       // part of execute itself.
       const httpRequest = constructRequest(requestData);
 
@@ -73,6 +73,7 @@ export async function individualRequestWithProgress(
 
 export async function allRequestsWithProgress(allRequests: { [name: string]: RequestData }) {
   let currHttpRequest: GotRequest;
+  let currRequestName: string = "";
 
   let responses: Array<{ cancelled: boolean; name: string; response: ResponseData }> = [];
 
@@ -82,11 +83,11 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
     {
       location: ProgressLocation.Window,
       cancellable: true,
-      title: `Running All Requests, click to cancel`,
+      title: `Running Requests, Click to Cancel`,
     },
     async (progress, token) => {
       const interval = setInterval(() => {
-        progress.report({ message: `${++seconds} sec` });
+        progress.report({ message: `${++seconds} s ${currRequestName}` });
       }, 1000);
 
       token.onCancellationRequested(() => {
@@ -99,8 +100,10 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
       for (const name in allRequests) {
         if (cancelled) {
-          continue;
+          break;
         }
+
+        currRequestName = `(Running '${name}')`;
 
         const requestData = allRequests[name];
         currHttpRequest = constructRequest(requestData);
