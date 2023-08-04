@@ -22,10 +22,7 @@ function getStringIfNotScalar(data: any) {
   return data;
 }
 
-export function runAllTests(
-  requestData: RequestData,
-  responseData: ResponseData,
-): string {
+export function runAllTests(requestData: RequestData, responseData: ResponseData): string {
   const name = requestData.name;
   const tests = requestData.tests;
   if (tests === undefined || Object.keys(tests).length === 0) {

@@ -25,7 +25,6 @@ export function constructGotRequest(allData: RequestData): GotRequest {
   return got(completeUrl, options);
 }
 
-
 function getBody(body: any): string | undefined {
   if (body === undefined) {
     return undefined;

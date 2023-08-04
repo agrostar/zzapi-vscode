@@ -176,10 +176,10 @@ function getMergedDataExceptTestsAndCaptures(
   }
 
   let baseUrl: string | undefined;
-  if(commonData === undefined){
+  if (commonData === undefined) {
     baseUrl = undefined;
   } else {
-    if(commonData.baseUrl === undefined){
+    if (commonData.baseUrl === undefined) {
       baseUrl = undefined;
     } else {
       baseUrl = replaceVariables(commonData.baseUrl);
