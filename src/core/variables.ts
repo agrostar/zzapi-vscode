@@ -25,7 +25,7 @@ export function setVariable(key: any, value: any): void {
   VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
 }
 
-export function loadVariables(filesToLoad: Array<string>): void {
+export function loadEnvironmentVariables(filesToLoad: Array<string>): void {
   VARIABLES = {};
 
   filesToLoad.forEach((filePath) => {
@@ -98,7 +98,7 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
  */
 const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
-function replaceVariables(text: string): string {
+export function replaceVariables(text: string): string {
   const outputText = text
     .replace(VAR_REGEX_WITH_BRACES, (match, variable) => {
       const varVal = VARIABLES[variable];

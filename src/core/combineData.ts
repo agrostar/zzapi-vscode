@@ -1,4 +1,4 @@
-import { replaceVariablesInObject, replaceVariablesInParams } from "./variables";
+import { replaceVariablesInObject, replaceVariablesInParams, replaceVariables } from "./variables";
 import { RequestData, Common, Header, Param, Tests, Captures, Request } from "./models";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {
@@ -7,27 +7,7 @@ export function getMergedData(common: Common | undefined, request: Request): Req
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as typeof common);
   let requestData = JSON.parse(JSON.stringify(request)) as typeof request;
 
-  [commonData, requestData] = setHeadersToLowerCase(commonData, requestData);
-
-  const params = getParamsForUrl(
-    commonData === undefined ? undefined : commonData.params,
-    requestData.params,
-  );
-  const tests = getMergedTestsAndCapture(
-    commonData === undefined ? undefined : commonData.tests,
-    requestData.tests,
-  );
-  const capture = getMergedTestsAndCapture(
-    commonData === undefined ? undefined : commonData.capture,
-    requestData.capture,
-  );
-
-  const allData: RequestData = getMergedDataExceptParamsTestsCapture(commonData, requestData);
-  allData.paramsForUrl = params;
-  allData.tests = tests;
-  allData.captures = capture;
-
-  return allData;
+  return getAllMergedData(commonData, requestData);
 }
 
 function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }): {
@@ -154,26 +134,39 @@ function getMergedTestsAndCapture(
   return mergedData;
 }
 
-function getMergedDataExceptParamsTestsCapture(
-  commonData: Common | undefined,
-  requestData: Request,
-): Omit<RequestData, "paramsForUrl" | "tests" | "capture"> {
+function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestData {
+  [commonData, requestData] = setHeadersToLowerCase(commonData, requestData);
+
+  const tests = getMergedTestsAndCapture(
+    commonData === undefined ? undefined : commonData.tests,
+    requestData.tests,
+  );
+  const capture = getMergedTestsAndCapture(
+    commonData === undefined ? undefined : commonData.capture,
+    requestData.capture,
+  );
+
   if (commonData !== undefined) {
-    delete commonData.params;
     delete commonData.tests;
     delete commonData.capture;
   }
 
-  delete requestData.params;
   delete requestData.tests;
   delete requestData.capture;
 
-  return replaceVariablesInObject(getMergedObjectData(commonData, requestData));
+  let mergedData: RequestData = replaceVariablesInObject(
+    getMergedDataExceptTestsAndCaptures(commonData, requestData),
+  );
+
+  mergedData.tests = tests;
+  mergedData.captures = capture;
+
+  return mergedData;
 }
 
-function getMergedObjectData(
-  commonData: Omit<Common, "params" | "tests" | "capture"> | undefined,
-  requestData: Omit<Request, "params" | "tests" | "capture">,
+function getMergedDataExceptTestsAndCaptures(
+  commonData: Omit<Common, "tests" | "capture"> | undefined,
+  requestData: Omit<Request, "tests" | "capture">,
 ): RequestData {
   const mergedHeaders = getMergedHeaders(commonData, requestData);
 
@@ -182,15 +175,57 @@ function getMergedObjectData(
     delete commonData.headers;
   }
 
+  let baseUrl: string | undefined;
+  if(commonData === undefined){
+    baseUrl = undefined;
+  } else {
+    if(commonData.baseUrl === undefined){
+      baseUrl = undefined;
+    } else {
+      baseUrl = replaceVariables(commonData.baseUrl);
+    }
+  }
+  const requestUrl = replaceVariables(requestData.url);
+  const params = getParamsForUrl(
+    commonData === undefined ? undefined : commonData.params,
+    requestData.params,
+  );
+
+  const completeUrl = getURL(baseUrl, requestUrl, params);
+
   let mergedData: RequestData = Object.assign(
     {},
     commonData === undefined ? {} : (commonData as Omit<typeof commonData, "headers">),
     requestData as Omit<typeof requestData, "headers">,
+    { headers: mergedHeaders },
+    { completeUrl: completeUrl },
   );
 
-  mergedData.headers = mergedHeaders;
-
   return mergedData;
+}
+
+function getURL(
+  baseUrl: string | undefined,
+  url: string | undefined,
+  paramsForUrl: string | undefined,
+): string {
+  if (paramsForUrl === undefined) {
+    paramsForUrl = "";
+  }
+
+  let completeUrl = "";
+  if (baseUrl !== undefined) {
+    completeUrl += baseUrl;
+  }
+  if (url !== undefined) {
+    if (url !== "" && url[0] !== "/") {
+      return url + paramsForUrl;
+    } else {
+      completeUrl += url;
+    }
+  }
+
+  return completeUrl + paramsForUrl;
 }
 
 function getMergedHeaders(

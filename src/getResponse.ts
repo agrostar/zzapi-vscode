@@ -2,7 +2,7 @@ import { window, ProgressLocation } from "vscode";
 
 import { getOutputChannel } from "./extension";
 import { ResponseData, RequestData, GotRequest } from "./core/models";
-import { constructRequest, executeHttpRequest } from "./core/executeRequest";
+import { constructGotRequest, executeGotRequest } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 
@@ -33,12 +33,12 @@ export async function individualRequestWithProgress(
 
       // TODO: construct need not be a separate function. We could make it
       // part of execute itself.
-      const httpRequest = constructRequest(requestData);
+      const httpRequest = constructGotRequest(requestData);
 
       const startTime = new Date().getTime();
       // TODO: change execut3eHttpRequest to take in RequestData and return the exec time in addition
       // to the response.
-      const httpResponse = await executeHttpRequest(httpRequest);
+      const httpResponse = await executeGotRequest(httpRequest);
       const executionTime = new Date().getTime() - startTime;
 
       // displaying rawHeaders, testing against headers
@@ -106,10 +106,10 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         currRequestName = `(Running '${name}')`;
 
         const requestData = allRequests[name];
-        currHttpRequest = constructRequest(requestData);
+        currHttpRequest = constructGotRequest(requestData);
 
         const startTime = new Date().getTime();
-        const httpResponse = await executeHttpRequest(currHttpRequest);
+        const httpResponse = await executeGotRequest(currHttpRequest);
         const executionTime = new Date().getTime() - startTime;
 
         const response = {

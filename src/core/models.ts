@@ -1,6 +1,6 @@
 /**
  * MODELS PROVIDED TO CALLER
- * RequestData
+ * @interface RequestData
  */
 
 import { CancelableRequest, Method, Response } from "got";
@@ -55,14 +55,12 @@ export interface Request {
 // the combined data that completely defines any request
 export interface RequestData {
   name: string;
-  baseUrl?: string;
-
-  url?: string;
+  completeUrl: string;
+  
   method?: Method;
   headers?: { [key: string]: string };
   body?: string;
   options?: { follow?: boolean; verifySSL?: boolean };
-  paramsForUrl?: string;
   tests?: Tests;
   captures?: Captures;
 }
