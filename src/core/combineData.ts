@@ -10,89 +10,38 @@ export function getMergedData(common: Common | undefined, request: Request): Req
   return getAllMergedData(commonData, requestData);
 }
 
-function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }): {
-  [key: string]: string | object;
-} {
-  let newObj: { [key: string]: string | object } = {};
-  for (const key in headers) {
-    newObj[key.toLowerCase()] = headers[key];
+function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestData {
+  [commonData, requestData] = setHeadersToLowerCase(commonData, requestData);
+
+  const tests = replaceVariablesInObject(
+    getMergedTestsAndCapture(
+      commonData === undefined ? undefined : commonData.tests,
+      requestData.tests,
+    ),
+  );
+  const capture = replaceVariablesInObject(
+    getMergedTestsAndCapture(
+      commonData === undefined ? undefined : commonData.capture,
+      requestData.capture,
+    ),
+  );
+
+  if (commonData !== undefined) {
+    delete commonData.tests;
+    delete commonData.capture;
   }
 
-  return newObj;
-}
+  delete requestData.tests;
+  delete requestData.capture;
 
-function setNameOfHeadersArrayToLowerCase(headers: Array<Header>): Array<Header> {
-  let newHeaders: Array<Header> = [];
-  headers.forEach((arrHeader) => {
-    const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
-    newHeaders.push(newHeader);
-  });
+  let mergedData: RequestData = Object.assign(
+    {},
+    replaceVariablesInObject(getMergedDataExceptTestsAndCaptures(commonData, requestData)),
+    { tests: tests },
+    { capture: capture },
+  );
 
-  return newHeaders;
-}
-
-function setHeadersToLowerCase(
-  common: Common | undefined,
-  request: Request,
-): [Common | undefined, Request] {
-  if (common !== undefined) {
-    if (common.headers !== undefined) {
-      common.headers = setNameOfHeadersArrayToLowerCase(common.headers);
-    }
-    if (common.tests !== undefined && common.tests.headers !== undefined) {
-      common.tests.headers = setKeyOfHeadersObjectToLowerCase(common.tests.headers);
-    }
-    if (common.capture !== undefined && common.capture.headers !== undefined) {
-      common.capture.headers = setKeyOfHeadersObjectToLowerCase(common.capture.headers);
-    }
-  }
-
-  if (request.headers !== undefined) {
-    request.headers = setNameOfHeadersArrayToLowerCase(request.headers);
-  }
-  if (request.tests !== undefined && request.tests.headers !== undefined) {
-    request.tests.headers = setKeyOfHeadersObjectToLowerCase(request.tests.headers);
-  }
-  if (request.capture !== undefined && request.capture.headers !== undefined) {
-    request.capture.headers = setKeyOfHeadersObjectToLowerCase(request.capture.headers);
-  }
-
-  return [common, request];
-}
-
-function getParamsForUrl(
-  commonParams: Array<Param> | undefined,
-  requestParams: Array<Param> | undefined,
-): string {
-  let mixedParams: Array<Param> | undefined;
-
-  if (commonParams === undefined || !Array.isArray(commonParams)) {
-    mixedParams = requestParams;
-  } else if (requestParams === undefined || !Array.isArray(requestParams)) {
-    mixedParams = commonParams;
-  } else {
-    mixedParams = commonParams.concat(requestParams);
-  }
-
-  if (mixedParams === undefined || !Array.isArray(mixedParams)) {
-    return "";
-  }
-
-  let params: Array<Param> = replaceVariablesInParams(mixedParams);
-  let paramArray: Array<string> = [];
-
-  params.forEach((param) => {
-    const key = param.name as string;
-    let value = param.value as string;
-    if (param.encode !== undefined && param.encode === false) {
-      paramArray.push(`${key}=${value}`);
-    } else {
-      paramArray.push(`${key}=${encodeURIComponent(value)}`);
-    }
-  });
-
-  const paramString = paramArray.join("&");
-  return `?${paramString}`;
+  return mergedData;
 }
 
 function getMergedTestsAndCapture(
@@ -134,41 +83,11 @@ function getMergedTestsAndCapture(
   return mergedData;
 }
 
-function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestData {
-  [commonData, requestData] = setHeadersToLowerCase(commonData, requestData);
-
-  const tests = getMergedTestsAndCapture(
-    commonData === undefined ? undefined : commonData.tests,
-    requestData.tests,
-  );
-  const capture = getMergedTestsAndCapture(
-    commonData === undefined ? undefined : commonData.capture,
-    requestData.capture,
-  );
-
-  if (commonData !== undefined) {
-    delete commonData.tests;
-    delete commonData.capture;
-  }
-
-  delete requestData.tests;
-  delete requestData.capture;
-
-  let mergedData: RequestData = Object.assign(
-    {},
-    replaceVariablesInObject(getMergedDataExceptTestsAndCaptures(commonData, requestData)),
-    { tests: tests },
-    { capture: capture },
-  );
-
-  return mergedData;
-}
-
 function getMergedDataExceptTestsAndCaptures(
   commonData: Omit<Common, "tests" | "capture"> | undefined,
   requestData: Omit<Request, "tests" | "capture">,
 ): RequestData {
-  const mergedHeaders = getMergedHeaders(commonData, requestData);
+  const mergedHeaders = replaceVariablesInObject(getMergedHeaders(commonData, requestData));
 
   delete requestData.headers;
   if (commonData !== undefined) {
@@ -185,6 +104,7 @@ function getMergedDataExceptTestsAndCaptures(
       baseUrl = replaceVariables(commonData.baseUrl);
     }
   }
+
   const requestUrl = replaceVariables(requestData.url);
   const params = getParamsForUrl(
     commonData === undefined ? undefined : commonData.params,
@@ -202,6 +122,74 @@ function getMergedDataExceptTestsAndCaptures(
   );
 
   return mergedData;
+}
+
+function getMergedHeaders(
+  commonData: Common | undefined,
+  requestData: Request,
+): { [key: string]: string } {
+  const requestHeaders = getObjectSetAsJSON(requestData.headers);
+  const commonHeaders = getObjectSetAsJSON(
+    commonData === undefined ? undefined : commonData.headers,
+  );
+
+  return Object.assign({}, commonHeaders === undefined ? {} : commonHeaders, requestHeaders);
+}
+
+function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }> | undefined):
+  | {
+      [key: string]: any;
+    }
+  | undefined {
+  if (objectSet === undefined) {
+    return undefined;
+  }
+
+  let finalObject: { [key: string]: any } = {};
+
+  objectSet.forEach((currObj) => {
+    const key = currObj.name;
+    const value = currObj.value;
+
+    finalObject[key] = value;
+  });
+
+  return finalObject;
+}
+
+function getParamsForUrl(
+  commonParams: Array<Param> | undefined,
+  requestParams: Array<Param> | undefined,
+): string {
+  let mixedParams: Array<Param> | undefined;
+
+  if (commonParams === undefined || !Array.isArray(commonParams)) {
+    mixedParams = requestParams;
+  } else if (requestParams === undefined || !Array.isArray(requestParams)) {
+    mixedParams = commonParams;
+  } else {
+    mixedParams = commonParams.concat(requestParams);
+  }
+
+  if (mixedParams === undefined || !Array.isArray(mixedParams)) {
+    return "";
+  }
+
+  let params: Array<Param> = replaceVariablesInParams(mixedParams);
+  let paramArray: Array<string> = [];
+
+  params.forEach((param) => {
+    const key = param.name as string;
+    let value = param.value as string;
+    if (param.encode !== undefined && param.encode === false) {
+      paramArray.push(`${key}=${value}`);
+    } else {
+      paramArray.push(`${key}=${encodeURIComponent(value)}`);
+    }
+  });
+
+  const paramString = paramArray.join("&");
+  return `?${paramString}`;
 }
 
 function getURL(
@@ -228,38 +216,52 @@ function getURL(
   return completeUrl + paramsForUrl;
 }
 
-function getMergedHeaders(
-  commonData: Common | undefined,
-  requestData: Request,
-): { [key: string]: string } {
-  const requestHeaders = getObjectSetAsJSON(requestData.headers);
-  const commonHeaders = getObjectSetAsJSON(
-    commonData === undefined ? undefined : commonData.headers,
-  );
+function setHeadersToLowerCase(
+  common: Common | undefined,
+  request: Request,
+): [Common | undefined, Request] {
+  if (common !== undefined) {
+    if (common.headers !== undefined) {
+      common.headers = setNameOfHeadersArrayToLowerCase(common.headers);
+    }
+    if (common.tests !== undefined && common.tests.headers !== undefined) {
+      common.tests.headers = setKeyOfHeadersObjectToLowerCase(common.tests.headers);
+    }
+    if (common.capture !== undefined && common.capture.headers !== undefined) {
+      common.capture.headers = setKeyOfHeadersObjectToLowerCase(common.capture.headers);
+    }
+  }
 
-  return Object.assign({}, commonHeaders === undefined ? {} : commonHeaders, requestHeaders);
+  if (request.headers !== undefined) {
+    request.headers = setNameOfHeadersArrayToLowerCase(request.headers);
+  }
+  if (request.tests !== undefined && request.tests.headers !== undefined) {
+    request.tests.headers = setKeyOfHeadersObjectToLowerCase(request.tests.headers);
+  }
+  if (request.capture !== undefined && request.capture.headers !== undefined) {
+    request.capture.headers = setKeyOfHeadersObjectToLowerCase(request.capture.headers);
+  }
+
+  return [common, request];
 }
 
-function getObjectSetAsJSON(objectSet: Array<{ name: string; value: any }> | undefined):
-  | {
-      [key: string]: any;
-    }
-  | undefined {
-  if (objectSet === undefined) {
-    return undefined;
+function setKeyOfHeadersObjectToLowerCase(headers: { [key: string]: string | object }): {
+  [key: string]: string | object;
+} {
+  let newObj: { [key: string]: string | object } = {};
+  for (const key in headers) {
+    newObj[key.toLowerCase()] = headers[key];
   }
 
-  let finalObject: { [key: string]: any } = {};
+  return newObj;
+}
 
-  const numElements = objectSet.length;
-  for (let i = 0; i < numElements; i++) {
-    const currObj: { name: string; value: any } = objectSet[i];
+function setNameOfHeadersArrayToLowerCase(headers: Array<Header>): Array<Header> {
+  let newHeaders: Array<Header> = [];
+  headers.forEach((arrHeader) => {
+    const newHeader = { name: arrHeader.name.toLowerCase(), value: arrHeader.value };
+    newHeaders.push(newHeader);
+  });
 
-    const key = currObj.name;
-    const value = currObj.value;
-
-    finalObject[key] = value;
-  }
-
-  return finalObject;
+  return newHeaders;
 }

@@ -17,13 +17,10 @@ export async function openEditorForIndividualReq(
 export async function openEditorForAllRequests(
   responses: Array<{ response: ResponseData; name: string }>,
 ): Promise<void> {
-  const numResponses = responses.length;
   let formattedContent = "";
   let formattedHeaders = "";
 
-  for (let i = 0; i < numResponses; i++) {
-    let responseObj = responses[i];
-
+  responses.forEach((responseObj) => {
     formattedContent += `${responseObj.name}\n\n`;
     let [contentData, headersData] = getDataOfIndReqAsString(
       responseObj.response,
@@ -31,7 +28,7 @@ export async function openEditorForAllRequests(
     );
     formattedContent += contentData + "\n-------\n";
     formattedHeaders += headersData + "\n-------\n";
-  }
+  });
 
   await showContent(formattedContent, formattedHeaders);
 }
