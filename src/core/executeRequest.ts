@@ -14,7 +14,7 @@ export function constructGotRequest(allData: RequestData): GotRequest {
 
   const options = {
     method: allData.method,
-    body: getBody(allData.body),
+    body: allData.body,
     headers: allData.headers,
     followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
 
@@ -24,17 +24,6 @@ export function constructGotRequest(allData: RequestData): GotRequest {
   };
 
   return got(completeUrl, options);
-}
-
-function getBody(body: any): string | undefined {
-  if (body === undefined) {
-    return undefined;
-  }
-  if (typeof body === "object") {
-    return JSON.stringify(body);
-  }
-
-  return body.toString();
 }
 
 export async function executeGotRequest(

@@ -303,9 +303,9 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         }
 
         if (result) {
-          testOutput += `\t${PASS} Regex ${regexTest} on ${received} is succesful\n`;
+          testOutput += `\t${PASS} Regex ${regexTest} on ${keyName} is succesful\n`;
         } else {
-          testOutput += `\t${PASS} Regex ${regexTest} on ${received} is unsuccesul\n`;
+          testOutput += `\t${PASS} Regex ${regexTest} on ${keyName} is unsuccesul\n`;
           NUM_FAILED++;
         }
       }
