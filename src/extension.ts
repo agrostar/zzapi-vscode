@@ -29,11 +29,20 @@ export function getRequiredFileEnd(): string {
   return BUNDLE_FILE_NAME_ENDING;
 }
 
+let EXTENSION_VERSION: string;
+function setExtensionVersion(context: ExtensionContext){
+  EXTENSION_VERSION = context.extension.packageJSON.version;
+}
+export function getExtensionVersion(){
+  return EXTENSION_VERSION;
+}
+
 export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && activeEditor.document.uri.fsPath.endsWith(BUNDLE_FILE_NAME_ENDING)) {
     setVarFileAndDirPath(activeEditor);
   }
+  setExtensionVersion(context);
 
   const STATUS_BAR = window.createStatusBarItem(StatusBarAlignment.Left);
   initialiseStatusBar(context, STATUS_BAR);

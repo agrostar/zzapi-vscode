@@ -4,12 +4,18 @@ import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEd
 import { RequestData, ResponseData } from "./core/models";
 import { allRequestsWithProgress, individualRequestWithProgress } from "./getResponse";
 import { getRequestsData } from "./core/parseBundle";
+import { getExtensionVersion } from "./extension";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
   const allData: RequestData = getRequestsData(text, name)[name];
-  if(allData === undefined){
+  if (allData === undefined) {
     return;
   }
+  allData.headers = Object.assign(
+    {},
+    { "user-agent": "zzAPI-v" + getExtensionVersion() },
+    allData.headers,
+  );
 
   const [cancelled, responseData] = await individualRequestWithProgress(allData);
   if (!cancelled) {
@@ -19,6 +25,13 @@ export async function runIndividualRequest(text: string, name: string): Promise<
 
 export async function runAllRequests(text: string): Promise<void> {
   const allRequests = getRequestsData(text);
+  for (const name in allRequests) {
+    allRequests[name].headers = Object.assign(
+      {},
+      { "user-agent": "zzAPI-v" + getExtensionVersion() },
+      allRequests[name].headers,
+    );
+  }
   const allResponses = await allRequestsWithProgress(allRequests);
 
   let atleastOneExecuted = false;
