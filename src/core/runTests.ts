@@ -83,7 +83,7 @@ export function runAllTests(requestData: RequestData, responseData: ResponseData
           }
           NUM_TESTS++;
         } else {
-          testOutput += runObjectTests(required, received, test);
+          testOutput += runObjectTests(required, received, headerTest);
         }
       }
     } else {
@@ -242,9 +242,17 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if ((received !== undefined) === compareTo) {
-        testOutput += `\t${PASS} ${GAP} ${keyName} exists\n`;
+        if(compareTo === true){
+          testOutput += `\t${PASS} ${GAP} ${keyName} exists\n`;
+        } else {
+          testOutput += `\t${PASS} ${GAP} ${keyName} does not exist\n`;
+        }
       } else {
-        testOutput += `\t${FAIL} ${GAP} ${keyName} does not exist\n`;
+        if(compareTo === true){
+          testOutput += `\t${FAIL} ${GAP} ${keyName} exists\n`;
+        } else {
+          testOutput += `\t${FAIL} ${GAP} ${keyName} does not exist\n`;
+        }
         NUM_FAILED++;
       }
     } else if (key === "$type") {

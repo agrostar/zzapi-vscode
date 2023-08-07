@@ -119,10 +119,10 @@ function getMergedTestsAndCapture(
   }
 
   let mergedData: Tests | Captures = {
-    json: getMergedObjectData(common?.json, request?.json),
-    body: getMergedBodyTest(common?.body, request?.body),
-    status: getMergedStatusTest(common?.status, request?.status),
-    headers: getMergedObjectData(common?.headers, request?.headers),
+    status: getTest(common?.status, request?.status),
+    headers: getTest(common?.headers, request?.headers),
+    json: getTest(common?.json, request?.json),
+    body: getTest(common?.body, request?.body),
   };
 
   type keyOfMergedData = keyof typeof mergedData;
@@ -135,61 +135,11 @@ function getMergedTestsAndCapture(
   return mergedData;
 }
 
-function getMergedObjectData(
-  inferiorObj: { [key: string]: any } | undefined,
-  superiorObj: { [key: string]: any } | undefined,
-): { [key: string]: any } | undefined {
-  if (inferiorObj === undefined) {
-    return superiorObj;
+function getTest(commonTest: any, requestTest: any) {
+  if (requestTest !== undefined) {
+    return requestTest;
   }
-  if (superiorObj === undefined) {
-    return inferiorObj;
-  }
-
-  for (const key in superiorObj) {
-    inferiorObj[key] = superiorObj[key];
-  }
-
-  return inferiorObj;
-}
-
-function getMergedBodyTest(
-  common: { [key: string]: any } | string | undefined,
-  request: { [key: string]: any } | string | undefined,
-): { [key: string]: any } | string | undefined {
-  if (common === undefined) {
-    return request;
-  }
-  if (request === undefined) {
-    return common;
-  }
-
-  if (typeof common === "string" && typeof request === "string") {
-    return request;
-  }
-
-  if (typeof common === "string") {
-    common = { $eq: common };
-  }
-  if (typeof request === "string") {
-    request = { $eq: request };
-  }
-
-  return getMergedObjectData(common, request);
-}
-
-function getMergedStatusTest(
-  commonStatus: number | undefined,
-  requestStatus: number | undefined,
-): number | undefined {
-  if (requestStatus === undefined) {
-    return commonStatus;
-  }
-  if (commonStatus === undefined) {
-    return requestStatus;
-  }
-
-  return requestStatus;
+  return commonTest;
 }
 
 function getArrayHeadersAsJSON(
