@@ -82,8 +82,11 @@ export function getRequestsData(document: string, name?: string): { [name: strin
 
   function getAllData(name: string) {
     let request: Request = allRequests[name];
-    request.name = name;
+    if(request === undefined){
+      return;
+    }
 
+    request.name = name;
     const allData: RequestData = getMergedData(commonData, request);
 
     requests[name] = allData;

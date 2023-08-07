@@ -10,17 +10,17 @@ export function getMergedData(common: Common | undefined, request: Request): Req
   return getAllMergedData(commonData, requestData);
 }
 
-function getAllMergedData(commonData: Common | undefined, requestData: Request) {
+function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestData {
   const name = requestData.name;
-  const completeUrl = getCompleteUrl(commonData, requestData);
+  const completeUrl = getCompleteUrl(commonData, requestData); // variables replaced
 
   const method = requestData.method;
-  const headers = getMergedHeaders(commonData, requestData);
-  const body = getBody(requestData.body);
+  const headers = getMergedHeaders(commonData, requestData); // variables replaced
+  const body = getBody(requestData.body); // variables replaced
   const options = getMergedOptions(commonData?.options, requestData.options);
   const tests = replaceVariablesInObject(
     getMergedTestsAndCapture(commonData?.tests, requestData.tests),
-  );
+  ); // variables replaced
   const captures = getMergedTestsAndCapture(commonData?.capture, requestData.capture);
 
   const mergedData: RequestData = {
@@ -48,7 +48,10 @@ function getBody(body: any): string | undefined {
   return replaceVariables(body.toString());
 }
 
-function getMergedHeaders(commonData: Common | undefined, requestData: Request) {
+function getMergedHeaders(
+  commonData: Common | undefined,
+  requestData: Request,
+): { [name: string]: string } {
   let commonHeaders = getArrayHeadersAsJSON(commonData?.headers);
   let requestHeaders = getArrayHeadersAsJSON(requestData.headers);
 
@@ -82,7 +85,7 @@ function getCompleteUrl(commonData: Common | undefined, requestData: Request): s
 function getMergedOptions(
   common: { follow: boolean; verifySSL: boolean } | undefined,
   request: { follow: boolean; verifySSL: boolean } | undefined,
-) {
+): { follow: boolean; verifySSL: boolean } {
   let follow: boolean;
   if (request !== undefined && request.follow !== undefined) {
     follow = request.follow;
@@ -135,7 +138,7 @@ function getMergedTestsAndCapture(
 function getMergedObjectData(
   inferiorObj: { [key: string]: any } | undefined,
   superiorObj: { [key: string]: any } | undefined,
-) {
+): { [key: string]: any } | undefined {
   if (inferiorObj === undefined) {
     return superiorObj;
   }
@@ -153,7 +156,7 @@ function getMergedObjectData(
 function getMergedBodyTest(
   common: { [key: string]: any } | string | undefined,
   request: { [key: string]: any } | string | undefined,
-) {
+): { [key: string]: any } | string | undefined {
   if (common === undefined) {
     return request;
   }
@@ -161,17 +164,24 @@ function getMergedBodyTest(
     return common;
   }
 
-  if (typeof common !== typeof request) {
+  if (typeof common === "string" && typeof request === "string") {
     return request;
   }
-  if (typeof common === "string" || typeof request === "string") {
-    return common;
+
+  if (typeof common === "string") {
+    common = { $eq: common };
+  }
+  if (typeof request === "string") {
+    request = { $eq: request };
   }
 
   return getMergedObjectData(common, request);
 }
 
-function getMergedStatusTest(commonStatus: number | undefined, requestStatus: number | undefined) {
+function getMergedStatusTest(
+  commonStatus: number | undefined,
+  requestStatus: number | undefined,
+): number | undefined {
   if (requestStatus === undefined) {
     return commonStatus;
   }

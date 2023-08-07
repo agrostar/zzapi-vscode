@@ -7,8 +7,11 @@ import { getRequestsData } from "./core/parseBundle";
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
   const allData: RequestData = getRequestsData(text, name)[name];
-  const [cancelled, responseData] = await individualRequestWithProgress(allData);
+  if(allData === undefined){
+    return;
+  }
 
+  const [cancelled, responseData] = await individualRequestWithProgress(allData);
   if (!cancelled) {
     await openEditorForIndividualReq(responseData, allData.name);
   }
