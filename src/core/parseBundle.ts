@@ -82,7 +82,7 @@ export function getRequestsData(document: string, name?: string): { [name: strin
 
   function getAllData(name: string) {
     let request: Request = allRequests[name];
-    if(request === undefined){
+    if (request === undefined) {
       return;
     }
 

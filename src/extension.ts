@@ -30,10 +30,10 @@ export function getRequiredFileEnd(): string {
 }
 
 let EXTENSION_VERSION: string;
-function setExtensionVersion(context: ExtensionContext){
+function setExtensionVersion(context: ExtensionContext) {
   EXTENSION_VERSION = context.extension.packageJSON.version;
 }
-export function getExtensionVersion(){
+export function getExtensionVersion() {
   return EXTENSION_VERSION;
 }
 

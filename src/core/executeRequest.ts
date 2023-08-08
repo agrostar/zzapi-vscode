@@ -32,7 +32,7 @@ function getBody(body: any): string | undefined {
     return undefined;
   }
   if (typeof body === "object") {
-    if(Array.isArray(body)){
+    if (Array.isArray(body)) {
       return replaceVariables(JSON.stringify(body));
     } else {
       return JSON.stringify(replaceVariablesInObject(body));

@@ -67,7 +67,7 @@ export interface RequestData {
 
   method: Method;
   headers?: { [key: string]: string };
-  body?: string;
+  body?: any;
   options?: { follow: boolean; verifySSL: boolean };
   tests?: Tests;
   captures?: Captures;
