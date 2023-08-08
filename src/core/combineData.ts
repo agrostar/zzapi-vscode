@@ -16,7 +16,7 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
 
   const method = requestData.method;
   const headers = getMergedHeaders(commonData, requestData); // variables replaced
-  const body = getBody(requestData.body); // variables replaced
+  const body = requestData.body; // variables replaced
   const options = getMergedOptions(commonData?.options, requestData.options);
   const tests = replaceVariablesInObject(
     getMergedTestsAndCapture(commonData?.tests, requestData.tests),
@@ -35,17 +35,6 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
   };
 
   return mergedData;
-}
-
-function getBody(body: any): string | undefined {
-  if (body === undefined) {
-    return undefined;
-  }
-  if (typeof body === "object") {
-    return replaceVariables(JSON.stringify(body));
-  }
-
-  return replaceVariables(body.toString());
 }
 
 function getMergedHeaders(

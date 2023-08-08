@@ -8,13 +8,14 @@
 import got from "got";
 
 import { GotRequest, RequestData } from "./models";
+import { replaceVariables, replaceVariablesInObject } from "./variables";
 
 export function constructGotRequest(allData: RequestData): GotRequest {
   const completeUrl = allData.completeUrl;
 
   const options = {
     method: allData.method,
-    body: allData.body,
+    body: getBody(allData.body),
     headers: allData.headers,
     followRedirect: allData.options !== undefined ? allData.options.follow : undefined,
 
@@ -24,6 +25,21 @@ export function constructGotRequest(allData: RequestData): GotRequest {
   };
 
   return got(completeUrl, options);
+}
+
+function getBody(body: any): string | undefined {
+  if (body === undefined) {
+    return undefined;
+  }
+  if (typeof body === "object") {
+    if(Array.isArray(body)){
+      return replaceVariables(JSON.stringify(body));
+    } else {
+      return JSON.stringify(replaceVariablesInObject(body));
+    }
+  }
+
+  return replaceVariables(body.toString());
 }
 
 export async function executeGotRequest(

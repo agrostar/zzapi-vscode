@@ -8,6 +8,14 @@ import jp from "jsonpath";
 import { setVariable } from "./variables";
 import { ResponseData, RequestData, Captures } from "./models";
 
+export function getStringIfNotScalar(data: any) {
+  if (typeof data === "object") {
+    return JSON.stringify(data);
+  }
+
+  return data;
+}
+
 export function captureVariables(requestData: RequestData, responseData: ResponseData): string {
   const name = requestData.name;
   const capture = requestData.captures;
@@ -61,8 +69,9 @@ export function captureVariables(requestData: RequestData, responseData: Respons
           if (errorInJP !== undefined) {
             captureOutput += `\tCould not set "${key}", error: ${errorInJP}\n`;
           } else {
+            value = getStringIfNotScalar(value);
             setVariable(key, value);
-            captureOutput += `\tVariable Set : "${key}" = "${value}"\n`;
+            captureOutput += `\tVariable Set : "${key}" = ${value}\n`;
           }
         }
       }
@@ -71,18 +80,20 @@ export function captureVariables(requestData: RequestData, responseData: Respons
       const headerCaptures = capture[test];
 
       for (const headerName in headerCaptures) {
-        const value = headers !== undefined ? headers[headerName] : undefined;
+        let value = headers !== undefined ? headers[headerName] : undefined;
         const key = headerCaptures[headerName];
 
+        value = getStringIfNotScalar(value);
         setVariable(key, value);
-        captureOutput += `\tVariable Set : "${key}" = "${value}"\n`;
+        captureOutput += `\tVariable Set : "${key}" = ${value}\n`;
       }
     } else {
-      const value = test;
+      let value = test;
       const key = capture[test as keyof Captures];
 
+      value = getStringIfNotScalar(value);
       setVariable(key, value);
-      captureOutput += `Variable Set : "${key}" = "${value}"\n`;
+      captureOutput += `Variable Set : "${key}" = ${value}\n`;
     }
   }
   captureOutput += "--------------------------------------\n";

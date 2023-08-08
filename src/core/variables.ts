@@ -7,7 +7,8 @@ import * as fs from "fs";
 
 import * as YAML from "yaml";
 
-import { Param } from "./models";
+import { Param, RequestData } from "./models";
+import { getStringIfNotScalar } from "./captureVars";
 
 let VARIABLES: { [key: string]: string } = {};
 
@@ -22,7 +23,7 @@ function getStrictStringValue(value: any): string {
 }
 
 export function setVariable(key: any, value: any): void {
-  VARIABLES[getStrictStringValue(key)] = getStrictStringValue(value);
+  VARIABLES[getStrictStringValue(key)] = getStringIfNotScalar(value);
 }
 
 export function setEnvironmentVariables(filesToLoad: Array<string>): void {
@@ -67,6 +68,10 @@ export function replaceVariablesInParams(arr: Array<Param>): Array<Param> {
   });
 
   return newArr;
+}
+
+export function replaceVariablesInRequest(request: RequestData) {
+  return replaceVariablesInObject(request);
 }
 
 /**

@@ -5,6 +5,7 @@ import { ResponseData, RequestData, GotRequest } from "./core/models";
 import { cancelGotRequest, constructGotRequest, executeGotRequest } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
+import { replaceVariablesInRequest } from "./core/variables";
 
 export async function individualRequestWithProgress(
   requestData: RequestData,
@@ -99,7 +100,8 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
         currRequestName = `(Running '${name}')`;
 
-        const requestData = allRequests[name];
+        let requestData = allRequests[name];
+        requestData = replaceVariablesInRequest(requestData);
         currHttpRequest = constructGotRequest(requestData);
 
         const [httpResponse, executionTime] = await executeGotRequest(currHttpRequest);
@@ -152,9 +154,9 @@ function getHeadersAsString(rawHeaders: Array<string>): string {
 
   const numElement = rawHeaders.length;
   for (let i = 0; i < numElement - 1; i += 2) {
-    formattedString += `\t${rawHeaders[i]}: ${getStrictStringValue(rawHeaders[i + 1])}\n`;
+    formattedString += `  ${rawHeaders[i]} : ${getStrictStringValue(rawHeaders[i + 1])}\n`;
   }
 
   formattedString = formattedString.trim();
-  return `\n\t${formattedString}`;
+  return `\n  ${formattedString}`;
 }

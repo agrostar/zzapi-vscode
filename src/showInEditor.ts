@@ -2,6 +2,7 @@ import { window, commands, workspace } from "vscode";
 
 import { getEnvDetails } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
+import * as YAML from "yaml";
 
 const KEYS_IN_BODY = ["body"];
 const KEYS_IN_HEADERS = ["executionTime", "status", "rawHeaders"];
@@ -17,8 +18,8 @@ export async function openEditorForIndividualReq(
 export async function openEditorForAllRequests(
   responses: Array<{ response: ResponseData; name: string }>,
 ): Promise<void> {
-  let formattedContent = "";
-  let formattedHeaders = "";
+  let formattedContent = "---\n";
+  let formattedHeaders = "---\n";
 
   responses.forEach((responseObj) => {
     formattedContent += `${responseObj.name}\n\n`;
@@ -26,8 +27,8 @@ export async function openEditorForAllRequests(
       responseObj.response,
       responseObj.name,
     );
-    formattedContent += contentData + "\n-------\n";
-    formattedHeaders += headersData + "\n-------\n";
+    formattedContent += contentData + "\n---\n";
+    formattedHeaders += headersData + "\n---\n";
   });
 
   await showContent(formattedContent, formattedHeaders);
@@ -43,7 +44,7 @@ function getDataOfIndReqAsString(
   }
 
   let contentData = "";
-  let headersData = `${name} headers\nEnvironment: ${currentEnvironment}\n\n`;
+  let headersData = `${name}: headers\nEnvironment: ${currentEnvironment}\n\n`;
 
   for (const key in responseData) {
     let value = responseData[key as keyof ResponseData];
@@ -58,8 +59,8 @@ function getDataOfIndReqAsString(
   return [contentData, headersData];
 }
 
-async function openDocument(content: string): Promise<void> {
-  await workspace.openTextDocument({ content: content }).then((document) => {
+async function openDocument(content: string, language?: string): Promise<void> {
+  await workspace.openTextDocument({ content: content, language: language }).then((document) => {
     window.showTextDocument(document, {
       preserveFocus: false,
     });
@@ -67,11 +68,23 @@ async function openDocument(content: string): Promise<void> {
 }
 
 async function showContent(bodyContent: string, headersContent: string): Promise<void> {
+  let language: string | undefined = "json";
+  try {
+    JSON.parse(bodyContent);
+  } catch {
+    language = undefined;
+  }
   // insert a new group to the right, insert the content
   commands.executeCommand("workbench.action.newGroupRight");
-  await openDocument(bodyContent);
+  await openDocument(bodyContent, language);
 
+  language = "yaml";
+  try {
+    YAML.parse(headersContent);
+  } catch {
+    language = undefined;
+  }
   // insert a new group below, insert the content
   commands.executeCommand("workbench.action.newGroupBelow");
-  await openDocument(headersContent);
+  await openDocument(headersContent, language);
 }
