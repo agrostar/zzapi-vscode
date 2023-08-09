@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "zzapi is an API testing and documentation tool + vs code extension",
+  "$defs": {
+    "header": {
+      "type": "object",
+      "required": ["name", "value"],
+      "additionalProperties": false,
+      "description": "A header is a map consisting of the keys name*, value* and doc",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the header"
+        },
+        "value": { "type": "string", "description": "Value of the header" },
+        "doc": {
+          "type": "string",
+          "description": "Documentation, typically in Markdown"
+        }
+      }
+    },
+    "param": {
+      "type": "object",
+      "required": ["name", "value"],
+      "description": "A param is a map consisting of the keys name*, value*, encode and doc",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the parameter."
+        },
+        "value": { "type": "string", "description": "Value of the parameter" },
+        "encode": {
+          "type": "boolean",
+          "description": "Whether to URL-encode the parameter value (names will never be encoded), the default is false"
+        },
+        "doc": {
+          "type": "string",
+          "description": "Documentation, typically in Markdown"
+        }
+      }
+    },
+    "options": {
+      "description": "Options applicable to requests { follow, verifySSL }",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "follow": {
+          "description": "If set, will automatically follow redirects (default: false)",
+          "type": "boolean"
+        },
+        "verifySSL": {
+          "description": "If set, will verify the SSL certificate (default: false)",
+          "type": "boolean"
+        }
+      }
+    },
+    "scalar": { "not": { "type": ["object", "array"] } },
+    "opValue": {
+    },
+    "assertion": {
+      "description": "An assertion: the value should be equal to the simple value, or match the operator/value as an object",
+      "anyOf": [
+        { "$ref": "#/$defs/scalar" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "$eq": { "description": "Equals" },
+            "$ne": { "$ref": "#/$defs/scalar" },
+            "$lt": { "$ref": "#/$defs/scalar" },
+            "$gt": { "$ref": "#/$defs/scalar" },
+            "$lte": { "$ref": "#/$defs/scalar" },
+            "$gte": { "$ref": "#/$defs/scalar" },
+            "$type": { "type": "string" },
+            "$regex": { "type": "string" },
+            "$options": { "type": "string" },
+            "$exists": { "type": "boolean" },
+            "$size": { "type": "integer" }
+          }
+        }
+      ]
+    },
+    "tests": {
+      "description": "A list of tests to run against the response",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "description": "An assertion against the HTTP status code in the response. The value can be a number (eg, 200), or an object with keys as operators and values as values",
+          "$ref": "#/$defs/assertion"
+        },
+        "body": {
+          "description": "An assertion against the entire response body",
+          "$ref": "#/$defs/assertion"
+        },
+        "json": {
+          "description": "A map of assertions against the response, parsed as JSON. The keys are paths into the nested JSON object",
+          "type": "object",
+          "patternProperties": {
+            "": { "$ref": "#/$defs/assertion" }
+          }
+        },
+        "headers": {
+          "description": "A map of assertions against HTTP headers. They keys are names of the headers",
+          "type": "object",
+          "patternProperties": {
+            "": { "$ref": "#/$defs/assertion" }
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["requests"],
+  "additionalProperties": false,
+  "properties": {
+    "common": {
+      "description": "Some properties that are applied to all requests.",
+      "type": "object",
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "description": "baseUrl, if defined, will be prepended to all request URLs"
+        },
+        "headers": {
+          "description": "HTTP Headers to be sent as part of any request in this bundle",
+          "type": "array",
+          "items": { "$ref": "#/$defs/header" }
+        },
+        "options": { "$ref": "#/$defs/options" },
+        "tests": { "$ref": "#/$defs/tests" }
+      }
+    },
+    "requests": {
+      "type": "object",
+      "description": "Each request defines an HTTP request",
+      "patternProperties": {
+        "": {
+          "type": "object",
+          "required": ["url", "method"],
+          "properties": {
+            "url": { "type": "string" },
+            "method": {
+              "type": "string",
+              "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+            },
+            "headers": {
+              "description": "HTTP Headers to be sent as part of the request. This is in addition to any header defined in common. Headers can be overridden.",
+              "type": "array",
+              "items": { "$ref": "#/$defs/header" }
+            },
+            "params": {
+              "description": "Query string parameters",
+              "type": "array",
+              "items": { "$ref": "#/$defs/param" }
+            },
+            "options": { "$ref": "#/$defs/options" },
+            "tests": { "$ref": "#/$defs/tests" }
+          }
+        }
+      }
+    }
+  }
+}

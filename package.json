@@ -20,7 +20,13 @@
         "title": "Select Environment"
       }
     ],
-    "configuration": {}
+    "configuration": {},
+    "yamlValidation":[
+      {
+        "fileMatch": "random.zzb.yaml",
+        "url": "./schema.json"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

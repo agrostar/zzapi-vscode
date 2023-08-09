@@ -23,7 +23,7 @@ import {
 
 let DISPOSABLES: Disposable[] = [];
 
-const BUNDLE_FILE_NAME_ENDING = ".zz-bundle.yaml";
+const BUNDLE_FILE_NAME_ENDING = ".zzb.yaml";
 
 export function getRequiredFileEnd(): string {
   return BUNDLE_FILE_NAME_ENDING;
