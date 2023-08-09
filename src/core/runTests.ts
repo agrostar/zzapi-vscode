@@ -218,7 +218,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         receivedLen = received.length;
       }
 
-      if (!canBeInteger(compareTo)) {
+      if (!canBeNumber(compareTo)) {
         testOutput += `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not a number\n`;
         NUM_FAILED++;
         NUM_TESTS++;
@@ -256,6 +256,10 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         NUM_FAILED++;
       }
     } else if (key === "$type") {
+      if (compareTo === "null") {
+        compareTo = null;
+      }
+
       if (
         (compareTo === null && received === null) ||
         (compareTo === "array" && Array.isArray(received)) ||
@@ -323,6 +327,6 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
   return testOutput;
 }
 
-function canBeInteger(input: any): boolean {
+function canBeNumber(input: any): boolean {
   return typeof input === "number";
 }
