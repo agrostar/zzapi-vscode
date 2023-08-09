@@ -43,15 +43,15 @@ export function setEnvironmentVariables(filesToLoad: Array<string>): void {
   });
 }
 
-export function replaceVariables<Type>(data: Type): Type {
+export function replaceVariables(data: any): any {
   if (data === undefined) {
-    return undefined as Type;
+    return undefined;
   }
   if (typeof data === "object") {
-    return replaceVariablesInNonScalar(data as object) as Type;
+    return replaceVariablesInNonScalar(data as object);
   }
   if (typeof data === "string") {
-    return replaceVariablesInString(data);
+    return replaceVariablesInString(data as string);
   }
   return data;
 }

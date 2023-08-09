@@ -219,7 +219,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (!canBeInteger(compareTo)) {
-        testOutput += `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not an integer\n`;
+        testOutput += `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not a number\n`;
         NUM_FAILED++;
         NUM_TESTS++;
 
@@ -256,15 +256,10 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         NUM_FAILED++;
       }
     } else if (key === "$type") {
-      if (compareTo === "null") {
-        compareTo = null;
-      }
-
       if (
-        (typeof compareTo === "string" &&
-          ((compareTo.toLowerCase() === "array" && Array.isArray(received)) ||
-            typeof received === compareTo.toLowerCase())) ||
-        (compareTo === null && received === null)
+        (compareTo === null && received === null) ||
+        (compareTo === "array" && Array.isArray(received)) ||
+        typeof received === compareTo
       ) {
         testOutput += `\t${PASS} ${GAP} type of ${keyName} is ${compareTo}\n`;
       } else {
@@ -329,9 +324,5 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
 }
 
 function canBeInteger(input: any): boolean {
-  if (input === undefined || typeof input === "object") {
-    return false;
-  }
-
-  return typeof input === "number" || /^[+-]?\d+$/.test(input);
+  return typeof input === "number";
 }
