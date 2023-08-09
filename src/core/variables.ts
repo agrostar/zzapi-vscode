@@ -7,13 +7,14 @@ import * as fs from "fs";
 
 import * as YAML from "yaml";
 
-import { Param, RequestData } from "./models";
-import { getStringIfNotScalar } from "./captureVars";
+import { RequestData } from "./models";
 
-let VARIABLES: { [key: string]: string } = {};
+let VARIABLES: { [key: string]: any } = {};
 
 function getStrictStringValue(value: any): string {
-  if (value === undefined) {
+  if (value === null) {
+    return "null";
+  } else if (value === undefined) {
     return "undefined";
   } else if (typeof value === "object") {
     return JSON.stringify(value);
@@ -23,7 +24,7 @@ function getStrictStringValue(value: any): string {
 }
 
 export function setVariable(key: any, value: any): void {
-  VARIABLES[getStrictStringValue(key)] = getStringIfNotScalar(value);
+  VARIABLES[getStrictStringValue(key)] = value;
 }
 
 export function setEnvironmentVariables(filesToLoad: Array<string>): void {
@@ -42,16 +43,59 @@ export function setEnvironmentVariables(filesToLoad: Array<string>): void {
   });
 }
 
-export function replaceVariablesInObject<Type>(objectData: Type): Type {
-  if (objectData === undefined) {
+export function replaceVariables<Type>(data: Type): Type {
+  if (data === undefined) {
     return undefined as Type;
   }
+  if (typeof data === "object") {
+    return replaceVariablesInNonScalar(data as object) as Type;
+  }
+  if (typeof data === "string") {
+    return replaceVariablesInString(data);
+  }
+  return data;
+}
 
+function replaceVariablesInNonScalar(data: { [key: string]: any } | Array<any>) {
+  if (Array.isArray(data)) {
+    return replaceVariablesInArray(data);
+  } else {
+    return replaceVariablesInObject(data);
+  }
+}
+
+function replaceVariablesInArray(data: Array<any>) {
+  let newData: Array<any> = [];
+
+  data.forEach((item) => {
+    if (typeof item === "object") {
+      if (Array.isArray(item)) {
+        newData.push(replaceVariablesInArray(item));
+      } else {
+        newData.push(replaceVariablesInObject(item));
+      }
+    } else if (typeof item === "string") {
+      newData.push(replaceVariablesInString(item));
+    } else {
+      newData.push(item);
+    }
+  });
+
+  return newData;
+}
+
+function replaceVariablesInObject(objectData: { [key: string]: any }): {
+  [key: string]: any;
+} {
   for (const key in objectData) {
     if (typeof objectData[key] === "object") {
-      objectData[key] = replaceVariablesInObject(objectData[key]);
+      if (Array.isArray(objectData[key])) {
+        objectData[key] = replaceVariablesInArray(objectData[key]);
+      } else {
+        objectData[key] = replaceVariablesInObject(objectData[key]);
+      }
     } else if (typeof objectData[key] === "string") {
-      (objectData as any)[key] = replaceVariables(objectData[key] as string);
+      objectData[key] = replaceVariablesInString(objectData[key] as string);
     }
   }
   return objectData;
@@ -61,17 +105,21 @@ function replaceVariablesInSelf(): void {
   VARIABLES = replaceVariablesInObject(VARIABLES);
 }
 
-export function replaceVariablesInParams(arr: Array<Param>): Array<Param> {
-  let newArr: Array<Param> = [];
-  arr.forEach((element) => {
-    newArr.push(replaceVariablesInObject(element));
-  });
-
-  return newArr;
-}
-
-export function replaceVariablesInRequest(request: RequestData) {
-  return replaceVariablesInObject(request);
+export function replaceVariablesInRequest(request: RequestData): RequestData {
+  type keyOfRequestData = keyof RequestData;
+  for (const key in request) {
+    const reqVal = request[key as keyOfRequestData];
+    if (typeof reqVal === "object") {
+      if (Array.isArray(reqVal)) {
+        request[key as keyOfRequestData] = replaceVariablesInArray(reqVal);
+      } else {
+        request[key as keyOfRequestData] = replaceVariablesInObject(reqVal);
+      }
+    } else if (typeof reqVal === "string") {
+      request[key as keyOfRequestData] = replaceVariablesInString(reqVal as string);
+    }
+  }
+  return request;
 }
 
 /**
@@ -103,12 +151,17 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
  */
 const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
-export function replaceVariables(text: string): string {
+export function replaceVariablesInString(text: string): any {
+  let retValueIfVariableIsFullText: any = undefined;
+
   const outputText = text
     .replace(VAR_REGEX_WITH_BRACES, (match, variable) => {
       const varVal = VARIABLES[variable];
+      if (text === match) {
+        retValueIfVariableIsFullText = varVal;
+      }
       if (varVal !== undefined) {
-        return varVal;
+        return getStrictStringValue(varVal);
       }
       return match;
     })
@@ -117,12 +170,20 @@ export function replaceVariables(text: string): string {
       if (variable === undefined) {
         return match;
       }
+
       const varVal = VARIABLES[variable];
+      if (text === match) {
+        retValueIfVariableIsFullText = varVal;
+      }
       if (varVal !== undefined) {
-        return varVal;
+        return getStrictStringValue(varVal);
       }
       return match;
     });
 
-  return outputText;
+  if (retValueIfVariableIsFullText !== undefined) {
+    return retValueIfVariableIsFullText;
+  } else {
+    return outputText;
+  }
 }

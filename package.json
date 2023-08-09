@@ -23,7 +23,7 @@
     "configuration": {},
     "yamlValidation":[
       {
-        "fileMatch": "*.zzb.yaml",
+        "fileMatch": ["*.zzb.yaml", "*.zzb.yml"],
         "url": "./schema.json"
       }
     ]

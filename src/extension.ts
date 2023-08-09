@@ -24,8 +24,12 @@ import {
 
 let DISPOSABLES: Disposable[] = [];
 
+/**
+ * Possible file extensions representing a bundle. Any bundle name must end with this. 
+ * 
+ * ANY CHANGES HERE MUST REFLECT IN yamlValidation IN package.json
+ */
 const BUNDLE_FILE_NAME_ENDINGS = [".zzb.yaml", ".zzb.yml"];
-
 export function documentIsBundle(document: TextDocument): boolean {
   const docFsPath = document.uri.fsPath;
 

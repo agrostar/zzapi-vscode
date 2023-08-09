@@ -1,4 +1,4 @@
-import { replaceVariablesInObject, replaceVariablesInParams, replaceVariables } from "./variables";
+import { replaceVariables, replaceVariablesInString } from "./variables";
 import { RequestData, Request, Common, Header, Param, Tests, Captures } from "./models";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {
@@ -16,11 +16,10 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
 
   const method = requestData.method;
   const headers = getMergedHeaders(commonData, requestData); // variables replaced
-  const body = requestData.body; // variables replaced
+  const body = requestData.body;
   const options = getMergedOptions(commonData?.options, requestData.options);
-  const tests = replaceVariablesInObject(
-    getMergedTestsAndCapture(commonData?.tests, requestData.tests),
-  ); // variables replaced
+
+  const tests = replaceVariables(getMergedTestsAndCapture(commonData?.tests, requestData.tests)); // variables replaced
   const captures = getMergedTestsAndCapture(commonData?.capture, requestData.capture);
 
   const mergedData: RequestData = {
@@ -47,7 +46,7 @@ function getMergedHeaders(
   commonHeaders = setHeadersToLowerCase(commonHeaders);
   requestHeaders = setHeadersToLowerCase(requestHeaders);
 
-  return replaceVariablesInObject(Object.assign({}, commonHeaders, requestHeaders));
+  return replaceVariables(Object.assign({}, commonHeaders, requestHeaders));
 }
 
 function getCompleteUrl(commonData: Common | undefined, requestData: Request): string {
@@ -58,10 +57,10 @@ function getCompleteUrl(commonData: Common | undefined, requestData: Request): s
     if (commonData.baseUrl === undefined) {
       baseUrl = undefined;
     } else {
-      baseUrl = replaceVariables(commonData.baseUrl);
+      baseUrl = replaceVariablesInString(commonData.baseUrl);
     }
   }
-  const requestUrl = replaceVariables(requestData.url);
+  const requestUrl = replaceVariablesInString(requestData.url);
   const params = getParamsForUrl(
     commonData === undefined ? undefined : commonData.params,
     requestData.params,
@@ -168,7 +167,7 @@ function getParamsForUrl(
     return "";
   }
 
-  let params: Array<Param> = replaceVariablesInParams(mixedParams);
+  let params: Array<Param> = replaceVariables(mixedParams);
   let paramArray: Array<string> = [];
 
   params.forEach((param) => {

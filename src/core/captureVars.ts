@@ -69,9 +69,8 @@ export function captureVariables(requestData: RequestData, responseData: Respons
           if (errorInJP !== undefined) {
             captureOutput += `\tCould not set "${key}", error: ${errorInJP}\n`;
           } else {
-            value = getStringIfNotScalar(value);
             setVariable(key, value);
-            captureOutput += `\tVariable Set : "${key}" = ${value}\n`;
+            captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
           }
         }
       }
@@ -83,17 +82,15 @@ export function captureVariables(requestData: RequestData, responseData: Respons
         let value = headers !== undefined ? headers[headerName] : undefined;
         const key = headerCaptures[headerName];
 
-        value = getStringIfNotScalar(value);
         setVariable(key, value);
-        captureOutput += `\tVariable Set : "${key}" = ${value}\n`;
+        captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
       }
     } else {
       let value = test;
       const key = capture[test as keyof Captures];
 
-      value = getStringIfNotScalar(value);
       setVariable(key, value);
-      captureOutput += `Variable Set : "${key}" = ${value}\n`;
+      captureOutput += `Variable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
     }
   }
   captureOutput += "--------------------------------------\n";
