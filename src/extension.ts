@@ -7,6 +7,7 @@ import {
   Disposable,
   OutputChannel,
   workspace,
+  TextDocument,
 } from "vscode";
 
 import { CodeLensProvider } from "./CodeLensProviders";
@@ -23,10 +24,19 @@ import {
 
 let DISPOSABLES: Disposable[] = [];
 
-const BUNDLE_FILE_NAME_ENDING = ".zzb.yaml";
+const BUNDLE_FILE_NAME_ENDINGS = [".zzb.yaml", ".zzb.yml"];
 
-export function getRequiredFileEnd(): string {
-  return BUNDLE_FILE_NAME_ENDING;
+export function documentIsBundle(document: TextDocument): boolean {
+  const docFsPath = document.uri.fsPath;
+
+  let docIsBundle: boolean = false;
+  BUNDLE_FILE_NAME_ENDINGS.forEach((ENDING) => {
+    if (docFsPath.endsWith(ENDING)) {
+      docIsBundle = true;
+    }
+  });
+
+  return docIsBundle;
 }
 
 let EXTENSION_VERSION: string;
@@ -39,7 +49,7 @@ export function getExtensionVersion() {
 
 export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
-  if (activeEditor && activeEditor.document.uri.fsPath.endsWith(BUNDLE_FILE_NAME_ENDING)) {
+  if (activeEditor && documentIsBundle(activeEditor.document)) {
     setVarFileAndDirPath(activeEditor);
   }
   setExtensionVersion(context);
@@ -57,7 +67,7 @@ export function activate(context: ExtensionContext): void {
   context.subscriptions.push(envFileChangeHandler);
 
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
-    if (activeEditor && activeEditor.document.uri.fsPath.endsWith(BUNDLE_FILE_NAME_ENDING)) {
+    if (activeEditor && documentIsBundle(activeEditor.document)) {
       //if we are referring to a new bundle, then we have to reload environments
       if (getWorkingDirectoryPath(activeEditor) !== getCurrDirPath()) {
         setVarFileAndDirPath(activeEditor);
