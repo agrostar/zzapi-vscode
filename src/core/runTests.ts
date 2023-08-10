@@ -106,11 +106,13 @@ export function runAllTests(requestData: RequestData, responseData: ResponseData
     }
   }
 
-  const numPassed = NUM_TESTS - NUM_FAILED;
-  if (NUM_FAILED > 0) {
-    testOutput += `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\t\t${PASS} PASSED: ${numPassed}/${NUM_TESTS}\n`;
+  const NUM_PASSED = NUM_TESTS - NUM_FAILED;
+  if (NUM_FAILED === 0) {
+    testOutput += `\n${PASS} PASSED: ${NUM_PASSED}/${NUM_TESTS}\n`;
+  } else if (NUM_PASSED == 0) {
+    testOutput += `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\n`;
   } else {
-    testOutput += `\n${PASS} PASSED: ${numPassed}/${NUM_TESTS}\n`;
+    testOutput += `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\t\t${PASS} PASSED: ${NUM_PASSED}/${NUM_TESTS}\n`;
   }
   testOutput += "--------------------------------------\n";
 

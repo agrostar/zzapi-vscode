@@ -1,6 +1,7 @@
 /**
  * FUNCTIONS PROVIDED TO CALLER
  * @function loadVariables
+ * @function replaceVariables
  */
 
 import * as fs from "fs";
@@ -152,37 +153,36 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
 const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
 function replaceVariablesInString(text: string): any {
-  let retValueIfVariableIsFullText: any = undefined;
+  let valueInNativeType: any;
+  let variableIsFullText: boolean = false;
 
   const outputText = text
     .replace(VAR_REGEX_WITH_BRACES, (match, variable) => {
-      const varVal = VARIABLES[variable];
-      if (text === match) {
-        retValueIfVariableIsFullText = varVal;
-      }
-      if (varVal !== undefined) {
+      if (VARIABLES.hasOwnProperty(variable)) {
+        const varVal = VARIABLES[variable];
+        if (text === match) {
+          variableIsFullText = true;
+          valueInNativeType = varVal;
+        }
         return getStrictStringValue(varVal);
       }
       return match;
     })
     .replace(VAR_REGEX_WITHOUT_BRACES, (match) => {
       const variable = match.slice(1);
-      if (variable === undefined) {
-        return match;
-      }
-
-      const varVal = VARIABLES[variable];
-      if (text === match) {
-        retValueIfVariableIsFullText = varVal;
-      }
-      if (varVal !== undefined) {
+      if (typeof variable === "string" && VARIABLES.hasOwnProperty(variable)) {
+        const varVal = VARIABLES[variable];
+        if (text === match) {
+          variableIsFullText = true;
+          valueInNativeType = varVal;
+        }
         return getStrictStringValue(varVal);
       }
       return match;
     });
 
-  if (retValueIfVariableIsFullText !== undefined) {
-    return retValueIfVariableIsFullText;
+  if (variableIsFullText) {
+    return valueInNativeType;
   } else {
     return outputText;
   }
