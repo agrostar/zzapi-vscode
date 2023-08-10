@@ -251,9 +251,9 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         }
       } else {
         if (compareTo === true) {
-          testOutput += `\t${FAIL} ${GAP} ${keyName} exists\n`;
+          testOutput += `\t${FAIL} ${GAP} Expected ${keyName} exists ${GAP} ${keyName} does not exist\n`;
         } else {
-          testOutput += `\t${FAIL} ${GAP} ${keyName} does not exist\n`;
+          testOutput += `\t${FAIL} ${GAP} Expected ${keyName} does not exist ${GAP} ${keyName} exists\n`;
         }
         NUM_FAILED++;
       }
@@ -292,7 +292,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (regexTest === undefined) {
-        testOutput += `\t${FAIL} ${GAP} Regex ${regexTest} is not specified\n`;
+        testOutput += `\t${FAIL} ${GAP} Regex is not specified\n`;
         NUM_FAILED++;
       } else {
         let regexStr = getStringIfNotScalar(regexTest);

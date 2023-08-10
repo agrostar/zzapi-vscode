@@ -10,7 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:yaml"
+    "workspaceContains:**/*.zzb"
   ],
   "main": "./out/extension.js",
   "contributes": {
