@@ -13,7 +13,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
   }
   allData.headers = Object.assign(
     {},
-    { "user-agent": "zzAPI-v" + getExtensionVersion() },
+    { "user-agent": "zzAPI-runner/" + (getExtensionVersion() as string) },
     allData.headers,
   );
 
@@ -28,7 +28,7 @@ export async function runAllRequests(text: string): Promise<void> {
   for (const name in allRequests) {
     allRequests[name].headers = Object.assign(
       {},
-      { "user-agent": "zzAPI-v" + getExtensionVersion() },
+      { "user-agent": "zzAPI-runner/" + (getExtensionVersion() as string) },
       allRequests[name].headers,
     );
   }

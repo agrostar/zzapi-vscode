@@ -30,26 +30,6 @@ let DISPOSABLES: Disposable[] = [];
  * ANY CHANGES HERE MUST REFLECT IN yamlValidation IN package.json
  */
 const BUNDLE_FILE_NAME_ENDINGS = [".zzb"] as const;
-export function documentIsBundle(document: TextDocument): boolean {
-  const docFsPath = document.uri.fsPath;
-
-  let docIsBundle: boolean = false;
-  BUNDLE_FILE_NAME_ENDINGS.forEach((ENDING) => {
-    if (docFsPath.endsWith(ENDING)) {
-      docIsBundle = true;
-    }
-  });
-
-  return docIsBundle;
-}
-
-let EXTENSION_VERSION: string;
-function setExtensionVersion(context: ExtensionContext) {
-  EXTENSION_VERSION = context.extension.packageJSON.version;
-}
-export function getExtensionVersion() {
-  return EXTENSION_VERSION;
-}
 
 export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
@@ -89,6 +69,27 @@ export function activate(context: ExtensionContext): void {
   commands.registerCommand("extension.runAllRequests", async () => {
     await registerRunAllRequests();
   });
+}
+
+export function documentIsBundle(document: TextDocument): boolean {
+  const docFsPath = document.uri.fsPath;
+
+  let docIsBundle: boolean = false;
+  BUNDLE_FILE_NAME_ENDINGS.forEach((ENDING) => {
+    if (docFsPath.endsWith(ENDING)) {
+      docIsBundle = true;
+    }
+  });
+
+  return docIsBundle;
+}
+
+let EXTENSION_VERSION: string;
+function setExtensionVersion(context: ExtensionContext) {
+  EXTENSION_VERSION = context.extension.packageJSON.version;
+}
+export function getExtensionVersion(): string {
+  return EXTENSION_VERSION;
 }
 
 let OUTPUT_CHANNEL: OutputChannel;
