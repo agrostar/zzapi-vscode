@@ -151,7 +151,7 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
  */
 const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
-export function replaceVariablesInString(text: string): any {
+function replaceVariablesInString(text: string): any {
   let retValueIfVariableIsFullText: any = undefined;
 
   const outputText = text

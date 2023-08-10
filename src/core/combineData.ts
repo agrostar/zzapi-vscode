@@ -1,4 +1,4 @@
-import { replaceVariables, replaceVariablesInString } from "./variables";
+import { replaceVariables } from "./variables";
 import { RequestData, Request, Common, Header, Param, Tests, Captures } from "./models";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {
@@ -57,10 +57,10 @@ function getCompleteUrl(commonData: Common | undefined, requestData: Request): s
     if (commonData.baseUrl === undefined) {
       baseUrl = undefined;
     } else {
-      baseUrl = replaceVariablesInString(commonData.baseUrl);
+      baseUrl = replaceVariables(commonData.baseUrl as string);
     }
   }
-  const requestUrl = replaceVariablesInString(requestData.url);
+  const requestUrl = replaceVariables(requestData.url as string);
   const params = getParamsForUrl(
     commonData === undefined ? undefined : commonData.params,
     requestData.params,
