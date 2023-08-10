@@ -1,8 +1,9 @@
 import { window, commands, workspace } from "vscode";
 
+import * as YAML from "yaml";
+
 import { getEnvDetails } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
-import * as YAML from "yaml";
 
 const KEYS_IN_BODY = ["body"];
 const KEYS_IN_HEADERS = ["executionTime", "status", "rawHeaders"];

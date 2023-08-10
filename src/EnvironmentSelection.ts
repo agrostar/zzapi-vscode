@@ -1,9 +1,9 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor, TextEditor } from "vscode";
-
 import * as fs from "fs";
 import * as path from "path";
 
 import * as YAML from "yaml";
+
 import { setEnvironmentVariables } from "./core/variables";
 
 const VAR_FILE_NAME = "zz-envs.yaml";
