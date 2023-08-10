@@ -258,18 +258,12 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         NUM_FAILED++;
       }
     } else if (key === "$type") {
-      if (compareTo === "null") {
-        compareTo = null;
-      }
+      const receivedType = getType(received);
 
-      if (
-        (compareTo === null && received === null) ||
-        (compareTo === "array" && Array.isArray(received)) ||
-        typeof received === compareTo
-      ) {
+      if (compareTo === receivedType) {
         testOutput += `\t${PASS} ${GAP} type of ${keyName} is ${compareTo}\n`;
       } else {
-        testOutput += `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${typeof received}\n`;
+        testOutput += `\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${received} of type ${receivedType}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$regex" || key === "$options") {
@@ -327,6 +321,16 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
   }
 
   return testOutput;
+}
+
+function getType(data: any) {
+  if (data === null) {
+    return "null";
+  } else if (Array.isArray(data)) {
+    return "array";
+  } else {
+    return typeof data;
+  }
 }
 
 function canBeNumber(input: any): boolean {
