@@ -23,8 +23,7 @@
     "configuration": {},
     "yamlValidation":[
       {
-        "fileMatch": ["*.zzb"],
-        "url": "./schema.json"
+        "fileMatch": ["*.zzb"]
       }
     ],
     "languages": [
@@ -32,9 +31,6 @@
         "id": "yaml",
         "extensions": [
           ".zzb"
-        ],
-        "aliases": [
-          "zzAPI Bundle"
         ]
       }
     ]
