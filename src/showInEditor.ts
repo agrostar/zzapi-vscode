@@ -1,4 +1,12 @@
-import { window, commands, workspace } from "vscode";
+import {
+  window,
+  commands,
+  workspace,
+  TextDocument,
+  WorkspaceEdit,
+  Range,
+  languages,
+} from "vscode";
 
 import * as YAML from "yaml";
 
@@ -13,7 +21,7 @@ export async function openEditorForIndividualReq(
   name: string,
 ): Promise<void> {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);
-  await showContent(contentData, headersData);
+  await showContent(contentData, headersData, name);
 }
 
 export async function openEditorForAllRequests(
@@ -60,32 +68,91 @@ function getDataOfIndReqAsString(
   return [contentData, headersData];
 }
 
-async function openDocument(content: string, language?: string): Promise<void> {
-  await workspace.openTextDocument({ content: content, language: language }).then((document) => {
-    window.showTextDocument(document, {
-      preserveFocus: false,
-    });
-  });
+let openDocs: { [key: string]: { body: TextDocument; headers: TextDocument } } = {};
+export function resetOpenDocs() {
+  openDocs = {};
 }
 
-async function showContent(bodyContent: string, headersContent: string): Promise<void> {
-  let language: string | undefined = "json";
+async function openDocument(content: string, language?: string): Promise<void> {
+  await workspace
+    .openTextDocument({ content: content, language: language })
+    .then(async function (document) {
+      await window.showTextDocument(document, {
+        preserveFocus: false,
+      });
+    });
+}
+
+async function replaceContent(document: TextDocument, content: string, language?: string) {
+  const edit = new WorkspaceEdit();
+
+  if (language !== undefined) {
+    languages.setTextDocumentLanguage(document, language);
+  }
+
+  edit.replace(
+    document.uri,
+    new Range(document.lineAt(0).range.start, document.lineAt(document.lineCount - 1).range.end),
+    content,
+  );
+  await workspace.applyEdit(edit);
+}
+
+function isOpenAndUntitled(document: TextDocument): boolean {
+  return !document.isClosed && document.isUntitled;
+}
+
+async function showContent(
+  bodyContent: string,
+  headersContent: string,
+  name?: string,
+): Promise<void> {
+  let bodyLanguage: string | undefined = "json";
   try {
     JSON.parse(bodyContent);
   } catch {
-    language = undefined;
+    bodyLanguage = undefined;
   }
-  // insert a new group to the right, insert the content
-  commands.executeCommand("workbench.action.newGroupRight");
-  await openDocument(bodyContent, language);
 
-  language = "yaml";
+  let headersLanguage: string | undefined = "yaml";
   try {
     YAML.parse(headersContent);
   } catch {
-    language = undefined;
+    headersLanguage = undefined;
   }
+
+  if (
+    name !== undefined &&
+    openDocs[name] !== undefined
+  ) {
+    if (isOpenAndUntitled(openDocs[name].body) && isOpenAndUntitled(openDocs[name].headers)) {
+      await replaceContent(openDocs[name].body, bodyContent, bodyLanguage);
+      await replaceContent(openDocs[name].headers, headersContent, headersLanguage);
+
+      return;
+    }
+  }
+
+  // insert a new group to the right, insert the content
+  commands.executeCommand("workbench.action.newGroupRight");
+  await openDocument(bodyContent, bodyLanguage);
+  let bodyDoc: TextDocument | undefined = undefined;
+  if (name !== undefined && window.activeTextEditor !== undefined) {
+    bodyDoc = window.activeTextEditor.document;
+  }
+
   // insert a new group below, insert the content
   commands.executeCommand("workbench.action.newGroupBelow");
-  await openDocument(headersContent, language);
+  await openDocument(headersContent, headersLanguage);
+  let headersDoc: TextDocument | undefined;
+  if (name !== undefined && window.activeTextEditor !== undefined) {
+    headersDoc = window.activeTextEditor.document;
+  }
+
+  if (name !== undefined && bodyDoc !== undefined && headersDoc !== undefined) {
+    openDocs[name] = {
+      body: bodyDoc,
+      headers: headersDoc,
+    };
+  }
 }

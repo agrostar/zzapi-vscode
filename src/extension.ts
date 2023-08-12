@@ -21,6 +21,7 @@ import {
   loadEnvironments,
   setVarFileAndDirPath,
 } from "./EnvironmentSelection";
+import { resetOpenDocs } from "./showInEditor";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -56,6 +57,7 @@ export function activate(context: ExtensionContext): void {
       if (getWorkingDirectoryPath(activeEditor) !== getCurrDirPath()) {
         setVarFileAndDirPath(activeEditor);
         loadEnvironments(STATUS_BAR);
+        resetOpenDocs();
       }
     }
   });
