@@ -1,12 +1,4 @@
-import {
-  window,
-  commands,
-  workspace,
-  TextDocument,
-  WorkspaceEdit,
-  Range,
-  languages,
-} from "vscode";
+import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, languages } from "vscode";
 
 import * as YAML from "yaml";
 
@@ -121,13 +113,12 @@ async function showContent(
     headersLanguage = undefined;
   }
 
-  if (
-    name !== undefined &&
-    openDocs[name] !== undefined
-  ) {
-    if (isOpenAndUntitled(openDocs[name].body) && isOpenAndUntitled(openDocs[name].headers)) {
-      await replaceContent(openDocs[name].body, bodyContent, bodyLanguage);
-      await replaceContent(openDocs[name].headers, headersContent, headersLanguage);
+  if (name !== undefined && openDocs[name] !== undefined) {
+    const bodyDoc = openDocs[name].body;
+    const headersDoc = openDocs[name].headers;
+    if (isOpenAndUntitled(bodyDoc) && isOpenAndUntitled(headersDoc)) {
+      await replaceContent(bodyDoc, bodyContent, bodyLanguage);
+      await replaceContent(headersDoc, headersContent, headersLanguage);
 
       return;
     }
