@@ -23,12 +23,12 @@ export async function openEditorForAllRequests(
   let formattedHeaders = "---\n";
 
   responses.forEach((responseObj) => {
-    formattedContent += `${responseObj.name}\n\n`;
+    formattedContent += `name: ${responseObj.name}\n\n`;
     let [contentData, headersData] = getDataOfIndReqAsString(
       responseObj.response,
       responseObj.name,
     );
-    formattedContent += contentData + "\n---\n";
+    formattedContent += "response: " + contentData + "\n---\n";
     formattedHeaders += headersData + "\n---\n";
   });
 
@@ -76,39 +76,60 @@ async function openDocument(content: string, language?: string): Promise<void> {
 }
 
 async function replaceContent(document: TextDocument, content: string, language?: string) {
-  const edit = new WorkspaceEdit();
-
   if (language !== undefined) {
     languages.setTextDocumentLanguage(document, language);
   }
 
+  const edit = new WorkspaceEdit();
   edit.replace(
     document.uri,
     new Range(document.lineAt(0).range.start, document.lineAt(document.lineCount - 1).range.end),
     content,
   );
-  await workspace.applyEdit(edit);
+  await workspace.applyEdit(edit); // this returns boolean for true or false maybe incorporate that?
 }
 
 function isOpenAndUntitled(document: TextDocument): boolean {
   return !document.isClosed && document.isUntitled;
 }
 
+/**
+ * Master function to show the content in the new windows or replace them
+ *  in the current windows
+ * 
+ * @param bodyContent The body of the response, or the set of all responses
+ * @param headersContent The headers of the response, or the set of all 
+ *  responses
+ * @param name Optional parameter. If name is specified then we are trying to
+ *  show an individual request's response, else we are trying to show runAllRequest's
+ *  response. Thus, any name === undefined test is to determine this. 
+ * @returns (void)
+ */
 async function showContent(
   bodyContent: string,
   headersContent: string,
   name?: string,
 ): Promise<void> {
-  let bodyLanguage: string | undefined = "json";
-  try {
-    JSON.parse(bodyContent);
-  } catch {
-    bodyLanguage = undefined;
+  let bodyLanguage: string | undefined;
+  if (name !== undefined) {
+    bodyLanguage = "json";
+    try {
+      JSON.parse(bodyContent);
+    } catch {
+      bodyLanguage = undefined;
+    }
+  } else {
+    bodyLanguage = "yaml";
+    try {
+      YAML.parseAllDocuments(bodyContent);
+    } catch {
+      bodyLanguage = undefined;
+    }
   }
 
   let headersLanguage: string | undefined = "yaml";
   try {
-    YAML.parse(headersContent);
+    YAML.parseAllDocuments(headersContent);
   } catch {
     headersLanguage = undefined;
   }
