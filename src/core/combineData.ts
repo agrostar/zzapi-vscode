@@ -74,25 +74,16 @@ function getMergedOptions(
   common: { follow: boolean; verifySSL: boolean } | undefined,
   request: { follow: boolean; verifySSL: boolean } | undefined,
 ): { follow: boolean; verifySSL: boolean } {
-  let follow: boolean;
-  if (request !== undefined && request.follow !== undefined) {
-    follow = request.follow;
-  } else {
-    follow = common === undefined ? false : common.follow;
+  if (request !== undefined) {
+    return request;
+  }
+  if (common !== undefined) {
+    return common;
   }
 
-  let verifySSL: boolean;
-  if (request !== undefined && request.verifySSL !== undefined) {
-    verifySSL = request.verifySSL;
-  } else {
-    verifySSL = common === undefined ? false : common.verifySSL;
-  }
-
-  let mergedOptions: { follow: boolean; verifySSL: boolean } = {
-    follow: follow,
-    verifySSL: verifySSL,
-  };
-  return mergedOptions;
+  const defaultFollow = false;
+  const defaultVerify = false;
+  return { follow: defaultFollow, verifySSL: defaultVerify };
 }
 
 function getMergedTestsAndCapture(

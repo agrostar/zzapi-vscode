@@ -60,9 +60,12 @@ function getDataOfIndReqAsString(
   return [contentData, headersData];
 }
 
-let openDocs: { [key: string]: { body: TextDocument; headers: TextDocument } } = {};
+let OPEN_DOCS: {
+  [bundlePath: string]: { [requestName: string]: { body: TextDocument; headers: TextDocument } };
+} = {};
+const ALL_REQ_NAME = "---@RUN@ALL@REQUESTS@---";
 export function resetOpenDocs() {
-  openDocs = {};
+  OPEN_DOCS = {};
 }
 
 async function openDocument(content: string, language?: string): Promise<void> {
@@ -96,13 +99,13 @@ function isOpenAndUntitled(document: TextDocument): boolean {
 /**
  * Master function to show the content in the new windows or replace them
  *  in the current windows
- * 
+ *
  * @param bodyContent The body of the response, or the set of all responses
- * @param headersContent The headers of the response, or the set of all 
+ * @param headersContent The headers of the response, or the set of all
  *  responses
  * @param name Optional parameter. If name is specified then we are trying to
  *  show an individual request's response, else we are trying to show runAllRequest's
- *  response. Thus, any name === undefined test is to determine this. 
+ *  response. Thus, any name === undefined test is to determine this.
  * @returns (void)
  */
 async function showContent(
@@ -110,6 +113,16 @@ async function showContent(
   headersContent: string,
   name?: string,
 ): Promise<void> {
+  if (window.activeTextEditor === undefined) {
+    return;
+  }
+
+  if (name === undefined) {
+    name = ALL_REQ_NAME;
+  }
+
+  const bundlePath = window.activeTextEditor.document.fileName;
+
   let bodyLanguage: string | undefined;
   if (name !== undefined) {
     bodyLanguage = "json";
@@ -134,9 +147,9 @@ async function showContent(
     headersLanguage = undefined;
   }
 
-  if (name !== undefined && openDocs[name] !== undefined) {
-    const bodyDoc = openDocs[name].body;
-    const headersDoc = openDocs[name].headers;
+  if (OPEN_DOCS[bundlePath] !== undefined && OPEN_DOCS[bundlePath][name] !== undefined) {
+    const bodyDoc = OPEN_DOCS[bundlePath][name].body;
+    const headersDoc = OPEN_DOCS[bundlePath][name].headers;
     if (isOpenAndUntitled(bodyDoc) && isOpenAndUntitled(headersDoc)) {
       await replaceContent(bodyDoc, bodyContent, bodyLanguage);
       await replaceContent(headersDoc, headersContent, headersLanguage);
@@ -161,8 +174,11 @@ async function showContent(
     headersDoc = window.activeTextEditor.document;
   }
 
-  if (name !== undefined && bodyDoc !== undefined && headersDoc !== undefined) {
-    openDocs[name] = {
+  if (bodyDoc !== undefined && headersDoc !== undefined) {
+    if (OPEN_DOCS[bundlePath] === undefined) {
+      OPEN_DOCS[bundlePath] = {};
+    }
+    OPEN_DOCS[bundlePath][name] = {
       body: bodyDoc,
       headers: headersDoc,
     };
