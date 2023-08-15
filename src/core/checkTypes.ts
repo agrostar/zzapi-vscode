@@ -125,27 +125,27 @@ function checkTests(obj: any) {
 
 function checkCaptures(obj: any) {
   if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [false, "Tests item must be an object"];
+    return [false, "Capture item must be an object"];
   }
 
   if (obj.hasOwnProperty("json") && typeof obj.json !== "object" && !Array.isArray(obj.json)) {
-    return [false, "JSON tests must be defined as an object"];
+    return [false, "JSON captures must be defined as an object"];
   }
   if (
     obj.hasOwnProperty("body") &&
-    !((typeof obj.json === "object" && !Array.isArray(obj.json)) || typeof obj.json === "string")
+    !(typeof obj.body === "string")
   ) {
-    return [false, "Body assertion must be defined as object tests, or a direct string assertion"];
+    return [false, "Value of body key must be a string representing variable name"];
   }
-  if (obj.hasOwnProperty("status") && typeof obj.status !== "number") {
-    return [false, "Status assertion must be a number"];
+  if (obj.hasOwnProperty("status") && typeof obj.status !== "string") {
+    return [false, "Value of status key must be a string representing variable name"];
   }
   if (
     obj.hasOwnProperty("headers") &&
     typeof obj.headers !== "object" &&
     !Array.isArray(obj.headers)
   ) {
-    return [false, "Headers tests must be defined as an object"];
+    return [false, "Headers captures must be defined as an object"];
   }
 
   return [true, undefined];
