@@ -76,7 +76,7 @@ export interface RequestData {
 
 export interface ResponseData {
   executionTime: number | string;
-  status: number | string;
+  status?: number;
   body: string;
   rawHeaders: string;
   headers: { [key: string]: string };

@@ -107,7 +107,10 @@ function checkTests(obj: any) {
       typeof obj.status === "number"
     )
   ) {
-    return [false, "Status assertion must be a number"];
+    return [
+      false,
+      "Status assertion must be defined as object tests, or a direct number assertion",
+    ];
   }
   if (
     obj.hasOwnProperty("headers") &&

@@ -51,7 +51,7 @@ export async function executeGotRequest(
       responseObject = res;
     } else {
       const message = e.name === "CancelError" ? "Cancelled" : e.message;
-      responseObject = { statusCode: e.name, body: message as string };
+      responseObject = { body: message as string };
     }
   }
   const executionTime = new Date().getTime() - startTime;
