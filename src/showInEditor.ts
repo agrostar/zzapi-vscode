@@ -71,7 +71,7 @@ export function resetOpenDocs() {
 async function openDocument(content: string, language?: string): Promise<void> {
   await workspace
     .openTextDocument({ content: content, language: language })
-    .then(async function (document) {
+    .then(async (document) => {
       await window.showTextDocument(document, {
         preserveFocus: false,
       });

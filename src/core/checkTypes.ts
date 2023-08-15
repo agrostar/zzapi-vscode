@@ -131,10 +131,7 @@ function checkCaptures(obj: any) {
   if (obj.hasOwnProperty("json") && typeof obj.json !== "object" && !Array.isArray(obj.json)) {
     return [false, "JSON captures must be defined as an object"];
   }
-  if (
-    obj.hasOwnProperty("body") &&
-    !(typeof obj.body === "string")
-  ) {
+  if (obj.hasOwnProperty("body") && !(typeof obj.body === "string")) {
     return [false, "Value of body key must be a string representing variable name"];
   }
   if (obj.hasOwnProperty("status") && typeof obj.status !== "string") {
@@ -209,7 +206,7 @@ const validMethods = [
   "head",
   "delete",
   "trace",
-];
+] as const;
 export function checkRequestType(obj: any): [boolean, string | undefined] {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [false, "Request must be of type object"];
@@ -223,7 +220,7 @@ export function checkRequestType(obj: any): [boolean, string | undefined] {
     return [false, `url must exist in request with type string`];
   }
   if (!(obj.hasOwnProperty("method") && validMethods.includes(obj.method))) {
-    return [false, `url exist and be one of ${getStringIfNotScalar(validMethods)}`];
+    return [false, `method must exist and be one of ${getStringIfNotScalar(validMethods)}`];
   }
 
   return [true, undefined];
