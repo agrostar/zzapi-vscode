@@ -27,14 +27,14 @@ export interface Param {
 export interface Tests {
   json?: { [key: string]: any }; // TODO: we should have string instead of any in tests.
   body?: { [key: string]: any } | string; // TODO: body should be string
-  status?: number;
+  status?: { [key: string]: any } | number;
   headers?: { [key: string]: any };
 }
 
 export interface Captures {
   json?: { [key: string]: any };
   body?: { [key: string]: any } | string;
-  status?: number;
+  status?: { [key: string]: any } | number;
   headers?: { [key: string]: any };
 }
 
@@ -47,6 +47,7 @@ export interface Common {
   tests?: Tests;
   capture?: Captures;
 }
+
 export interface Request {
   name: string;
 

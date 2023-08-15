@@ -8,6 +8,7 @@ import * as YAML from "yaml";
 
 import { Request, RequestData, RequestPosition } from "./models";
 import { getMergedData } from "./combineData";
+import { checkCommonType, checkRequestType } from "./checkTypes";
 
 /*
  * Returns an array of requestPosition objects. If the name of a
@@ -78,15 +79,25 @@ export function getRequestsData(document: string, name?: string): { [name: strin
   const requests: { [name: string]: RequestData } = {};
 
   const commonData = parsedData.common;
+  if (commonData !== undefined) {
+    const [valid, error] = checkCommonType(commonData);
+    if (!valid) {
+      throw new Error(error);
+    }
+  }
   const allRequests = parsedData.requests;
 
   function getAllData(name: string) {
     let request: Request = allRequests[name];
     if (request === undefined) {
-      return;
+      throw new Error("Request must be defined");
     }
 
     request.name = name;
+    const [valid, error] = checkRequestType(request);
+    if (!valid) {
+      throw new Error(`Error in request ${name}: ${error}`);
+    }
     const allData: RequestData = getMergedData(commonData, request);
 
     requests[name] = allData;
@@ -99,16 +110,6 @@ export function getRequestsData(document: string, name?: string): { [name: strin
   } else {
     getAllData(name);
   }
-
-  // Do all the merging etc here. Depending on how we do the merge, we may not need
-  // the CommonData model at all. We can also replace the variables here itself.
-  // The returned set of requestData is then ready to be executed.
-
-  // Need to also validate the bundle, and ensure mandatory attributes (URL, Method)
-  // exist in each request, otherwise throw an error.
-
-  // The caller needs to handle errors in the bundle. We cannot assume it is always
-  // valid. This includes YAML syntax errors and also schema errors.
 
   return requests;
 }
