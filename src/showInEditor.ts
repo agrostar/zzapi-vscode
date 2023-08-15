@@ -117,10 +117,6 @@ async function showContent(
     return;
   }
 
-  if (name === undefined) {
-    name = ALL_REQ_NAME;
-  }
-
   const bundlePath = window.activeTextEditor.document.fileName;
 
   let bodyLanguage: string | undefined;
@@ -145,6 +141,10 @@ async function showContent(
     YAML.parseAllDocuments(headersContent);
   } catch {
     headersLanguage = undefined;
+  }
+
+  if (name === undefined) {
+    name = ALL_REQ_NAME;
   }
 
   if (OPEN_DOCS[bundlePath] !== undefined && OPEN_DOCS[bundlePath][name] !== undefined) {

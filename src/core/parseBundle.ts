@@ -82,7 +82,7 @@ export function getRequestsData(document: string, name?: string): { [name: strin
   if (commonData !== undefined) {
     const [valid, error] = checkCommonType(commonData);
     if (!valid) {
-      throw new Error(error);
+      throw new Error(`Error in common: ${error}`);
     }
   }
   const allRequests = parsedData.requests;
