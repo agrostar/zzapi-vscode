@@ -11,7 +11,8 @@ import {
 } from "vscode";
 
 import { CodeLensProvider } from "./CodeLensProviders";
-import { registerRunRequest, registerRunAllRequests } from "./registerRequests";
+import { runRequestCommand, runAllRequestsCommand } from "./registerRequests";
+import { importPostmanCommand } from "./runImportPostman";
 import {
   createEnvironmentSelector,
   getCurrDirPath,
@@ -66,11 +67,14 @@ export function activate(context: ExtensionContext): void {
   OUTPUT_CHANNEL = window.createOutputChannel("zzAPI");
   languages.registerCodeLensProvider("*", new CodeLensProvider());
   commands.registerCommand("extension.runRequest", async (name) => {
-    await registerRunRequest(name);
+    await runRequestCommand(name);
   });
   commands.registerCommand("extension.runAllRequests", async () => {
-    await registerRunAllRequests();
+    await runAllRequestsCommand();
   });
+  commands.registerCommand("extension.importPostman", async () => {
+    await importPostmanCommand();
+  })
 }
 
 export function documentIsBundle(document: TextDocument): boolean {
