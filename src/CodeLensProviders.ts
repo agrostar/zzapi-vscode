@@ -39,13 +39,13 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
         let newCodeLens: vscode.CodeLens;
         if (name === undefined) {
           newCodeLens = new vscode.CodeLens(range, {
-            title: "↪ Run All Requests",
+            title: "↪ Run all requests",
             tooltip: "Click to run all requests",
             command: "extension.runAllRequests",
           });
         } else {
           newCodeLens = new vscode.CodeLens(range, {
-            title: `▶ Run '${name}'`,
+            title: `▶ Run request`,
             tooltip: `Click to run '${name}'`,
             command: "extension.runRequest",
             arguments: [name],

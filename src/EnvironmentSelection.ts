@@ -1,4 +1,4 @@
-import { ExtensionContext, commands, window, StatusBarItem, ThemeColor, TextEditor } from "vscode";
+import { ExtensionContext, commands, window, StatusBarItem, TextEditor } from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -104,8 +104,8 @@ export function getWorkingDirectoryPath(activeEditor: TextEditor): string {
 
 export function setDefaultStatusBarValues(statusBar: StatusBarItem): void {
   CURRENT_ENVIRONMENT = "";
-  statusBar.text = "zzAPI: Set Environment";
-  statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
+  statusBar.text = "zzAPI: Set Env";
+  // statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
 }
 
 export function setEnvironment(statusBar: StatusBarItem, environment: string): void {
