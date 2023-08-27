@@ -1,5 +1,5 @@
 import { window, workspace } from "vscode";
-import convertPostman from './core/postmanImport'
+import convertPostman from './core/convertPostman'
 
 export async function importPostmanCommand(): Promise<void> {
   const file = await window.showOpenDialog({

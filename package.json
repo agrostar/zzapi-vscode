@@ -27,14 +27,15 @@
     "configuration": {},
     "yamlValidation":[
       {
-        "fileMatch": ["*.zzb"]
+        "fileMatch": ["*.zzb", "*.zzv"],
+        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json"
       }
     ],
     "languages": [
       {
         "id": "yaml",
         "extensions": [
-          ".zzb"
+          ".zzb", ".zzv"
         ]
       }
     ]
