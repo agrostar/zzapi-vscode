@@ -1,13 +1,18 @@
 {
-  "name": "extension",
+  "name": "zzapi",
   "displayName": "zzAPI",
-  "description": "",
-  "version": "0.0.1",
+  "publisher": "AgroStar",
+  "description": "Tool for testing and documenting REST APIs",
+  "repository": "https://github.com/agrostar/zzapi-vscode",
+  "version": "0.9.0",
   "engines": {
     "vscode": "^1.79.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages", "Snippets", "Testing"
+  ],
+  "keywords": [
+    "api", "rest", "http", "client", "postman", "testing", "api documentation"
   ],
   "activationEvents": [
     "workspaceContains:**/*.zzb"
@@ -27,7 +32,7 @@
     "configuration": {},
     "yamlValidation":[
       {
-        "fileMatch": ["*.zzb", "*.zzv"],
+        "fileMatch": ["*.zzb"],
         "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json"
       }
     ],

@@ -1,9 +1,27 @@
-# Feature Ideas
+# Before first release
+
+* Icon for the extension
+* Bundle using webpack
+* Combine all vars file into a single one with envs (zz-envs.yaml), varsets: array of vars (but need to keep personal/secrets separate)
+* Schema for envs
+* Variables support within the bundle (common, variables, requests are three top level items)
+* Reuse windows for output (across all requests. Yes.)
+* Settings:
+  * Format JSON response (default: true)
+  * Hide header output (default: false). Or, some command to show headers (status bar?)
+* Scaffolding:
+  * Command to scaffold: create example .zzb, .zzv, and zz-envs.yaml
+  * Create these on postman import also (save them, yes, but don't overwrite. Or, ask? Especially if there were variables in the postman collection)
+* Environments: remove need for "varsets" top level item
+* Invalid URL: print the URL also in the output (or status?)
+* Missing variable: warning (causes the above)
+
+# Improvements
 
 * More tools:
   * Separate out core into a new repo and create a core library npm
   * zzapi-runner: command-line runner which can use the core library
-  * zzapi-doc: documentation generator, which also can use the core library
+  * zzapi-doc: documentation generator, which can use the core library
 
 * Support `{ foo: bar }` kind of headers and params in addition to arrays. Use case: when need to override, unique keys, they can use the shorter simpler form of `foo: bar`. In more complex cases of repeating parameter names or needing the doc: attribute, they can use the long form. 
 
@@ -16,3 +34,10 @@
 * Commands should be visbile in the command pallette (or somewhere else). Cannot rely on CodeLens alone.
 
 * A Tree View in the explorer sidebar for selecting and executing requests (replacement for OUTLINE, which does not allow commands on the tree elements).
+
+* Show output as "http" language and get it automatically formatted. (see https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+
+* Cookie-jar to capture cookies automatically and add them to following requests with in the same run (or even persist?)
+
+* Show/export as curl: Not prioritized as MVP because the collections are meant to be shared via the code repository anyway. No need for exporting as curl to share (which is the main use case). But it is still very useful, especially if the other team member does not use zzAPI. curl is useful if executing from some remote machine. Otherwise, copy-paste the request YAML and let the other person use zzAPI to execute it.
+

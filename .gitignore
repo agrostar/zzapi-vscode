@@ -1,4 +1,3 @@
 node_modules
 out
-extension-0.0.1.vsix
-
+*.vsix
