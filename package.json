@@ -33,7 +33,11 @@
     "yamlValidation":[
       {
         "fileMatch": ["*.zzb"],
-        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/schema.json"
+        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzb.schema.json"
+      },
+      {
+        "fileMatch": ["*.zzv"],
+        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzv.schema.json"
       }
     ],
     "languages": [

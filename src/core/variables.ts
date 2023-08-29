@@ -1,14 +1,10 @@
-/**
- * FUNCTIONS PROVIDED TO CALLER
- * @function loadVariables
- * @function replaceVariables
- */
-
 import * as fs from "fs";
-
+import * as path from "path";
 import * as YAML from "yaml";
 
 import { RequestData } from "./models";
+
+const VARFILE_EXTENSION = '.zzv';
 
 let VARIABLES: { [key: string]: any } = {};
 
@@ -24,24 +20,39 @@ function getStrictStringValue(value: any): string {
   }
 }
 
-export function setVariable(key: any, value: any): void {
-  VARIABLES[getStrictStringValue(key)] = value;
+function getVarFilePaths(dirPath: string): string[] {
+  if (!dirPath) return [];
+  const dirContents = fs.readdirSync(dirPath, { recursive: false }) as string[];
+  const varFiles = dirContents.filter(file => path.extname(file) == VARFILE_EXTENSION);
+  return varFiles.map(file => path.join(dirPath, file));
 }
 
-export function setEnvironmentVariables(filesToLoad: Array<string>): void {
+export function getVarSetNames(dirPath: string): string[] {
+  if (!dirPath) return [];
+  let allVarSets = {};
+  getVarFilePaths(dirPath).forEach(varFilePath => {
+    const fileData = fs.readFileSync(varFilePath, "utf-8");
+    const varSets = YAML.parse(fileData);
+    allVarSets = Object.assign(allVarSets, varSets);
+  });
+  return Object.keys(allVarSets);
+}
+
+export function loadVarSet(dirPath: string, setName: string) {
+  if (!dirPath) return {};
   VARIABLES = {};
-
-  filesToLoad.forEach((filePath) => {
-    if (fs.existsSync(filePath)) {
-      let fileData = fs.readFileSync(filePath, "utf-8");
-      let parsedVariables = YAML.parse(fileData);
-
-      for (const key in parsedVariables) {
-        VARIABLES[key] = parsedVariables[key];
-        replaceVariablesInSelf();
-      }
+  getVarFilePaths(dirPath).forEach(varFilePath => {
+    const fileData = fs.readFileSync(varFilePath, "utf-8");
+    const varSets = YAML.parse(fileData);
+    if (varSets[setName]) {
+      VARIABLES = Object.assign(VARIABLES, varSets[setName]);
     }
   });
+}
+
+// TODO: may not need to do getStrict...
+export function setVariable(key: any, value: any): void {
+  VARIABLES[getStrictStringValue(key)] = value;
 }
 
 export function replaceVariables(data: any): any {

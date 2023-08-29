@@ -2,7 +2,7 @@ import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, langua
 
 import * as YAML from "yaml";
 
-import { getEnvDetails } from "./EnvironmentSelection";
+import { getActiveVarSet } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
 
 const KEYS_IN_BODY = ["body"];
@@ -39,8 +39,8 @@ function getDataOfIndReqAsString(
   responseData: ResponseData,
   name: string,
 ): [contentData: string, headersData: string] {
-  let currentEnvironment = getEnvDetails()[0];
-  if (currentEnvironment === "") {
+  let currentEnvironment = getActiveVarSet();
+  if (!currentEnvironment) {
     currentEnvironment = "None Selected";
   }
 

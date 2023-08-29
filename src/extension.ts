@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {
   ExtensionContext,
   languages,
@@ -6,7 +7,6 @@ import {
   StatusBarAlignment,
   Disposable,
   OutputChannel,
-  workspace,
   TextDocument,
 } from "vscode";
 
@@ -16,11 +16,8 @@ import { importPostmanCommand } from "./runImportPostman";
 import {
   createEnvironmentSelector,
   getCurrDirPath,
-  getCurrVarFilePath,
-  getWorkingDirectoryPath,
   initialiseStatusBar,
-  loadEnvironments,
-  setVarFileAndDirPath,
+  setWorkingDir,
 } from "./EnvironmentSelection";
 import { resetOpenDocs } from "./showInEditor";
 
@@ -36,28 +33,20 @@ const BUNDLE_FILE_NAME_ENDINGS = [".zzb"] as const;
 export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && documentIsBundle(activeEditor.document)) {
-    setVarFileAndDirPath(activeEditor);
+    setWorkingDir(path.dirname(activeEditor.document.uri.path));
   }
   setExtensionVersion(context);
 
-  const STATUS_BAR = window.createStatusBarItem(StatusBarAlignment.Left);
-  initialiseStatusBar(context, STATUS_BAR);
-  createEnvironmentSelector(context, STATUS_BAR);
-  loadEnvironments(STATUS_BAR);
+  const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
 
-  const envFileChangeHandler = workspace.onDidChangeTextDocument((event) => {
-    if (event.document.uri.path === getCurrVarFilePath()) {
-      loadEnvironments(STATUS_BAR);
-    }
-  });
-  context.subscriptions.push(envFileChangeHandler);
+  initialiseStatusBar(context, statusBar);
+  createEnvironmentSelector(context, statusBar);
 
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
     if (activeEditor && documentIsBundle(activeEditor.document)) {
       //if we are referring to a new bundle, then we have to reload environments
-      if (getWorkingDirectoryPath(activeEditor) !== getCurrDirPath()) {
-        setVarFileAndDirPath(activeEditor);
-        loadEnvironments(STATUS_BAR);
+      if (activeEditor.document.uri.path !== getCurrDirPath()) {
+        setWorkingDir(path.dirname(activeEditor.document.uri.path));
         resetOpenDocs();
       }
     }
@@ -77,6 +66,7 @@ export function activate(context: ExtensionContext): void {
   })
 }
 
+// TODO: move this to utils or some place. Avoid circular dependency
 export function documentIsBundle(document: TextDocument): boolean {
   const docFsPath = document.uri.fsPath;
 
@@ -90,6 +80,9 @@ export function documentIsBundle(document: TextDocument): boolean {
   return docIsBundle;
 }
 
+// TODO: move this to utils or some place. Avoid circular dependency
+// Better still, let extension version be a closure variable in activate()
+// Pass it through in runXXXCommand where needed.
 let EXTENSION_VERSION: string;
 function setExtensionVersion(context: ExtensionContext) {
   EXTENSION_VERSION = context.extension.packageJSON.version;
