@@ -38,6 +38,8 @@ export function getVarSetNames(dirPath: string): string[] {
   return Object.keys(allVarSets);
 }
 
+// TODO: not happy with global here. Need to create an instance or object
+// and pass it through to requests.
 export function loadVarSet(dirPath: string, setName: string) {
   if (!dirPath) return {};
   VARIABLES = {};
