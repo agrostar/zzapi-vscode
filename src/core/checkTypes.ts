@@ -9,10 +9,10 @@ function checkHeaderItem(obj: any): [boolean, string | undefined] {
     return [false, `Each header must be an object of type {name: string; value: string}`];
   }
   if (!(keys.includes("name") && typeof obj.name === "string")) {
-    return [false, `Name property of each header item must exist as a string`];
+    return [false, `name property of each header item must exist as a string`];
   }
   if (!(keys.includes("value") && typeof obj.value === "string")) {
-    return [false, `Value property of each header item must exist as a string`];
+    return [false, `value property of each header item must exist as a string`];
   }
 
   return [true, undefined];
@@ -27,15 +27,17 @@ function checkParamItem(obj: any) {
   }
   const keys = Object.keys(obj);
   if (!(keys.length === 2 || keys.length === 3)) {
-    return [false, `Each param must be an object of type {name: string; value: string}`];
+    return [false, `Each param must be an object of type {name: string; value: string; encode?: boolean}`];
   }
   if (!(keys.includes("name") && typeof obj.name === "string")) {
-    return [false, `Name property of each param item must exist as a string`];
+    return [false, `name property of each param item must exist as a string`];
   }
   if (!(keys.includes("value") && typeof obj.value === "string")) {
-    return [false, `Value property of each param item must exist as a string`];
+    return [false, `value property of each param item must exist as a string`];
   }
-
+  if(keys.includes("encode") && typeof obj.encode !== "boolean"){
+    return [false, `encode property of each param item must be a boolean`];
+  }
   return [true, undefined];
 }
 
