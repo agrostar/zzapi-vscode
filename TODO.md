@@ -1,20 +1,19 @@
 # Before first release
 
-* Icon for the extension
-* Bundle using webpack
-* Combine all vars file into a single one with envs (zz-envs.yaml), varsets: array of vars (but need to keep personal/secrets separate)
-* Schema for envs
-* Variables support within the bundle (common, variables, requests are three top level items)
-* Reuse windows for output (across all requests. Yes.)
-* Settings:
-  * Format JSON response (default: true)
-  * Hide header output (default: false). Or, some command to show headers (status bar?)
-* Scaffolding:
-  * Command to scaffold: create example .zzb, .zzv, and zz-envs.yaml
+* Invalid URL: print the URL also in the output (or status?) (Varun)
+* Missing variable: warning (causes the above) - can show in the output window
+* Variables support within the bundle (common, variables, requests are three top level items) (Varun)
+* Icon for the extension (Vasan)
+* Bundle using webpack (Vasan)
+* Reuse windows for output (across all requests. Yes.) (Varun)
+* Options:
+  * Format JSON response (default: true) (Varun)
+  * Hide header output (default: false). Or, some command to show headers (status bar?) (Varun)
+* Scaffolding (Vasan)
+  * Command to scaffold: create example .zzb, .zzv, and zz-envs.yaml (Vasan)
   * Create these on postman import also (save them, yes, but don't overwrite. Or, ask? Especially if there were variables in the postman collection)
-* Environments: remove need for "varsets" top level item
-* Invalid URL: print the URL also in the output (or status?)
-* Missing variable: warning (causes the above)
+* Fix circular dependencies (Varun)
+* Review READMEs, LICENCE and schemas one last time (Vasan)
 
 # Improvements
 
