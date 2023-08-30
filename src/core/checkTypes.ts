@@ -91,7 +91,7 @@ function checkTests(obj: any) {
     return [false, "Tests item must be an object"];
   }
 
-  if (obj.hasOwnProperty("json") && typeof obj.json !== "object" && !Array.isArray(obj.json)) {
+  if (obj.hasOwnProperty("json") && (typeof obj.json !== "object" || Array.isArray(obj.json))) {
     return [false, "JSON tests must be defined as an object"];
   }
   if (
@@ -128,7 +128,7 @@ function checkCaptures(obj: any) {
     return [false, "Capture item must be an object"];
   }
 
-  if (obj.hasOwnProperty("json") && typeof obj.json !== "object" && !Array.isArray(obj.json)) {
+  if (obj.hasOwnProperty("json") && (typeof obj.json !== "object" || Array.isArray(obj.json))) {
     return [false, "JSON captures must be defined as an object"];
   }
   if (obj.hasOwnProperty("body") && !(typeof obj.body === "string")) {
@@ -139,8 +139,7 @@ function checkCaptures(obj: any) {
   }
   if (
     obj.hasOwnProperty("headers") &&
-    typeof obj.headers !== "object" &&
-    !Array.isArray(obj.headers)
+    (typeof obj.headers !== "object" || Array.isArray(obj.headers))
   ) {
     return [false, "Headers captures must be defined as an object"];
   }

@@ -4,7 +4,7 @@ import * as YAML from "yaml";
 
 import { RequestData } from "./models";
 
-const VARFILE_EXTENSION = '.zzv';
+const VARFILE_EXTENSION = ".zzv";
 
 let VARIABLES: { [key: string]: any } = {};
 
@@ -23,14 +23,14 @@ function getStrictStringValue(value: any): string {
 function getVarFilePaths(dirPath: string): string[] {
   if (!dirPath) return [];
   const dirContents = fs.readdirSync(dirPath, { recursive: false }) as string[];
-  const varFiles = dirContents.filter(file => path.extname(file) == VARFILE_EXTENSION);
-  return varFiles.map(file => path.join(dirPath, file));
+  const varFiles = dirContents.filter((file) => path.extname(file) == VARFILE_EXTENSION);
+  return varFiles.map((file) => path.join(dirPath, file));
 }
 
 export function getVarSetNames(dirPath: string): string[] {
   if (!dirPath) return [];
   let allVarSets = {};
-  getVarFilePaths(dirPath).forEach(varFilePath => {
+  getVarFilePaths(dirPath).forEach((varFilePath) => {
     const fileData = fs.readFileSync(varFilePath, "utf-8");
     const varSets = YAML.parse(fileData);
     allVarSets = Object.assign(allVarSets, varSets);
@@ -43,7 +43,7 @@ export function getVarSetNames(dirPath: string): string[] {
 export function loadVarSet(dirPath: string, setName: string) {
   if (!dirPath) return {};
   VARIABLES = {};
-  getVarFilePaths(dirPath).forEach(varFilePath => {
+  getVarFilePaths(dirPath).forEach((varFilePath) => {
     const fileData = fs.readFileSync(varFilePath, "utf-8");
     const varSets = YAML.parse(fileData);
     if (varSets[setName]) {
@@ -113,10 +113,6 @@ function replaceVariablesInObject(objectData: { [key: string]: any }): {
     }
   }
   return objectData;
-}
-
-function replaceVariablesInSelf(): void {
-  VARIABLES = replaceVariablesInObject(VARIABLES);
 }
 
 export function replaceVariablesInRequest(request: RequestData): RequestData {

@@ -96,7 +96,7 @@ export function getRequestsData(document: string, name?: string): { [name: strin
     request.name = name;
     const [valid, error] = checkRequestType(request);
     if (!valid) {
-      throw new Error(`Error in request ${name}: ${error}`);
+      throw new Error(`Error in request '${name}': ${error}`);
     }
     const allData: RequestData = getMergedData(commonData, request);
 

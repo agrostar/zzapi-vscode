@@ -32,10 +32,10 @@ export interface Tests {
 }
 
 export interface Captures {
-  json?: { [key: string]: any };
-  body?: { [key: string]: any } | string;
-  status?: { [key: string]: any } | number;
-  headers?: { [key: string]: any };
+  json?: { [key: string]: string };
+  body?: string;
+  status?: string;
+  headers?: { [key: string]: string };
 }
 
 export interface Common {

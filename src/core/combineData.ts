@@ -19,8 +19,8 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
   const body = requestData.body;
   const options = getMergedOptions(commonData?.options, requestData.options);
 
-  const tests = replaceVariables(getMergedTestsAndCapture(commonData?.tests, requestData.tests)); // variables replaced
-  const captures = getMergedTestsAndCapture(commonData?.capture, requestData.capture);
+  const tests = getMergedTests(commonData?.tests, requestData.tests); // variables replaced
+  const captures = getMergedCaptures(commonData?.capture, requestData.capture);
 
   const mergedData: RequestData = {
     name: name,
@@ -86,10 +86,10 @@ function getMergedOptions(
   return { follow: defaultFollow, verifySSL: defaultVerify };
 }
 
-function getMergedTestsAndCapture(
-  common: Tests | Captures | undefined,
-  request: Tests | Captures | undefined,
-): Tests | Captures | undefined {
+function getMergedCaptures(
+  common: Captures | undefined,
+  request: Captures | undefined,
+): Captures | undefined {
   if (common !== undefined) {
     common.headers = setHeadersToLowerCase(common.headers);
   }
@@ -97,7 +97,7 @@ function getMergedTestsAndCapture(
     request.headers = setHeadersToLowerCase(request.headers);
   }
 
-  let mergedData: Tests | Captures = {
+  let mergedData: Captures = {
     status: getTest(common?.status, request?.status),
     headers: getTest(common?.headers, request?.headers),
     json: getTest(common?.json, request?.json),
@@ -112,6 +112,31 @@ function getMergedTestsAndCapture(
   }
 
   return mergedData;
+}
+
+function getMergedTests(common: Tests | undefined, request: Tests | undefined): Tests | undefined {
+  if (common !== undefined) {
+    common.headers = setHeadersToLowerCase(common.headers);
+  }
+  if (request !== undefined) {
+    request.headers = setHeadersToLowerCase(request.headers);
+  }
+
+  let mergedData: Tests = {
+    status: getTest(common?.status, request?.status),
+    headers: getTest(common?.headers, request?.headers),
+    json: getTest(common?.json, request?.json),
+    body: getTest(common?.body, request?.body),
+  };
+
+  type keyOfMergedData = keyof typeof mergedData;
+  for (const key in mergedData) {
+    if (mergedData[key as keyOfMergedData] === undefined) {
+      delete mergedData[key as keyOfMergedData];
+    }
+  }
+
+  return replaceVariables(mergedData);
 }
 
 function getTest(commonTest: any, requestTest: any) {
