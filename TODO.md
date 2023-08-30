@@ -1,6 +1,6 @@
 # Before first release
 
-* Invalid URL: print the URL also in the output (or status?) (Varun)
+* Invalid URL: print the URL also in the output (or status?) (Varun) (Done)
 * Missing variable: (causes the above) - can show a warning in the output window, or as errorMessage (Varun)
 * Variables support within the bundle (common, variables, requests are three top level items) (Varun)
 * Icon for the extension (Vasan)
