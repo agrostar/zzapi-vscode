@@ -10,7 +10,15 @@ import got from "got";
 import { GotRequest, RequestData } from "./models";
 import { replaceVariables } from "./variables";
 
-export function constructGotRequest(allData: RequestData): GotRequest {
+let UNDEFINED_VARS = new Set<string>();
+export function appendUndefinedVars(warning: string) {
+  UNDEFINED_VARS.add(warning);
+}
+
+export function constructGotRequest(allData: RequestData): {
+  request: GotRequest;
+  warnings: string;
+} {
   const completeUrl = allData.completeUrl;
 
   const options = {
@@ -24,7 +32,13 @@ export function constructGotRequest(allData: RequestData): GotRequest {
     },
   };
 
-  return got(completeUrl, options);
+  let warnings = "";
+  UNDEFINED_VARS.forEach((variable) => {
+    warnings += `🟡 WARNING: variable '${variable}' is not defined\n`;
+  });
+
+  UNDEFINED_VARS.clear(); //reset the warnings
+  return { request: got(completeUrl, options), warnings: warnings };
 }
 
 function getBody(body: any): string | undefined {

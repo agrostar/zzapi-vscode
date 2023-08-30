@@ -32,7 +32,9 @@ export async function individualRequestWithProgress(
         clearInterval(interval);
       });
 
-      const httpRequest = constructGotRequest(requestData);
+      const requestWithWarnings = constructGotRequest(requestData);
+      const httpRequest = requestWithWarnings.request;
+      const warnings = requestWithWarnings.warnings;
 
       const [httpResponse, executionTime] = await executeGotRequest(httpRequest);
 
@@ -47,6 +49,8 @@ export async function individualRequestWithProgress(
 
       if (!cancelled) {
         const outputChannel = getOutputChannel();
+
+        outputChannel.appendLine(warnings);
 
         const testOutput = runAllTests(requestData, response);
         outputChannel.append(testOutput);
@@ -102,7 +106,10 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
         let requestData = allRequests[name];
         requestData = replaceVariablesInRequest(requestData);
-        currHttpRequest = constructGotRequest(requestData);
+
+        const requestWithWarnings = constructGotRequest(requestData);
+        currHttpRequest = requestWithWarnings.request;
+        const warnings = requestWithWarnings.warnings;
 
         const [httpResponse, executionTime] = await executeGotRequest(currHttpRequest);
 
@@ -116,6 +123,8 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
         if (!cancelled) {
           const outputChannel = getOutputChannel();
+
+          outputChannel.appendLine(warnings);
 
           const testOutput = runAllTests(requestData, response);
           outputChannel.append(testOutput);

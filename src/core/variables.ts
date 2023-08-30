@@ -3,7 +3,7 @@ import * as path from "path";
 import * as YAML from "yaml";
 
 import { RequestData } from "./models";
-import { getOutputChannel } from "../extension";
+import { appendUndefinedVars } from "./executeRequest";
 
 const VARFILE_EXTENSION = ".zzv";
 
@@ -176,7 +176,7 @@ function replaceVariablesInString(text: string): any {
         }
         return getStrictStringValue(varVal);
       }
-      getOutputChannel().appendLine(`🟡 WARNING: variable '${variable}' is not defined`);
+      appendUndefinedVars(variable);
       return match;
     })
     .replace(VAR_REGEX_WITHOUT_BRACES, (match) => {
@@ -189,7 +189,7 @@ function replaceVariablesInString(text: string): any {
         }
         return getStrictStringValue(varVal);
       }
-      getOutputChannel().appendLine(`🟡 WARNING: variable '${variable}' is not defined`);
+      appendUndefinedVars(variable);
       return match;
     });
 

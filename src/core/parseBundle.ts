@@ -99,7 +99,6 @@ export function getRequestsData(document: string, name?: string): { [name: strin
       throw new Error(`Error in request '${name}': ${error}`);
     }
     const allData: RequestData = getMergedData(commonData, request);
-
     requests[name] = allData;
   }
 
