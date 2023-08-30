@@ -50,7 +50,14 @@ export async function executeGotRequest(
     if (res) {
       responseObject = res;
     } else {
-      const message = e.code === "ERR_INVALID_URL" ? `Invalid URL: ${e.input}` : e.message;
+      let message: string;
+      if (e.code === "ERR_INVALID_URL") {
+        message = `Invalid URL: ${e.input}`;
+      } else if (e.name === "CancelError") {
+        message = "Cancelled";
+      } else {
+        message = e.message;
+      }
       responseObject = { body: message as string };
     }
   }
