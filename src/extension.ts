@@ -19,7 +19,6 @@ import {
   initialiseStatusBar,
   setWorkingDir,
 } from "./EnvironmentSelection";
-import { resetOpenDocs } from "./showInEditor";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -47,7 +46,6 @@ export function activate(context: ExtensionContext): void {
       //if we are referring to a new bundle, then we have to reload environments
       if (activeEditor.document.uri.path !== getCurrDirPath()) {
         setWorkingDir(path.dirname(activeEditor.document.uri.path));
-        resetOpenDocs();
       }
     }
   });

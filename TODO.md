@@ -2,10 +2,10 @@
 
 * Invalid URL: print the URL also in the output (or status?) (Varun) (Done)
 * Missing variable: (causes the above) - can show a warning in the output window, or as errorMessage (Varun)
-* Variables support within the bundle (common, variables, requests are three top level items) (Varun)
+* Variables support within the bundle (common, variables, requests are three top level items) (Varun) (Done)
 * Icon for the extension (Vasan)
 * Bundle using webpack (Vasan)
-* Reuse windows for output (across all requests. Yes.) (Varun)
+* Reuse windows for output (across all requests. Yes.) (Varun) (Done)
 * Options:
   * Format JSON response (default: true) (Varun)
   * Hide header output (default: false). Or, some command to show headers (status bar?). Or, two Code Lenses, one for "Brief" (only output) and another "Verbose" (with headers and tests) (Varun)

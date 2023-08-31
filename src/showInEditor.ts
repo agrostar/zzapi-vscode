@@ -61,12 +61,9 @@ function getDataOfIndReqAsString(
 }
 
 let OPEN_DOCS: {
-  [bundlePath: string]: { [requestName: string]: { body: TextDocument; headers: TextDocument } };
-} = {};
-const ALL_REQ_NAME = "---@RUN@ALL@REQUESTS@---";
-export function resetOpenDocs() {
-  OPEN_DOCS = {};
-}
+  body: TextDocument | undefined;
+  headers: TextDocument | undefined;
+} = { body: undefined, headers: undefined };
 
 async function openDocument(content: string, language?: string): Promise<void> {
   await workspace
@@ -117,8 +114,6 @@ async function showContent(
     return;
   }
 
-  const bundlePath = window.activeTextEditor.document.fileName;
-
   let bodyLanguage: string | undefined;
   if (name !== undefined) {
     bodyLanguage = "json";
@@ -143,44 +138,39 @@ async function showContent(
     headersLanguage = undefined;
   }
 
-  if (name === undefined) {
-    name = ALL_REQ_NAME;
-  }
+  const bodyDoc = OPEN_DOCS.body;
+  const headersDoc = OPEN_DOCS.headers;
 
-  if (OPEN_DOCS[bundlePath] !== undefined && OPEN_DOCS[bundlePath][name] !== undefined) {
-    const bodyDoc = OPEN_DOCS[bundlePath][name].body;
-    const headersDoc = OPEN_DOCS[bundlePath][name].headers;
-    if (isOpenAndUntitled(bodyDoc) && isOpenAndUntitled(headersDoc)) {
-      await replaceContent(bodyDoc, bodyContent, bodyLanguage);
-      await replaceContent(headersDoc, headersContent, headersLanguage);
-
-      return;
+  // remember to add flag for headers also here
+  if (
+    bodyDoc === undefined ||
+    !isOpenAndUntitled(bodyDoc) ||
+    headersDoc === undefined ||
+    !isOpenAndUntitled(headersDoc)
+  ) {
+    // insert a new group to the right, insert the content
+    commands.executeCommand("workbench.action.newGroupRight");
+    await openDocument(bodyContent, bodyLanguage);
+    let bodyDocument: TextDocument | undefined = undefined;
+    if (window.activeTextEditor !== undefined) {
+      bodyDocument = window.activeTextEditor.document;
     }
-  }
 
-  // insert a new group to the right, insert the content
-  commands.executeCommand("workbench.action.newGroupRight");
-  await openDocument(bodyContent, bodyLanguage);
-  let bodyDoc: TextDocument | undefined = undefined;
-  if (name !== undefined && window.activeTextEditor !== undefined) {
-    bodyDoc = window.activeTextEditor.document;
-  }
-
-  // insert a new group below, insert the content
-  commands.executeCommand("workbench.action.newGroupBelow");
-  await openDocument(headersContent, headersLanguage);
-  let headersDoc: TextDocument | undefined;
-  if (name !== undefined && window.activeTextEditor !== undefined) {
-    headersDoc = window.activeTextEditor.document;
-  }
-
-  if (bodyDoc !== undefined && headersDoc !== undefined) {
-    if (OPEN_DOCS[bundlePath] === undefined) {
-      OPEN_DOCS[bundlePath] = {};
+    // insert a new group below, insert the content
+    commands.executeCommand("workbench.action.newGroupBelow");
+    await openDocument(headersContent, headersLanguage);
+    let headersDocument: TextDocument | undefined;
+    if (window.activeTextEditor !== undefined) {
+      headersDocument = window.activeTextEditor.document;
     }
-    OPEN_DOCS[bundlePath][name] = {
-      body: bodyDoc,
-      headers: headersDoc,
-    };
+
+    OPEN_DOCS.body = bodyDocument;
+    OPEN_DOCS.headers = headersDocument;
+  } else {
+    await replaceContent(bodyDoc, bodyContent, bodyLanguage);
+    await replaceContent(headersDoc, bodyContent, bodyLanguage);
+
+    OPEN_DOCS.body = bodyDoc;
+    OPEN_DOCS.headers = headersDoc;
   }
 }
