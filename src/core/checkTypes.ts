@@ -226,3 +226,17 @@ export function checkRequestType(obj: any): [boolean, string | undefined] {
 
   return [true, undefined];
 }
+
+export function checkVariables(obj: any){
+  if(typeof obj !== "object" || Array.isArray(obj)){
+    return [false, 'Variables must be defined as an object with keys as variables names, and values as their values'];
+  }
+
+  for(const key in obj){
+    if(typeof key !== "string"){
+      return [false, "Variable names must be a string"];
+    }
+  }
+
+  return [true, undefined];
+}

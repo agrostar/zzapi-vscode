@@ -53,9 +53,8 @@ export function loadVarSet(dirPath: string, setName: string) {
   });
 }
 
-// TODO: may not need to do getStrict...
 export function setVariable(key: any, value: any): void {
-  VARIABLES[getStrictStringValue(key)] = value;
+  VARIABLES[key] = value;
 }
 
 export function replaceVariables(data: any): any {
