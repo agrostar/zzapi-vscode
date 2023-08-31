@@ -149,25 +149,26 @@ function checkCaptures(obj: any) {
   return [true, undefined];
 }
 
+const VALID_OPTIONS = ["follow", "verifySSL", "formatJSON"];
 function checkOptions(obj: any) {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [
       false,
-      "options must be defined as an object of type {follow: boolean; verifySSL: boolean}",
+      "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean}",
     ];
   }
-  const keys = Object.keys(obj);
-  if (keys.length !== 2) {
-    return [
-      false,
-      "options must be defined as an object of type {follow: boolean; verifySSL: boolean}",
-    ];
-  }
-  if (!keys.includes("follow") || typeof obj.follow !== "boolean") {
-    return [false, "follow property must exist with type boolean"];
-  }
-  if (!keys.includes("verifySSL") || typeof obj.verifySSL !== "boolean") {
-    return [false, "verifySSL must exist with type boolean"];
+
+  for(const key in obj){
+    if(VALID_OPTIONS.includes(key)){
+      if(typeof obj[key] !== "boolean"){
+        return [false, `${key} must be of type boolean if it exists`];
+      }
+    } else {
+      return [
+        false,
+        "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean}",
+      ];
+    }
   }
 
   return [true, undefined];

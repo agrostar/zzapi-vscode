@@ -11,8 +11,21 @@ const KEYS_IN_HEADERS = ["executionTime", "status", "rawHeaders"];
 export async function openEditorForIndividualReq(
   responseData: ResponseData,
   name: string,
+  formatJSON?: boolean
 ): Promise<void> {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);
+  let format: boolean = formatJSON === undefined ? true : formatJSON;
+
+  let parsedData: any;
+  try{
+    parsedData = JSON.parse(contentData);
+  } catch {
+    format = false;
+  }
+
+  if(format){
+    contentData = JSON.stringify(parsedData, undefined, 2);
+  }
   await showContent(contentData, headersData, name);
 }
 
@@ -168,7 +181,7 @@ async function showContent(
     OPEN_DOCS.headers = headersDocument;
   } else {
     await replaceContent(bodyDoc, bodyContent, bodyLanguage);
-    await replaceContent(headersDoc, bodyContent, bodyLanguage);
+    await replaceContent(headersDoc, headersContent, bodyLanguage);
 
     OPEN_DOCS.body = bodyDoc;
     OPEN_DOCS.headers = headersDoc;

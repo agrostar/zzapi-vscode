@@ -24,7 +24,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
 
   const [cancelled, responseData] = await individualRequestWithProgress(allData);
   if (!cancelled) {
-    await openEditorForIndividualReq(responseData, allData.name);
+    await openEditorForIndividualReq(responseData, allData.name, allData.options?.formatJSON);
   }
 }
 

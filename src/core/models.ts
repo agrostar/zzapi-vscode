@@ -17,6 +17,12 @@ export interface Param {
   encode?: boolean;
 }
 
+export interface Options {
+  follow?: boolean;
+  verifySSL?: boolean;
+  formatJSON?: boolean;
+}
+
 /**
  * For now, the value in json tests is assumed to be a scalar for direct comparison.
  * If the value is an object, it is assumed that we want to perform object tests ($eq: , $ne: )
@@ -43,7 +49,7 @@ export interface Common {
 
   headers?: Array<Header>;
   params?: Array<Param>;
-  options?: { follow: boolean; verifySSL: boolean };
+  options?: Options;
   tests?: Tests;
   capture?: Captures;
 }
@@ -56,7 +62,7 @@ export interface Request {
   headers?: Array<Header>;
   params?: Array<Param>;
   body?: string;
-  options?: { follow: boolean; verifySSL: boolean };
+  options?: Options;
   tests?: Tests;
   capture?: Captures;
 }
@@ -69,7 +75,7 @@ export interface RequestData {
   method: Method;
   headers?: { [key: string]: string };
   body?: any;
-  options?: { follow: boolean; verifySSL: boolean };
+  options?: Options;
   tests?: Tests;
   captures?: Captures;
 }

@@ -1,5 +1,5 @@
 import { replaceVariables } from "./variables";
-import { RequestData, Request, Common, Header, Param, Tests, Captures } from "./models";
+import { RequestData, Request, Common, Header, Param, Tests, Captures, Options } from "./models";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {
   // making deep copies of the objects because we will be deleting some data
@@ -71,19 +71,42 @@ function getCompleteUrl(commonData: Common | undefined, requestData: Request): s
 }
 
 function getMergedOptions(
-  common: { follow: boolean; verifySSL: boolean } | undefined,
-  request: { follow: boolean; verifySSL: boolean } | undefined,
-): { follow: boolean; verifySSL: boolean } {
-  if (request !== undefined) {
-    return request;
-  }
-  if (common !== undefined) {
-    return common;
-  }
-
+  common: Options | undefined,
+  request: Options | undefined,
+): Options {
   const defaultFollow = false;
   const defaultVerify = false;
-  return { follow: defaultFollow, verifySSL: defaultVerify };
+  const defaultFormat = true;
+
+  let finalFollow: boolean;
+  if(request !== undefined && request.follow !== undefined){
+    finalFollow = request.follow;
+  } else if(common !== undefined && common.follow !== undefined){
+    finalFollow = common.follow;
+  } else {
+    finalFollow = defaultFollow;
+  }
+
+  let finalVerify: boolean;
+  if(request !== undefined && request.verifySSL !== undefined){
+    finalVerify = request.verifySSL;
+  } else if(common !== undefined && common.verifySSL !== undefined){
+    finalVerify = common.verifySSL;
+  } else {
+    finalVerify = defaultVerify;
+  }
+
+  let finalFormat: boolean;
+  if(request !== undefined && request.formatJSON !== undefined){
+    finalFormat = request.formatJSON;
+  } else if(common !== undefined && common.formatJSON !== undefined){
+    finalFormat = common.formatJSON;
+  } else {
+    finalFormat = defaultFormat;
+  }
+  
+
+  return { follow: finalFollow, verifySSL: finalVerify, formatJSON: finalFormat };
 }
 
 function getMergedCaptures(
