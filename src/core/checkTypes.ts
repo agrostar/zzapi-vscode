@@ -27,7 +27,10 @@ function checkParamItem(obj: any) {
   }
   const keys = Object.keys(obj);
   if (!(keys.length === 2 || keys.length === 3)) {
-    return [false, `Each param must be an object of type {name: string; value: string; encode?: boolean}`];
+    return [
+      false,
+      `Each param must be an object of type {name: string; value: string; encode?: boolean}`,
+    ];
   }
   if (!(keys.includes("name") && typeof obj.name === "string")) {
     return [false, `name property of each param item must exist as a string`];
@@ -35,7 +38,7 @@ function checkParamItem(obj: any) {
   if (!(keys.includes("value") && typeof obj.value === "string")) {
     return [false, `value property of each param item must exist as a string`];
   }
-  if(keys.includes("encode") && typeof obj.encode !== "boolean"){
+  if (keys.includes("encode") && typeof obj.encode !== "boolean") {
     return [false, `encode property of each param item must be a boolean`];
   }
   return [true, undefined];
@@ -158,9 +161,9 @@ function checkOptions(obj: any) {
     ];
   }
 
-  for(const key in obj){
-    if(VALID_OPTIONS.includes(key)){
-      if(typeof obj[key] !== "boolean"){
+  for (const key in obj) {
+    if (VALID_OPTIONS.includes(key)) {
+      if (typeof obj[key] !== "boolean") {
         return [false, `${key} must be of type boolean if it exists`];
       }
     } else {
@@ -228,13 +231,16 @@ export function checkRequestType(obj: any): [boolean, string | undefined] {
   return [true, undefined];
 }
 
-export function checkVariables(obj: any){
-  if(typeof obj !== "object" || Array.isArray(obj)){
-    return [false, 'Variables must be defined as an object with keys as variables names, and values as their values'];
+export function checkVariables(obj: any) {
+  if (typeof obj !== "object" || Array.isArray(obj)) {
+    return [
+      false,
+      "Variables must be defined as an object with keys as variables names, and values as their values",
+    ];
   }
 
-  for(const key in obj){
-    if(typeof key !== "string"){
+  for (const key in obj) {
+    if (typeof key !== "string") {
       return [false, "Variable names must be a string"];
     }
   }

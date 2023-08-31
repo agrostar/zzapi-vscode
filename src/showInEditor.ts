@@ -11,7 +11,7 @@ const KEYS_IN_HEADERS = ["executionTime", "status", "rawHeaders"];
 export async function openEditorForIndividualReq(
   responseData: ResponseData,
   name: string,
-  formatJSON?: boolean
+  formatJSON?: boolean,
 ): Promise<void> {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name, formatJSON);
 
@@ -19,7 +19,8 @@ export async function openEditorForIndividualReq(
 }
 
 export async function openEditorForAllRequests(
-  responses: Array<{ response: ResponseData; name: string }>, formatJSON?: boolean
+  responses: Array<{ response: ResponseData; name: string }>,
+  formatJSON?: boolean,
 ): Promise<void> {
   let formattedContent = "---\n";
   let formattedHeaders = "---\n";
@@ -29,7 +30,7 @@ export async function openEditorForAllRequests(
     let [contentData, headersData] = getDataOfIndReqAsString(
       responseObj.response,
       responseObj.name,
-      formatJSON
+      formatJSON,
     );
     formattedContent += "response: " + contentData + "\n---\n";
     formattedHeaders += headersData + "\n---\n";
@@ -41,7 +42,7 @@ export async function openEditorForAllRequests(
 function getDataOfIndReqAsString(
   responseData: ResponseData,
   name: string,
-  formatJSON?: boolean
+  formatJSON?: boolean,
 ): [contentData: string, headersData: string] {
   let currentEnvironment = getActiveVarSet();
   if (!currentEnvironment) {
@@ -61,17 +62,17 @@ function getDataOfIndReqAsString(
     }
   }
 
-  if(formatJSON === undefined || formatJSON){
+  if (formatJSON === undefined || formatJSON) {
     let canFormat: boolean = true;
 
     let parsedData: any;
-    try{
+    try {
       parsedData = JSON.parse(contentData);
     } catch {
       canFormat = false;
     }
 
-    if(canFormat){
+    if (canFormat) {
       contentData = JSON.stringify(parsedData, undefined, 2);
     }
   }

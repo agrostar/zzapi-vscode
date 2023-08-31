@@ -1,5 +1,5 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "vscode";
-import {  getVarSetNames } from "./core/variables";
+import { getVarSetNames } from "./core/variables";
 
 const NO_VARSET = "-- None --";
 
@@ -34,19 +34,20 @@ export function createEnvironmentSelector(
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     const varSetNames = getVarSetNames(WORKING_DIR);
     varSetNames.push(NO_VARSET);
-    window.showQuickPick(varSetNames, {
-      placeHolder: "Select a variable set",
-      matchOnDetail: true,
-      matchOnDescription: true,
-    })
-    .then((selectedVarSetName) => {
-      if (!selectedVarSetName) return;
-      if (selectedVarSetName === NO_VARSET) {
-        resetActiveVarSet(statusBar);
-      } else {
-        setCurrentVarSetName(statusBar, selectedVarSetName);
-      }
-    });
+    window
+      .showQuickPick(varSetNames, {
+        placeHolder: "Select a variable set",
+        matchOnDetail: true,
+        matchOnDescription: true,
+      })
+      .then((selectedVarSetName) => {
+        if (!selectedVarSetName) return;
+        if (selectedVarSetName === NO_VARSET) {
+          resetActiveVarSet(statusBar);
+        } else {
+          setCurrentVarSetName(statusBar, selectedVarSetName);
+        }
+      });
   });
   context.subscriptions.push(statusClick);
 }

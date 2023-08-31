@@ -70,41 +70,37 @@ function getCompleteUrl(commonData: Common | undefined, requestData: Request): s
   return completeUrl;
 }
 
-function getMergedOptions(
-  common: Options | undefined,
-  request: Options | undefined,
-): Options {
+function getMergedOptions(common: Options | undefined, request: Options | undefined): Options {
   const defaultFollow = false;
   const defaultVerify = false;
   const defaultFormat = true;
 
   let finalFollow: boolean;
-  if(request !== undefined && request.follow !== undefined){
+  if (request !== undefined && request.follow !== undefined) {
     finalFollow = request.follow;
-  } else if(common !== undefined && common.follow !== undefined){
+  } else if (common !== undefined && common.follow !== undefined) {
     finalFollow = common.follow;
   } else {
     finalFollow = defaultFollow;
   }
 
   let finalVerify: boolean;
-  if(request !== undefined && request.verifySSL !== undefined){
+  if (request !== undefined && request.verifySSL !== undefined) {
     finalVerify = request.verifySSL;
-  } else if(common !== undefined && common.verifySSL !== undefined){
+  } else if (common !== undefined && common.verifySSL !== undefined) {
     finalVerify = common.verifySSL;
   } else {
     finalVerify = defaultVerify;
   }
 
   let finalFormat: boolean;
-  if(request !== undefined && request.formatJSON !== undefined){
+  if (request !== undefined && request.formatJSON !== undefined) {
     finalFormat = request.formatJSON;
-  } else if(common !== undefined && common.formatJSON !== undefined){
+  } else if (common !== undefined && common.formatJSON !== undefined) {
     finalFormat = common.formatJSON;
   } else {
     finalFormat = defaultFormat;
   }
-  
 
   return { follow: finalFollow, verifySSL: finalVerify, formatJSON: finalFormat };
 }

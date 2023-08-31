@@ -17,4 +17,3 @@ export async function runAllRequestsCommand(): Promise<void> {
     await runAllRequests(text);
   }
 }
-

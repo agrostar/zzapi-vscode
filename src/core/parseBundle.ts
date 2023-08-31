@@ -78,10 +78,10 @@ export function getRequestsData(document: string, name?: string): { [name: strin
   }
 
   const variables = parsedData.variables;
-  if(variables !== undefined){
+  if (variables !== undefined) {
     checkVariables(variables);
 
-    for(const key in variables){
+    for (const key in variables) {
       setVariable(key, variables[key]);
     }
   }

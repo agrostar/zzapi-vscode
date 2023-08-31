@@ -7,7 +7,7 @@
 * Bundle using webpack (Vasan)
 * Reuse windows for output (across all requests. Yes.) (Varun) (Done)
 * Options:
-  * Format JSON response (default: true) (Varun)
+  * Format JSON response (default: true) (Varun) (Done)
   * Hide header output (default: false). Or, some command to show headers (status bar?). Or, two Code Lenses, one for "Brief" (only output) and another "Verbose" (with headers and tests) (Varun)
 * Scaffolding (Vasan)
   * Command to scaffold: create example .zzb, .zzv, and zz-envs.yaml (Vasan)

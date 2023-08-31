@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from "path";
 import {
   ExtensionContext,
   languages,
@@ -61,7 +61,7 @@ export function activate(context: ExtensionContext): void {
   });
   commands.registerCommand("extension.importPostman", async () => {
     await importPostmanCommand();
-  })
+  });
 }
 
 // TODO: move this to utils or some place. Avoid circular dependency
