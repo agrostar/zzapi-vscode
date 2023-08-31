@@ -50,7 +50,11 @@ export async function individualRequestWithProgress(
       if (!cancelled) {
         const outputChannel = getOutputChannel();
 
-        outputChannel.appendLine(warnings);
+        if (warnings.length > 0) {
+          outputChannel.appendLine("--------------------------------------");
+          outputChannel.append(warnings);
+          outputChannel.appendLine("--------------------------------------");
+        }
 
         const testOutput = runAllTests(requestData, response);
         outputChannel.append(testOutput);
@@ -75,7 +79,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
   let currRequestName: string = "";
 
   let responses: Array<{ cancelled: boolean; name: string; response: ResponseData }> = [];
-  let warningsToDisplay = "";
+  let warnings = new Set<string>();
 
   let cancelled = false;
   let seconds = 0;
@@ -110,8 +114,8 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
         const requestWithWarnings = constructGotRequest(requestData);
         currHttpRequest = requestWithWarnings.request;
-        const warnings = requestWithWarnings.warnings;
-        warningsToDisplay += warnings;
+        const warning = requestWithWarnings.warnings;
+        warnings.add(warning);
 
         const [httpResponse, executionTime] = await executeGotRequest(currHttpRequest);
 
@@ -142,7 +146,15 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
     },
   );
 
-  getOutputChannel().appendLine(warningsToDisplay);
+  if (warnings.size > 0) {
+    const outputChannel = getOutputChannel();
+    outputChannel.appendLine("--------------------------------------");
+    warnings.forEach((warning) => {
+      outputChannel.append(warning);
+    });
+    outputChannel.appendLine("--------------------------------------");
+  }
+
   return responses;
 }
 
