@@ -13,24 +13,13 @@ export async function openEditorForIndividualReq(
   name: string,
   formatJSON?: boolean
 ): Promise<void> {
-  let [contentData, headersData] = getDataOfIndReqAsString(responseData, name);
-  let format: boolean = formatJSON === undefined ? true : formatJSON;
+  let [contentData, headersData] = getDataOfIndReqAsString(responseData, name, formatJSON);
 
-  let parsedData: any;
-  try{
-    parsedData = JSON.parse(contentData);
-  } catch {
-    format = false;
-  }
-
-  if(format){
-    contentData = JSON.stringify(parsedData, undefined, 2);
-  }
   await showContent(contentData, headersData, name);
 }
 
 export async function openEditorForAllRequests(
-  responses: Array<{ response: ResponseData; name: string }>,
+  responses: Array<{ response: ResponseData; name: string }>, formatJSON?: boolean
 ): Promise<void> {
   let formattedContent = "---\n";
   let formattedHeaders = "---\n";
@@ -40,6 +29,7 @@ export async function openEditorForAllRequests(
     let [contentData, headersData] = getDataOfIndReqAsString(
       responseObj.response,
       responseObj.name,
+      formatJSON
     );
     formattedContent += "response: " + contentData + "\n---\n";
     formattedHeaders += headersData + "\n---\n";
@@ -51,6 +41,7 @@ export async function openEditorForAllRequests(
 function getDataOfIndReqAsString(
   responseData: ResponseData,
   name: string,
+  formatJSON?: boolean
 ): [contentData: string, headersData: string] {
   let currentEnvironment = getActiveVarSet();
   if (!currentEnvironment) {
@@ -67,6 +58,21 @@ function getDataOfIndReqAsString(
       contentData += `${value}\n`;
     } else if (KEYS_IN_HEADERS.includes(key)) {
       headersData += `${key}: ${value}\n`;
+    }
+  }
+
+  if(formatJSON === undefined || formatJSON){
+    let canFormat: boolean = true;
+
+    let parsedData: any;
+    try{
+      parsedData = JSON.parse(contentData);
+    } catch {
+      canFormat = false;
+    }
+
+    if(canFormat){
+      contentData = JSON.stringify(parsedData, undefined, 2);
     }
   }
 
