@@ -17,10 +17,18 @@ export interface Param {
   encode?: boolean;
 }
 
-export interface Options {
+export interface RequestOptions {
   follow?: boolean;
   verifySSL?: boolean;
   formatJSON?: boolean;
+  showHeaders?: boolean;
+}
+
+export interface Options {
+  follow: boolean;
+  verifySSL: boolean;
+  formatJSON: boolean;
+  showHeaders: boolean;
 }
 
 /**
@@ -49,7 +57,7 @@ export interface Common {
 
   headers?: Array<Header>;
   params?: Array<Param>;
-  options?: Options;
+  options?: RequestOptions;
   tests?: Tests;
   capture?: Captures;
 }
@@ -62,7 +70,7 @@ export interface Request {
   headers?: Array<Header>;
   params?: Array<Param>;
   body?: string;
-  options?: Options;
+  options?: RequestOptions;
   tests?: Tests;
   capture?: Captures;
 }
@@ -75,7 +83,7 @@ export interface RequestData {
   method: Method;
   headers?: { [key: string]: string };
   body?: any;
-  options?: Options;
+  options: Options;
   tests?: Tests;
   captures?: Captures;
 }

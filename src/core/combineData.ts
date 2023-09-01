@@ -1,5 +1,15 @@
 import { replaceVariables } from "./variables";
-import { RequestData, Request, Common, Header, Param, Tests, Captures, Options } from "./models";
+import {
+  RequestData,
+  Request,
+  Common,
+  Header,
+  Param,
+  Tests,
+  Captures,
+  RequestOptions,
+  Options,
+} from "./models";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {
   // making deep copies of the objects because we will be deleting some data
@@ -70,10 +80,14 @@ function getCompleteUrl(commonData: Common | undefined, requestData: Request): s
   return completeUrl;
 }
 
-function getMergedOptions(common: Options | undefined, request: Options | undefined): Options {
+function getMergedOptions(
+  common: RequestOptions | undefined,
+  request: RequestOptions | undefined,
+): Options {
   const defaultFollow = false;
   const defaultVerify = false;
   const defaultFormat = true;
+  const defaultHeaders = false;
 
   let finalFollow: boolean;
   if (request !== undefined && request.follow !== undefined) {
@@ -102,7 +116,21 @@ function getMergedOptions(common: Options | undefined, request: Options | undefi
     finalFormat = defaultFormat;
   }
 
-  return { follow: finalFollow, verifySSL: finalVerify, formatJSON: finalFormat };
+  let finalShowHeaders: boolean;
+  if (request !== undefined && request.showHeaders !== undefined) {
+    finalShowHeaders = request.showHeaders;
+  } else if (common !== undefined && common.showHeaders !== undefined) {
+    finalShowHeaders = common.showHeaders;
+  } else {
+    finalShowHeaders = defaultHeaders;
+  }
+
+  return {
+    follow: finalFollow,
+    verifySSL: finalVerify,
+    formatJSON: finalFormat,
+    showHeaders: finalShowHeaders,
+  };
 }
 
 function getMergedCaptures(

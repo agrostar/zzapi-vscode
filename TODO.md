@@ -1,14 +1,14 @@
 # Before first release
 
 * Invalid URL: print the URL also in the output (or status?) (Varun) (Done)
-* Missing variable: (causes the above) - can show a warning in the output window, or as errorMessage (Varun)
+* Missing variable: (causes the above) - can show a warning in the output window, or as errorMessage (Varun) (Done)
 * Variables support within the bundle (common, variables, requests are three top level items) (Varun) (Done)
 * Icon for the extension (Vasan)
 * Bundle using webpack (Vasan)
 * Reuse windows for output (across all requests. Yes.) (Varun) (Done)
 * Options:
   * Format JSON response (default: true) (Varun) (Done)
-  * Hide header output (default: false). Or, some command to show headers (status bar?). Or, two Code Lenses, one for "Brief" (only output) and another "Verbose" (with headers and tests) (Varun)
+  * Hide header output (default: false). Or, some command to show headers (status bar?). Or, two Code Lenses, one for "Brief" (only output) and another "Verbose" (with headers and tests) (Varun) (Done)
 * Scaffolding (Vasan)
   * Command to scaffold: create example .zzb, .zzv, and zz-envs.yaml (Vasan)
   * Create these on postman import also (save them, yes, but don't overwrite. Or, ask? Especially if there were variables in the postman collection)

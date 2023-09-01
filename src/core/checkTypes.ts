@@ -152,12 +152,12 @@ function checkCaptures(obj: any) {
   return [true, undefined];
 }
 
-const VALID_OPTIONS = ["follow", "verifySSL", "formatJSON"];
+const VALID_OPTIONS = ["follow", "verifySSL", "formatJSON", "showHeaders"];
 function checkOptions(obj: any) {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [
       false,
-      "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean}",
+      "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean; showHeaders?: boolean}",
     ];
   }
 
@@ -169,7 +169,7 @@ function checkOptions(obj: any) {
     } else {
       return [
         false,
-        "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean}",
+        "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean; showHeaders?: boolean}",
       ];
     }
   }

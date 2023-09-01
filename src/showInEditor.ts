@@ -11,15 +11,17 @@ const KEYS_IN_HEADERS = ["executionTime", "status", "rawHeaders"];
 export async function openEditorForIndividualReq(
   responseData: ResponseData,
   name: string,
-  formatJSON?: boolean,
+  formatJSON: boolean,
+  showHeaders: boolean,
 ): Promise<void> {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name, formatJSON);
 
-  await showContent(contentData, headersData, name);
+  await showContent(contentData, headersData, showHeaders, name);
 }
 
 export async function openEditorForAllRequests(
   responses: Array<{ response: ResponseData; name: string }>,
+  showHeaders: boolean,
   formatJSON?: boolean,
 ): Promise<void> {
   let formattedContent = "---\n";
@@ -36,7 +38,7 @@ export async function openEditorForAllRequests(
     formattedHeaders += headersData + "\n---\n";
   });
 
-  await showContent(formattedContent, formattedHeaders);
+  await showContent(formattedContent, formattedHeaders, showHeaders);
 }
 
 function getDataOfIndReqAsString(
@@ -128,6 +130,7 @@ function isOpenAndUntitled(document: TextDocument): boolean {
 async function showContent(
   bodyContent: string,
   headersContent: string,
+  showHeaders: boolean,
   name?: string,
 ): Promise<void> {
   if (window.activeTextEditor === undefined) {
@@ -152,10 +155,13 @@ async function showContent(
   }
 
   let headersLanguage: string | undefined = "yaml";
-  try {
-    YAML.parseAllDocuments(headersContent);
-  } catch {
-    headersLanguage = undefined;
+
+  if (showHeaders) {
+    try {
+      YAML.parseAllDocuments(headersContent);
+    } catch {
+      headersLanguage = undefined;
+    }
   }
 
   const bodyDoc = OPEN_DOCS.body;
@@ -165,8 +171,7 @@ async function showContent(
   if (
     bodyDoc === undefined ||
     !isOpenAndUntitled(bodyDoc) ||
-    headersDoc === undefined ||
-    !isOpenAndUntitled(headersDoc)
+    (showHeaders && (headersDoc === undefined || !isOpenAndUntitled(headersDoc)))
   ) {
     // insert a new group to the right, insert the content
     commands.executeCommand("workbench.action.newGroupRight");
@@ -175,22 +180,27 @@ async function showContent(
     if (window.activeTextEditor !== undefined) {
       bodyDocument = window.activeTextEditor.document;
     }
-
-    // insert a new group below, insert the content
-    commands.executeCommand("workbench.action.newGroupBelow");
-    await openDocument(headersContent, headersLanguage);
-    let headersDocument: TextDocument | undefined;
-    if (window.activeTextEditor !== undefined) {
-      headersDocument = window.activeTextEditor.document;
-    }
-
     OPEN_DOCS.body = bodyDocument;
-    OPEN_DOCS.headers = headersDocument;
+
+    OPEN_DOCS.headers = undefined;
+    if (showHeaders) {
+      // insert a new group below, insert the content
+      commands.executeCommand("workbench.action.newGroupBelow");
+      await openDocument(headersContent, headersLanguage);
+      let headersDocument: TextDocument | undefined;
+      if (window.activeTextEditor !== undefined) {
+        headersDocument = window.activeTextEditor.document;
+      }
+      OPEN_DOCS.headers = headersDocument;
+    }
   } else {
     await replaceContent(bodyDoc, bodyContent, bodyLanguage);
-    await replaceContent(headersDoc, headersContent, bodyLanguage);
-
     OPEN_DOCS.body = bodyDoc;
-    OPEN_DOCS.headers = headersDoc;
+
+    OPEN_DOCS.headers = undefined;
+    if (showHeaders && headersDoc !== undefined) {
+      await replaceContent(headersDoc, headersContent, bodyLanguage);
+      OPEN_DOCS.headers = headersDoc;
+    }
   }
 }

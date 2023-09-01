@@ -24,7 +24,12 @@ export async function runIndividualRequest(text: string, name: string): Promise<
 
   const [cancelled, responseData] = await individualRequestWithProgress(allData);
   if (!cancelled) {
-    await openEditorForIndividualReq(responseData, allData.name, allData.options?.formatJSON);
+    await openEditorForIndividualReq(
+      responseData,
+      allData.name,
+      allData.options.formatJSON,
+      allData.options.showHeaders,
+    );
   }
 }
 
@@ -57,7 +62,7 @@ export async function runAllRequests(text: string): Promise<void> {
   });
 
   if (atleastOneExecuted) {
-    await openEditorForAllRequests(responses);
+    await openEditorForAllRequests(responses, true);
   } else {
     window.showInformationMessage("ALL REQUESTS WERE CANCELLED");
   }
