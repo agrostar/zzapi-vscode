@@ -23,9 +23,8 @@ export async function showVariables() {
   let language = undefined;
 
   if (varSize <= 0 && capSize <= 0) {
-    throw new Error(
-      "No variables stored. Running a request may store the associated variables, if any are defined",
-    );
+    content =
+      "No variables stored.\nRunning a request may store the associated variables, if any are defined";
   } else {
     content = "";
 
@@ -64,9 +63,10 @@ export async function showVariables() {
 let HEADERS_DOC: TextDocument | undefined = undefined;
 
 export async function showRecentHeaders() {
-  const [headers, headersLang] = getRecentHeadersData();
+  let [headers, headersLang] = getRecentHeadersData();
   if (headers === undefined) {
-    throw new Error("No headers stored, run a request and try again");
+    headers = "No headers stored, run a request and try again";
+    headersLang = undefined;
   }
 
   if (HEADERS_DOC === undefined || !isOpenAndUntitled(HEADERS_DOC)) {
