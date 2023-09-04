@@ -19,6 +19,8 @@ import {
   initialiseStatusBar,
   setWorkingDir,
 } from "./EnvironmentSelection";
+import { showVariables } from "./showVars";
+import { resetCapturedVariables } from "./core/variables";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -44,8 +46,9 @@ export function activate(context: ExtensionContext): void {
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
     if (activeEditor && documentIsBundle(activeEditor.document)) {
       //if we are referring to a new bundle, then we have to reload environments
-      if (activeEditor.document.uri.path !== getCurrDirPath()) {
+      if (path.dirname(activeEditor.document.uri.path) !== getCurrDirPath()) {
         setWorkingDir(path.dirname(activeEditor.document.uri.path));
+        resetCapturedVariables();
       }
     }
   });
@@ -61,6 +64,9 @@ export function activate(context: ExtensionContext): void {
   });
   commands.registerCommand("extension.importPostman", async () => {
     await importPostmanCommand();
+  });
+  commands.registerCommand("extension.showVariables", async () => {
+    await showVariables();
   });
 }
 

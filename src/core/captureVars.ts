@@ -5,7 +5,7 @@
 
 import jp from "jsonpath";
 
-import { setVariable } from "./variables";
+import { captureVariable } from "./variables";
 import { ResponseData, RequestData, Captures } from "./models";
 
 export function getStringIfNotScalar(data: any) {
@@ -69,7 +69,7 @@ export function captureVariables(requestData: RequestData, responseData: Respons
           if (errorInJP !== undefined) {
             captureOutput += `\tCould not set "${key}", error: ${errorInJP}\n`;
           } else {
-            setVariable(key, value);
+            captureVariable(key, value);
             captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
           }
         }
@@ -82,14 +82,14 @@ export function captureVariables(requestData: RequestData, responseData: Respons
         let value = headers !== undefined ? headers[headerName] : undefined;
         const key = headerCaptures[headerName];
 
-        setVariable(key, value);
+        captureVariable(key, value);
         captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
       }
     } else {
       let value = test;
       const key = capture[test as keyof Captures];
 
-      setVariable(key, value);
+      captureVariable(key, value);
       captureOutput += `Variable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
     }
   }

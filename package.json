@@ -22,11 +22,15 @@
     "commands": [
       {
         "command": "extension.clickEnvSelector",
-        "title": "Select Environment"
+        "title": "zzAPI: Select Environment"
       },
       {
         "command": "extension.importPostman",
         "title": "zzAPI: Import Postman collection"
+      },
+      {
+        "command": "extension.showVariables",
+        "title": "zzAPI: Show Variables"
       }
     ],
     "configuration": {},

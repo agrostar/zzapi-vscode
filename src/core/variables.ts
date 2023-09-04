@@ -8,6 +8,17 @@ import { appendUndefinedVars } from "./executeRequest";
 const VARFILE_EXTENSION = ".zzv";
 
 let VARIABLES: { [key: string]: any } = {};
+export function getVariables() {
+  return VARIABLES;
+}
+
+let CAPTURED_VARIABLES: { [key: string]: any } = {};
+export function getCapturedVariables() {
+  return CAPTURED_VARIABLES;
+}
+export function resetCapturedVariables() {
+  CAPTURED_VARIABLES = {};
+}
 
 function getStrictStringValue(value: any): string {
   if (value === null) {
@@ -51,10 +62,16 @@ export function loadVarSet(dirPath: string, setName: string) {
       VARIABLES = Object.assign(VARIABLES, varSets[setName]);
     }
   });
+
+  VARIABLES = Object.assign(VARIABLES, CAPTURED_VARIABLES);
 }
 
-export function setVariable(key: any, value: any): void {
-  VARIABLES[key] = value;
+export function setVariables(varSet: { [key: string]: any }) {
+  VARIABLES = Object.assign(VARIABLES, varSet);
+}
+
+export function captureVariable(key: any, value: any): void {
+  CAPTURED_VARIABLES[key] = value;
 }
 
 export function replaceVariables(data: any): any {

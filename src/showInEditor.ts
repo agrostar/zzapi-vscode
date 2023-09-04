@@ -87,7 +87,7 @@ let OPEN_DOCS: {
   headers: TextDocument | undefined;
 } = { body: undefined, headers: undefined };
 
-async function openDocument(content: string, language?: string): Promise<void> {
+export async function openDocument(content: string, language?: string): Promise<void> {
   await workspace
     .openTextDocument({ content: content, language: language })
     .then(async (document) => {
@@ -97,7 +97,7 @@ async function openDocument(content: string, language?: string): Promise<void> {
     });
 }
 
-async function replaceContent(document: TextDocument, content: string, language?: string) {
+export async function replaceContent(document: TextDocument, content: string, language?: string) {
   if (language !== undefined) {
     languages.setTextDocumentLanguage(document, language);
   }
@@ -111,7 +111,7 @@ async function replaceContent(document: TextDocument, content: string, language?
   await workspace.applyEdit(edit); // this returns boolean for true or false maybe incorporate that?
 }
 
-function isOpenAndUntitled(document: TextDocument): boolean {
+export function isOpenAndUntitled(document: TextDocument): boolean {
   return !document.isClosed && document.isUntitled;
 }
 

@@ -9,7 +9,7 @@ import * as YAML from "yaml";
 import { Request, RequestData, RequestPosition } from "./models";
 import { getMergedData } from "./combineData";
 import { checkCommonType, checkRequestType, checkVariables } from "./checkTypes";
-import { setVariable } from "./variables";
+import { setVariables } from "./variables";
 
 /*
  * Returns an array of requestPosition objects. If the name of a
@@ -79,11 +79,11 @@ export function getRequestsData(document: string, name?: string): { [name: strin
 
   const variables = parsedData.variables;
   if (variables !== undefined) {
-    checkVariables(variables);
-
-    for (const key in variables) {
-      setVariable(key, variables[key]);
+    const [valid, error] = checkVariables(variables);
+    if (!valid) {
+      throw new Error(`Error in variables: ${error}`);
     }
+    setVariables(variables);
   }
 
   const requests: { [name: string]: RequestData } = {};
