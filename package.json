@@ -37,6 +37,31 @@
         "title": "zzAPI: Show Recent Reponse Headers"
       }
     ],
+    "submenus": [
+      {
+        "id": "zzapi_submenu",
+        "label": "zzAPI"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "zzapi_submenu",
+          "group": "zzAPI"
+        }
+      ],
+      "zzapi_submenu": [
+        {
+          "command": "extension.importPostman"
+        },
+        {
+          "command": "extension.showVariables"
+        },
+        {
+          "command": "extension.showRecentHeaders"
+        }
+      ]
+    },
     "configuration": {},
     "yamlValidation":[
       {
