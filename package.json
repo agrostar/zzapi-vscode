@@ -31,6 +31,10 @@
       {
         "command": "extension.showVariables",
         "title": "zzAPI: Show Variables"
+      },
+      {
+        "command": "extension.showRecentHeaders",
+        "title": "zzAPI: Show Recent Reponse Headers"
       }
     ],
     "configuration": {},

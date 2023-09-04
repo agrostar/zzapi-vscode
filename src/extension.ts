@@ -19,7 +19,7 @@ import {
   initialiseStatusBar,
   setWorkingDir,
 } from "./EnvironmentSelection";
-import { showVariables } from "./showVars";
+import { showRecentHeaders, showVariables } from "./showData";
 import { resetCapturedVariables } from "./core/variables";
 
 let DISPOSABLES: Disposable[] = [];
@@ -67,6 +67,9 @@ export function activate(context: ExtensionContext): void {
   });
   commands.registerCommand("extension.showVariables", async () => {
     await showVariables();
+  });
+  commands.registerCommand("extension.showRecentHeaders", async () => {
+    await showRecentHeaders();
   });
 }
 

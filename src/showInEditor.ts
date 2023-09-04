@@ -115,6 +115,12 @@ export function isOpenAndUntitled(document: TextDocument): boolean {
   return !document.isClosed && document.isUntitled;
 }
 
+let MOST_RECENT_HEADERS: string | undefined = undefined;
+let MOST_RECENT_HEADERS_LANG: string | undefined = undefined;
+export function getRecentHeadersData(){
+  return [MOST_RECENT_HEADERS, MOST_RECENT_HEADERS_LANG];
+}
+
 /**
  * Master function to show the content in the new windows or replace them
  *  in the current windows
@@ -199,8 +205,11 @@ async function showContent(
 
     OPEN_DOCS.headers = undefined;
     if (showHeaders && headersDoc !== undefined) {
-      await replaceContent(headersDoc, headersContent, bodyLanguage);
+      await replaceContent(headersDoc, headersContent, headersLanguage);
       OPEN_DOCS.headers = headersDoc;
     }
   }
+
+  MOST_RECENT_HEADERS = headersContent;
+  MOST_RECENT_HEADERS_LANG = headersLanguage;
 }

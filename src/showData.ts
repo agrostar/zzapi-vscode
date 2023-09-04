@@ -2,7 +2,12 @@ import * as YAML from "yaml";
 
 import { TextDocument, commands, window } from "vscode";
 
-import { isOpenAndUntitled, openDocument, replaceContent } from "./showInEditor";
+import {
+  getRecentHeadersData,
+  isOpenAndUntitled,
+  openDocument,
+  replaceContent,
+} from "./showInEditor";
 import { getCapturedVariables, getVariables } from "./core/variables";
 
 let VAR_DOCUMENT: TextDocument | undefined = undefined;
@@ -18,7 +23,9 @@ export async function showVariables() {
   let language = undefined;
 
   if (varSize <= 0 && capSize <= 0) {
-    content = "No variables stored";
+    throw new Error(
+      "No variables stored. Running a request may store the associated variables, if any are defined",
+    );
   } else {
     content = "";
 
@@ -51,5 +58,25 @@ export async function showVariables() {
     }
   } else {
     await replaceContent(VAR_DOCUMENT, content, language);
+  }
+}
+
+let HEADERS_DOC: TextDocument | undefined = undefined;
+
+export async function showRecentHeaders() {
+  const [headers, headersLang] = getRecentHeadersData();
+  if (headers === undefined) {
+    throw new Error("No headers stored, run a request and try again");
+  }
+
+  if (HEADERS_DOC === undefined || !isOpenAndUntitled(HEADERS_DOC)) {
+    commands.executeCommand("workbench.action.newGroupRight");
+    await openDocument(headers, headersLang);
+
+    if (window.activeTextEditor !== undefined) {
+      HEADERS_DOC = window.activeTextEditor.document;
+    }
+  } else {
+    await replaceContent(HEADERS_DOC, headers, headersLang);
   }
 }
