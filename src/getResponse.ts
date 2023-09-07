@@ -56,11 +56,22 @@ export async function individualRequestWithProgress(
           outputChannel.appendLine("--------------------------------------");
         }
 
-        const testOutput = runAllTests(requestData, response);
-        outputChannel.append(testOutput);
+        const [testOutput, NUM_FAILED, NUM_TESTS] = runAllTests(requestData, response);
+        const NUM_PASSED = NUM_TESTS - NUM_FAILED;
+        
+        if (NUM_FAILED == 0){
+          outputChannel.appendLine(`[info]  "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+        } else {
+          outputChannel.appendLine(`[error] "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+          outputChannel.append(testOutput);
+        }
+        outputChannel.appendLine("");
 
         const captureOutput = captureVariables(requestData, response);
-        outputChannel.append(captureOutput);
+        if(captureOutput != ""){
+          outputChannel.append(captureOutput);
+          outputChannel.appendLine("")
+        }
 
         if (testOutput != "" || captureOutput != "") {
           outputChannel.show();
@@ -130,11 +141,22 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (!cancelled) {
           const outputChannel = getOutputChannel();
 
-          const testOutput = runAllTests(requestData, response);
-          outputChannel.append(testOutput);
+          const [testOutput, NUM_FAILED, NUM_TESTS] = runAllTests(requestData, response);
+          const NUM_PASSED = NUM_TESTS - NUM_FAILED;
+          
+          if (NUM_FAILED == 0){
+            outputChannel.appendLine(`[info]  "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+          } else {
+            outputChannel.appendLine(`[error] "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+            outputChannel.append(testOutput);
+          }
+          outputChannel.appendLine("");
 
           const captureOutput = captureVariables(requestData, response);
-          outputChannel.append(captureOutput);
+          if(captureOutput != ""){
+            outputChannel.append(captureOutput);
+            outputChannel.appendLine("")
+          }
 
           if (testOutput != "" || captureOutput != "") {
             outputChannel.show();

@@ -54,7 +54,7 @@ export function activate(context: ExtensionContext): void {
   });
   context.subscriptions.push(bundleChangeHandler);
 
-  OUTPUT_CHANNEL = window.createOutputChannel("zzAPI");
+  OUTPUT_CHANNEL = window.createOutputChannel("zzAPI", "log");
   languages.registerCodeLensProvider("*", new CodeLensProvider());
   commands.registerCommand("extension.runRequest", async (name) => {
     await runRequestCommand(name);

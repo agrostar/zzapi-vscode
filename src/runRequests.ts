@@ -10,9 +10,12 @@ import { getCurrDirPath, getActiveVarSet } from "./EnvironmentSelection";
 import { getExtensionVersion } from "./extension"; // TODO: pass this in to avoid circular dependency
 
 export async function runIndividualRequest(text: string, name: string): Promise<void> {
-  loadVarSet(getCurrDirPath(), getActiveVarSet());
-
+  /*
+  Also loads the bundle vars
+  */
   const allData: RequestData = getRequestsData(text, name)[name];
+
+  loadVarSet(getCurrDirPath(), getActiveVarSet());
 
   if (allData === undefined) {
     return;
@@ -34,9 +37,11 @@ export async function runIndividualRequest(text: string, name: string): Promise<
 }
 
 export async function runAllRequests(text: string): Promise<void> {
-  loadVarSet(getCurrDirPath(), getActiveVarSet());
-
+  /*
+  Also loads the bundle vars
+  */
   const allRequests = getRequestsData(text);
+  loadVarSet(getCurrDirPath(), getActiveVarSet());
 
   for (const name in allRequests) {
     allRequests[name].headers = Object.assign(

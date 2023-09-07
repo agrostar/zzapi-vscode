@@ -27,17 +27,17 @@ export function captureVariables(requestData: RequestData, responseData: Respons
   const headers = responseData.headers;
 
   let captureOutput = "";
-  captureOutput += `Running captures of '${name}':\n`;
+  captureOutput += `[debug] Running captures of '${name}':\n`;
 
   for (const test in capture) {
     if (test === "json") {
-      captureOutput += "JSON:\n";
+      captureOutput += "\tJSON:\n";
 
       let errorInParsing = false;
       let body: object = {};
 
       if (responseData.body === undefined) {
-        captureOutput += `\tJSON capture not evaluated, body not defined\n`;
+        captureOutput += `\t\tJSON capture not evaluated, body not defined\n`;
         errorInParsing = true;
       }
 
@@ -45,7 +45,7 @@ export function captureVariables(requestData: RequestData, responseData: Respons
         try {
           body = JSON.parse(responseData.body as string);
         } catch (err) {
-          captureOutput += `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}\n`;
+          captureOutput += `\t\tJSON capture not evaluated due to error in parsing: \n\t\t${err}\n`;
           errorInParsing = true;
         }
       }
@@ -67,15 +67,15 @@ export function captureVariables(requestData: RequestData, responseData: Respons
           }
 
           if (errorInJP !== undefined) {
-            captureOutput += `\tCould not set "${key}", error: ${errorInJP}\n`;
+            captureOutput += `\t\tCould not set "${key}", error: ${errorInJP}\n`;
           } else {
             captureVariable(key, value);
-            captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
+            captureOutput += `\t\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
           }
         }
       }
     } else if (test === "headers") {
-      captureOutput += "HEADERS: \n";
+      captureOutput += "\tHEADERS: \n";
       const headerCaptures = capture[test];
 
       for (const headerName in headerCaptures) {
@@ -83,17 +83,16 @@ export function captureVariables(requestData: RequestData, responseData: Respons
         const key = headerCaptures[headerName];
 
         captureVariable(key, value);
-        captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
+        captureOutput += `\t\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
       }
     } else {
       let value = test;
       const key = capture[test as keyof Captures];
 
       captureVariable(key, value);
-      captureOutput += `Variable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
+      captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
     }
   }
-  captureOutput += "--------------------------------------\n";
 
   return captureOutput;
 }

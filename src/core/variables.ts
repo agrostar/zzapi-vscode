@@ -20,6 +20,8 @@ export function resetCapturedVariables() {
   CAPTURED_VARIABLES = {};
 }
 
+let BUNDLE_VARIABLES: {[key: string]: any} = {};
+
 function getStrictStringValue(value: any): string {
   if (value === null) {
     return "null";
@@ -63,15 +65,16 @@ export function loadVarSet(dirPath: string, setName: string) {
     }
   });
 
-  VARIABLES = Object.assign(VARIABLES, CAPTURED_VARIABLES);
+  VARIABLES = Object.assign(VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
 }
 
 export function setVariables(varSet: { [key: string]: any }) {
-  VARIABLES = Object.assign(VARIABLES, varSet);
+  BUNDLE_VARIABLES = varSet;
 }
 
 export function captureVariable(key: any, value: any): void {
   CAPTURED_VARIABLES[key] = value;
+  VARIABLES = Object.assign(VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
 }
 
 export function replaceVariables(data: any): any {
