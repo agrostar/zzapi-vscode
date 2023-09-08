@@ -54,12 +54,10 @@ function getBody(body: any): string | undefined {
 
 export async function executeGotRequest(
   httpRequest: GotRequest,
-): Promise<
-  [response: { [key: string]: any }, executionTime: number, byteLength: number | undefined]
-> {
+): Promise<[response: { [key: string]: any }, executionTime: number, byteLength: number]> {
   const startTime = new Date().getTime();
   let responseObject: { [key: string]: any };
-  let size: number;
+  let size: number = 0;
 
   try {
     responseObject = await httpRequest;
