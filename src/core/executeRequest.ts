@@ -54,7 +54,9 @@ function getBody(body: any): string | undefined {
 
 export async function executeGotRequest(
   httpRequest: GotRequest,
-): Promise<[response: { [key: string]: any }, executionTime: number, byteLength: number | undefined]> {
+): Promise<
+  [response: { [key: string]: any }, executionTime: number, byteLength: number | undefined]
+> {
   const startTime = new Date().getTime();
   let responseObject: { [key: string]: any };
   let size: number;
@@ -66,7 +68,7 @@ export async function executeGotRequest(
     const res = e.response;
     if (res) {
       responseObject = res;
-      if(res.body){
+      if (res.body) {
         size = Buffer.byteLength(res.body);
       } else {
         size = 0;

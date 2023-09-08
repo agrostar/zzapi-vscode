@@ -117,7 +117,7 @@ export function isOpenAndUntitled(document: TextDocument): boolean {
 
 let MOST_RECENT_HEADERS: string | undefined = undefined;
 let MOST_RECENT_HEADERS_LANG: string | undefined = undefined;
-export function getRecentHeadersData(){
+export function getRecentHeadersData() {
   return [MOST_RECENT_HEADERS, MOST_RECENT_HEADERS_LANG];
 }
 

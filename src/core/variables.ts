@@ -20,7 +20,7 @@ export function resetCapturedVariables() {
   CAPTURED_VARIABLES = {};
 }
 
-let BUNDLE_VARIABLES: {[key: string]: any} = {};
+let BUNDLE_VARIABLES: { [key: string]: any } = {};
 
 function getStrictStringValue(value: any): string {
   if (value === null) {
