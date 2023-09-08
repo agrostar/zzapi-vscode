@@ -31,13 +31,11 @@ export function captureVariables(requestData: RequestData, responseData: Respons
 
   for (const test in capture) {
     if (test === "json") {
-      captureOutput += "\tJSON:\n";
-
       let errorInParsing = false;
       let body: object = {};
 
       if (responseData.body === undefined) {
-        captureOutput += `\t\tJSON capture not evaluated, body not defined\n`;
+        captureOutput += `\tJSON capture not evaluated, body not defined\n`;
         errorInParsing = true;
       }
 
@@ -45,7 +43,7 @@ export function captureVariables(requestData: RequestData, responseData: Respons
         try {
           body = JSON.parse(responseData.body as string);
         } catch (err) {
-          captureOutput += `\t\tJSON capture not evaluated due to error in parsing: \n\t\t${err}\n`;
+          captureOutput += `\tJSON capture not evaluated due to error in parsing: \n\t\t${err}\n`;
           errorInParsing = true;
         }
       }
@@ -67,15 +65,14 @@ export function captureVariables(requestData: RequestData, responseData: Respons
           }
 
           if (errorInJP !== undefined) {
-            captureOutput += `\t\tCould not set "${key}", error: ${errorInJP}\n`;
+            captureOutput += `\tCould not set "${key}", error: ${errorInJP}\n`;
           } else {
             captureVariable(key, value);
-            captureOutput += `\t\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
+            captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
           }
         }
       }
     } else if (test === "headers") {
-      captureOutput += "\tHEADERS: \n";
       const headerCaptures = capture[test];
 
       for (const headerName in headerCaptures) {
@@ -83,7 +80,7 @@ export function captureVariables(requestData: RequestData, responseData: Respons
         const key = headerCaptures[headerName];
 
         captureVariable(key, value);
-        captureOutput += `\t\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
+        captureOutput += `\tVariable Set : "${key}" = ${getStringIfNotScalar(value)}\n`;
       }
     } else {
       let value = test;

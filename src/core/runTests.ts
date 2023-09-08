@@ -45,14 +45,12 @@ export function runAllTests(requestData: RequestData, responseData: ResponseData
       let jsonBody: object = {};
 
       if (responseData.body === undefined) {
-        testOutput += "JSON:\n";
         testOutput += `\t${FAIL} ${GAP} JSON tests not evaluated due body being undefined\n`;
         parseError = true;
       } else {
         try {
           jsonBody = JSON.parse(responseData.body);
         } catch (err) {
-          testOutput += "JSON:\n";
           testOutput += `\t${FAIL} ${GAP} JSON tests not evaluated due to error in parsing: \n\t\t${err}\n`;
           parseError = true;
         }
@@ -62,8 +60,6 @@ export function runAllTests(requestData: RequestData, responseData: ResponseData
         testOutput += runJSONTests(tests.json, jsonBody);
       }
     } else if (test === "headers") {
-      testOutput += "\tHeaders\n";
-
       const headerTests = tests[test];
       for (const headerTest in headerTests) {
         let required = headerTests[headerTest];
@@ -73,9 +69,9 @@ export function runAllTests(requestData: RequestData, responseData: ResponseData
           required = getStringIfNotScalar(required);
           received = getStringIfNotScalar(received);
           if (received === required) {
-            testOutput += `\t\t${PASS} ${GAP} ${headerTest} : ${required}\n`;
+            testOutput += `\t${PASS} ${GAP} ${headerTest} : ${required}\n`;
           } else {
-            testOutput += `\t\t${FAIL} ${GAP} ${headerTest} : ${required} ${GAP} Received ${received}\n`;
+            testOutput += `\t${FAIL} ${GAP} ${headerTest} : ${required} ${GAP} Received ${received}\n`;
             NUM_FAILED++;
           }
           NUM_TESTS++;
@@ -103,21 +99,12 @@ export function runAllTests(requestData: RequestData, responseData: ResponseData
     }
   }
 
-  // if (NUM_FAILED === 0) {
-  //   testOutput += `\n${PASS} PASSED: ${NUM_PASSED}/${NUM_TESTS}\n`;
-  // } else if (NUM_PASSED == 0) {
-  //   testOutput += `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\n`;
-  // } else {
-  //   testOutput += `\n${FAIL} FAILED: ${NUM_FAILED}/${NUM_TESTS}\t\t${PASS} PASSED: ${NUM_PASSED}/${NUM_TESTS}\n`;
-  // }
-
   return [testOutput, NUM_FAILED, NUM_TESTS];
 }
 
 function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object): string {
   let testOutput = "";
 
-  testOutput += "\tJSON:\n";
   for (const key in jsonTests) {
     let required = jsonTests[key];
     let received = getValueForJSONTests(responseContent, key);
@@ -126,9 +113,9 @@ function runJSONTests(jsonTests: { [key: string]: any }, responseContent: object
       required = getStringIfNotScalar(required);
       received = getStringIfNotScalar(received);
       if (received === required) {
-        testOutput += `\t\t${PASS} ${GAP} ${key} : ${required}\n`;
+        testOutput += `\t${PASS} ${GAP} ${key} : ${required}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} ${key} : ${required} ${GAP} Received ${received}\n`;
+        testOutput += `\t${FAIL} ${GAP} ${key} : ${required} ${GAP} Received ${received}\n`;
         NUM_FAILED++;
       }
       NUM_TESTS++;
@@ -164,9 +151,9 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       const receivedData = getStringIfNotScalar(received);
 
       if (receivedData === compareTo) {
-        testOutput += `\t\t${PASS} ${GAP} ${keyName} == ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} ${keyName} $eq ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} ${keyName} == ${compareTo} ${GAP} Received ${receivedData}\n`;
+        testOutput += `\t${FAIL} ${GAP} ${keyName} $eq ${compareTo} ${GAP} Received ${receivedData}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$ne") {
@@ -174,37 +161,37 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       const receivedData = getStringIfNotScalar(received);
 
       if (receivedData !== compareTo) {
-        testOutput += `\t\t${PASS} ${GAP} ${keyName} != ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} ${keyName} $ne ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} ${keyName} != ${compareTo} ${GAP} Received ${receivedData}\n`;
+        testOutput += `\t${FAIL} ${GAP} ${keyName} $ne ${compareTo} ${GAP} Received ${receivedData}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$lt") {
       if (received < compareTo) {
-        testOutput += `\t\t${PASS} ${GAP} ${keyName} < ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} ${keyName} $lt ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} ${keyName} < ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
+        testOutput += `\t${FAIL} ${GAP} ${keyName} $lt ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$gt") {
       if (received > compareTo) {
-        testOutput += `\t\t${PASS} ${GAP} ${keyName} > ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} ${keyName} $gt ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} ${keyName} > ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
+        testOutput += `\t${FAIL} ${GAP} ${keyName} $gt ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$lte") {
       if (received <= compareTo) {
-        testOutput += `\t\t${PASS} ${GAP} ${keyName} <= ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} ${keyName} $lte ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} ${keyName} <= ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
+        testOutput += `\t${FAIL} ${GAP} ${keyName} $lte ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$gte") {
       if (received >= compareTo) {
-        testOutput += `\t\t${PASS} ${GAP} ${keyName} >= ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} ${keyName} $gte ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} ${keyName} >= ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
+        testOutput += `\t${FAIL} ${GAP} ${keyName} $gte ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$size") {
@@ -216,7 +203,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (!canBeNumber(compareTo)) {
-        testOutput += `\t\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not a number\n`;
+        testOutput += `\t${FAIL} ${GAP} $size of ${keyName} == ${compareTo} ${GAP} ${compareTo} is not a number\n`;
         NUM_FAILED++;
         NUM_TESTS++;
 
@@ -224,14 +211,14 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (receivedLen === parseInt(compareTo)) {
-        testOutput += `\t\t${PASS} ${GAP} size of ${keyName} == ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} size of ${keyName} == ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)} of size ${receivedLen}\n`;
+        testOutput += `\t${FAIL} ${GAP} size of ${keyName} == ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)} of size ${receivedLen}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$exists") {
       if (typeof compareTo !== "boolean") {
-        testOutput += `\t\t${FAIL} ${GAP} item exists ${GAP} ${compareTo} is not a boolean\n`;
+        testOutput += `\t${FAIL} ${GAP} item exists ${GAP} ${compareTo} is not a boolean\n`;
         NUM_FAILED++;
         NUM_TESTS++;
 
@@ -240,15 +227,15 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
 
       if ((received !== undefined) === compareTo) {
         if (compareTo === true) {
-          testOutput += `\t\t${PASS} ${GAP} ${keyName} exists\n`;
+          testOutput += `\t${PASS} ${GAP} ${keyName} exists\n`;
         } else {
-          testOutput += `\t\t${PASS} ${GAP} ${keyName} does not exist\n`;
+          testOutput += `\t${PASS} ${GAP} ${keyName} does not exist\n`;
         }
       } else {
         if (compareTo === true) {
-          testOutput += `\t\t${FAIL} ${GAP} Expected ${keyName} exists ${GAP} ${keyName} does not exist\n`;
+          testOutput += `\t${FAIL} ${GAP} Expected ${keyName} to exist ${GAP} ${keyName} does not exist\n`;
         } else {
-          testOutput += `\t\t${FAIL} ${GAP} Expected ${keyName} does not exist ${GAP} ${keyName} exists\n`;
+          testOutput += `\t${FAIL} ${GAP} Expected ${keyName} to not exist ${GAP} ${keyName} exists\n`;
         }
         NUM_FAILED++;
       }
@@ -256,9 +243,9 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       const receivedType = getType(received);
 
       if (compareTo === receivedType) {
-        testOutput += `\t\t${PASS} ${GAP} type of ${keyName} is ${compareTo}\n`;
+        testOutput += `\t${PASS} ${GAP} $type of ${keyName} is ${compareTo}\n`;
       } else {
-        testOutput += `\t\t${FAIL} ${GAP} type of ${keyName} is ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)} of type ${receivedType}\n`;
+        testOutput += `\t${FAIL} ${GAP} $type of ${keyName} is ${compareTo} ${GAP} Received ${getStringIfNotScalar(received)} of type ${receivedType}\n`;
         NUM_FAILED++;
       }
     } else if (key === "$regex" || key === "$options") {
@@ -281,7 +268,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
       }
 
       if (regexTest === undefined) {
-        testOutput += `\t\t${FAIL} ${GAP} Regex is not specified\n`;
+        testOutput += `\t${FAIL} ${GAP} Regex is not specified\n`;
         NUM_FAILED++;
       } else {
         let regexStr = getStringIfNotScalar(regexTest);
@@ -293,7 +280,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         try {
           result = regex.test(receivedData as string);
         } catch (err: any) {
-          testOutput += `\t\t${FAIL} ${GAP} Regex ${regexTest} ${GAP} Error: ${err}\n`;
+          testOutput += `\t${FAIL} ${GAP} Regex ${regexTest} ${GAP} Error: ${err}\n`;
           NUM_FAILED++;
           NUM_TESTS++;
 
@@ -301,14 +288,14 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         }
 
         if (result) {
-          testOutput += `\t\t${PASS} Regex ${regexTest} on ${keyName} is succesful\n`;
+          testOutput += `\t${PASS} Regex ${regexTest} on ${keyName} is succesful\n`;
         } else {
-          testOutput += `\t\t${PASS} Regex ${regexTest} on ${keyName} is unsuccesul\n`;
+          testOutput += `\t${PASS} Regex ${regexTest} on ${keyName} is unsuccesful\n`;
           NUM_FAILED++;
         }
       }
     } else {
-      testOutput += `\t\t${FAIL} ${GAP} ${keyName} ${key} ${compareTo} ${GAP} Invalid Operator ${key}\n`;
+      testOutput += `\t${FAIL} ${GAP} ${keyName} ${key} ${compareTo} ${GAP} Invalid Operator ${key}\n`;
       NUM_FAILED++;
     }
 
