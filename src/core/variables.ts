@@ -70,6 +70,7 @@ export function loadVarSet(dirPath: string, setName: string) {
 
 export function setVariables(varSet: { [key: string]: any }) {
   BUNDLE_VARIABLES = varSet;
+  VARIABLES = Object.assign(VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
 }
 
 export function captureVariable(key: any, value: any): void {

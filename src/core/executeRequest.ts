@@ -34,7 +34,7 @@ export function constructGotRequest(allData: RequestData): {
 
   let warnings = "";
   UNDEFINED_VARS.forEach((variable) => {
-    warnings += `🟡 WARNING: variable '${variable}' is not defined\n`;
+    warnings += `WARNING: variable '${variable}' is not defined\n`;
   });
 
   UNDEFINED_VARS.clear(); //reset the warnings
@@ -54,15 +54,23 @@ function getBody(body: any): string | undefined {
 
 export async function executeGotRequest(
   httpRequest: GotRequest,
-): Promise<[response: { [key: string]: any }, executionTime: number]> {
+): Promise<[response: { [key: string]: any }, executionTime: number, byteLength: number | undefined]> {
   const startTime = new Date().getTime();
   let responseObject: { [key: string]: any };
+  let size: number;
+
   try {
     responseObject = await httpRequest;
+    size = Buffer.byteLength(responseObject.rawBody);
   } catch (e: any) {
     const res = e.response;
     if (res) {
       responseObject = res;
+      if(res.body){
+        size = Buffer.byteLength(res.body);
+      } else {
+        size = 0;
+      }
     } else {
       let message: string;
       if (e.code === "ERR_INVALID_URL") {
@@ -72,11 +80,12 @@ export async function executeGotRequest(
       } else {
         message = e.message;
       }
-      responseObject = { body: message as string };
+      responseObject = { body: message };
+      size = Buffer.byteLength(responseObject.body);
     }
   }
   const executionTime = new Date().getTime() - startTime;
-  return [responseObject, executionTime];
+  return [responseObject, executionTime, size];
 }
 
 export function cancelGotRequest(httpRequest: GotRequest): void {

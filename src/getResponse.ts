@@ -36,7 +36,7 @@ export async function individualRequestWithProgress(
       const httpRequest = requestWithWarnings.request;
       const warnings = requestWithWarnings.warnings;
 
-      const [httpResponse, executionTime] = await executeGotRequest(httpRequest);
+      const [httpResponse, executionTime, size] = await executeGotRequest(httpRequest);
 
       // displaying rawHeaders, testing against headers
       const response = {
@@ -58,24 +58,26 @@ export async function individualRequestWithProgress(
 
         const [testOutput, NUM_FAILED, NUM_TESTS] = runAllTests(requestData, response);
         const NUM_PASSED = NUM_TESTS - NUM_FAILED;
-        
-        if (NUM_FAILED == 0){
-          outputChannel.appendLine(`[info]  "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+
+        if (NUM_FAILED == 0) {
+          outputChannel.appendLine(
+            `[info]  "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+          );
         } else {
-          outputChannel.appendLine(`[error] "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+          outputChannel.appendLine(
+            `[error] "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+          );
           outputChannel.append(testOutput);
         }
         outputChannel.appendLine("");
 
         const captureOutput = captureVariables(requestData, response);
-        if(captureOutput != ""){
+        if (captureOutput != "") {
           outputChannel.append(captureOutput);
-          outputChannel.appendLine("")
+          outputChannel.appendLine("");
         }
 
-        if (testOutput != "" || captureOutput != "") {
-          outputChannel.show();
-        }
+        outputChannel.show();
       }
 
       return [cancelled, response];
@@ -128,7 +130,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         const warning = requestWithWarnings.warnings;
         warnings.add(warning);
 
-        const [httpResponse, executionTime] = await executeGotRequest(currHttpRequest);
+        const [httpResponse, executionTime, size] = await executeGotRequest(currHttpRequest);
 
         const response = {
           executionTime: executionTime + " ms",
@@ -143,24 +145,26 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
           const [testOutput, NUM_FAILED, NUM_TESTS] = runAllTests(requestData, response);
           const NUM_PASSED = NUM_TESTS - NUM_FAILED;
-          
-          if (NUM_FAILED == 0){
-            outputChannel.appendLine(`[info]  "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+
+          if (NUM_FAILED == 0) {
+            outputChannel.appendLine(
+              `[info]  "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+            );
           } else {
-            outputChannel.appendLine(`[error] "${requestData.name}" status: ${response.status} time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`);
+            outputChannel.appendLine(
+              `[error] "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+            );
             outputChannel.append(testOutput);
           }
           outputChannel.appendLine("");
 
           const captureOutput = captureVariables(requestData, response);
-          if(captureOutput != ""){
+          if (captureOutput != "") {
             outputChannel.append(captureOutput);
-            outputChannel.appendLine("")
+            outputChannel.appendLine("");
           }
 
-          if (testOutput != "" || captureOutput != "") {
-            outputChannel.show();
-          }
+          outputChannel.show();
         }
 
         responses.push({ cancelled: cancelled, name: name, response: response });
