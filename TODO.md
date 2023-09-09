@@ -2,9 +2,18 @@
 
 * Icon for the extension (Vasan)
 * Bundle using webpack (Vasan)
-* Menu item for show headers etc. (Varun)
 * Fix circular dependencies (Varun)
 * Review READMEs, LICENCE and schemas one last time (Vasan)
+* Content-Type: application/json has set while importing Postman (Vasan)
+* Really need the curl command (to just know what will be done) (Varun)
+* Can make use of output window a lot more rather than new text editor windows (Varun)
+* Would be nice to warn to use $eq when using an object comparison (Varun)
+* Need not show headers on run all (Varun)
+* Include an example yaml in the vscode readme (extensive help can be in zzapi-core) (Vasan)
+* Regex match failure shows as info instead of error (Varun)
+* Need not have a line break after each request (Varun)
+* Debug capture can be removed (Varun)
+* Let us add method to status line (Varun)
 
 # Improvements
 
