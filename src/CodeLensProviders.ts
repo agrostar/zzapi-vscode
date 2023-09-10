@@ -37,6 +37,7 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
 
       if (range) {
         let newCodeLens: vscode.CodeLens;
+        let curlCodelens: vscode.CodeLens | undefined = undefined;
         if (name === undefined) {
           newCodeLens = new vscode.CodeLens(range, {
             title: "↪ Run all requests",
@@ -50,8 +51,17 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             command: "extension.runRequest",
             arguments: [name],
           });
+          curlCodelens = new vscode.CodeLens(range, {
+            title: `Show curl`,
+            tooltip: `Click to show the curl of '${name}'`,
+            command: "extension.showCurl",
+            arguments: [name]
+          });
         }
         this.codeLenses.push(newCodeLens);
+        if(curlCodelens !== undefined){
+          this.codeLenses.push(curlCodelens);
+        }
       }
     });
 

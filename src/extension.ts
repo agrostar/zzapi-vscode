@@ -11,7 +11,7 @@ import {
 } from "vscode";
 
 import { CodeLensProvider } from "./CodeLensProviders";
-import { runRequestCommand, runAllRequestsCommand } from "./registerRequests";
+import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./registerRequests";
 import { importPostmanCommand } from "./runImportPostman";
 import {
   createEnvironmentSelector,
@@ -70,6 +70,9 @@ export function activate(context: ExtensionContext): void {
   });
   commands.registerCommand("extension.showRecentHeaders", async () => {
     await showRecentHeaders();
+  });
+  commands.registerCommand("extension.showCurl", (name) => {
+    showCurlCommand(name);
   });
 }
 

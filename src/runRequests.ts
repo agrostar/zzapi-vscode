@@ -22,7 +22,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
   }
   allData.headers = Object.assign(
     { "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string) },
-    allData.headers,
+    allData.headers === undefined ? {} : allData.headers,
   );
 
   const [cancelled, responseData] = await individualRequestWithProgress(allData);

@@ -41,7 +41,7 @@ export function constructGotRequest(allData: RequestData): {
   return { request: got(completeUrl, options), warnings: warnings };
 }
 
-function getBody(body: any): string | undefined {
+export function getBody(body: any): string | undefined {
   if (body === undefined) {
     return undefined;
   }
