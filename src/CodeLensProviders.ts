@@ -55,11 +55,11 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             title: `➰ Show curl`,
             tooltip: `Click to show the curl of '${name}'`,
             command: "extension.showCurl",
-            arguments: [name]
+            arguments: [name],
           });
         }
         this.codeLenses.push(newCodeLens);
-        if(curlCodelens !== undefined){
+        if (curlCodelens !== undefined) {
           this.codeLenses.push(curlCodelens);
         }
       }

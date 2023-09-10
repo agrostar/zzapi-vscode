@@ -1,8 +1,6 @@
 import * as YAML from "yaml";
 
-import {
-  getRecentHeadersData
-} from "./showInEditor";
+import { getRecentHeadersData } from "./showInEditor";
 import { getCapturedVariables, getVariables } from "./core/variables";
 import { getOutputChannel } from "./extension";
 
@@ -20,7 +18,7 @@ export async function showVariables() {
     content +=
       "No variables stored.\nRunning a request may store the associated variables, if any are defined";
     content += "----------\n";
-    } else {
+  } else {
     content = "";
 
     content += "----------\n";
@@ -53,7 +51,7 @@ export async function showRecentHeaders() {
 
   const outputChannel = getOutputChannel();
   outputChannel.appendLine("----------");
-  if(reqName !== undefined){
+  if (reqName !== undefined) {
     outputChannel.appendLine(`[debug] headers of ${reqName}`);
   }
   outputChannel.append(headers);

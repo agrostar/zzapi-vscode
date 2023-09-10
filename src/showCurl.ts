@@ -1,9 +1,11 @@
 import { getCurlRequest } from "./core/constructCurl";
 import { getRequestsData } from "./core/parseBundle";
+import { replaceVariablesInRequest } from "./core/variables";
 import { getExtensionVersion, getOutputChannel } from "./extension";
 
-export function showCurl(text: string, name: string){
-  const request = getRequestsData(text, name)[name];
+export function showCurl(text: string, name: string) {
+  let request = getRequestsData(text, name)[name];
+  request = replaceVariablesInRequest(request);
   request.headers = Object.assign(
     { "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string) },
     request.headers === undefined ? {} : request.headers,

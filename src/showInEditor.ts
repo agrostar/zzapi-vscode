@@ -162,10 +162,7 @@ async function showContent(
 
   const bodyDoc = OPEN_DOCS.body;
 
-  if (
-    bodyDoc === undefined ||
-    !isOpenAndUntitled(bodyDoc)
-  ) {
+  if (bodyDoc === undefined || !isOpenAndUntitled(bodyDoc)) {
     // insert a new group to the right, insert the content
     commands.executeCommand("workbench.action.newGroupRight");
     await openDocument(bodyContent, bodyLanguage);
@@ -179,8 +176,8 @@ async function showContent(
     OPEN_DOCS.body = bodyDoc;
   }
 
-  if(name !== undefined){
-    if(showHeaders){
+  if (name !== undefined) {
+    if (showHeaders) {
       const outputChannel = getOutputChannel();
 
       outputChannel.appendLine("----------");
