@@ -6,14 +6,14 @@
 * Review READMEs, LICENCE and schemas one last time (Vasan)
 * Content-Type: application/json has set while importing Postman (Vasan)
 * Really need the curl command (to just know what will be done) (Varun)
-* Can make use of output window a lot more rather than new text editor windows (Varun)
-* Would be nice to warn to use $eq when using an object comparison (Varun)
-* Need not show headers on run all (Varun)
+* Can make use of output window a lot more rather than new text editor windows (Varun) (Done)
+* Would be nice to warn to use $eq when using an object comparison (Varun) (Done)
+* Need not show headers on run all (Varun) (Done)
 * Include an example yaml in the vscode readme (extensive help can be in zzapi-core) (Vasan)
-* Regex match failure shows as info instead of error (Varun)
-* Need not have a line break after each request (Varun)
-* Debug capture can be removed (Varun)
-* Let us add method to status line (Varun)
+* Regex match failure shows as info instead of error (Varun) (Done)
+* Need not have a line break after each request (Varun) (Done)
+* Debug capture can be removed (Varun) (Done)
+* Let us add method to status line (Varun) (Done)
 
 # Improvements
 

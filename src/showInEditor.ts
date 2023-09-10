@@ -6,7 +6,7 @@ import { getActiveVarSet } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
 
 const KEYS_IN_BODY = ["body"];
-const KEYS_IN_HEADERS = ["executionTime", "status", "rawHeaders"];
+const KEYS_IN_HEADERS = ["rawHeaders"];
 
 export async function openEditorForIndividualReq(
   responseData: ResponseData,
@@ -116,9 +116,9 @@ export function isOpenAndUntitled(document: TextDocument): boolean {
 }
 
 let MOST_RECENT_HEADERS: string | undefined = undefined;
-let MOST_RECENT_HEADERS_LANG: string | undefined = undefined;
+let MOST_RECENT_REQUEST_NAME: string | undefined = undefined;
 export function getRecentHeadersData() {
-  return [MOST_RECENT_HEADERS, MOST_RECENT_HEADERS_LANG];
+  return [MOST_RECENT_HEADERS, MOST_RECENT_REQUEST_NAME];
 }
 
 /**
@@ -210,6 +210,8 @@ async function showContent(
     }
   }
 
-  MOST_RECENT_HEADERS = headersContent;
-  MOST_RECENT_HEADERS_LANG = headersLanguage;
+  if(name !== undefined){
+    MOST_RECENT_HEADERS = headersContent;
+    MOST_RECENT_REQUEST_NAME = name;
+  }
 }

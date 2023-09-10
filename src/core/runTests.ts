@@ -142,8 +142,16 @@ function getValueForJSONTests(responseContent: object, key: string): any {
 }
 
 //if RHS is an object
+const VALID_KEYS = ["$eq", "$ne", "$gt", "$lt", "$lte", "$gte", "$regex", "$options", "$size", "$exists", "$type"];
 function runObjectTests(required: { [key: string]: any }, received: any, keyName: string): string {
   let testOutput = "";
+  for(const key in required){
+    if(!VALID_KEYS.includes(key)){
+      testOutput += "[warning] these tests include invalid keys, ";
+      testOutput += "note that for direct object comparisons, we must use $eq\n";
+      break;
+    }  
+  }
 
   let regexRan = false;
 
@@ -305,7 +313,7 @@ function runObjectTests(required: { [key: string]: any }, received: any, keyName
         if (result) {
           testOutput += `\t${PASS} Regex ${regexTest} on ${keyName} is succesful\n`;
         } else {
-          testOutput += `\t${PASS} Regex ${regexTest} on ${keyName} is unsuccesful\n`;
+          testOutput += `\t${FAIL} Regex ${regexTest} on ${keyName} is unsuccesful\n`;
           NUM_FAILED++;
         }
       }

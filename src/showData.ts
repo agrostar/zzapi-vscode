@@ -1,16 +1,10 @@
 import * as YAML from "yaml";
 
-import { TextDocument, commands, window } from "vscode";
-
 import {
-  getRecentHeadersData,
-  isOpenAndUntitled,
-  openDocument,
-  replaceContent,
+  getRecentHeadersData
 } from "./showInEditor";
 import { getCapturedVariables, getVariables } from "./core/variables";
-
-let VAR_DOCUMENT: TextDocument | undefined = undefined;
+import { getOutputChannel } from "./extension";
 
 export async function showVariables() {
   const variables = getVariables();
@@ -19,64 +13,50 @@ export async function showVariables() {
   const varSize = Object.keys(variables).length;
   const capSize = Object.keys(capturedVars).length;
 
-  let content: string;
-  let language = undefined;
+  let content: string = "";
 
   if (varSize <= 0 && capSize <= 0) {
-    content =
+    content += "------\n";
+    content +=
       "No variables stored.\nRunning a request may store the associated variables, if any are defined";
-  } else {
+    content += "------\n";
+    } else {
     content = "";
 
-    content += "# Current Loaded Variables: variables currently considered by the bundle\n";
-    content += "# Captured Variables: variables stored as a result of captures\n";
-    content += "---\n";
+    content += "------\n";
     if (varSize > 0) {
+      content += "# Current Loaded Variables: variables currently considered by the bundle\n";
       content += YAML.stringify({ "Current Loaded Variables": variables });
     } else {
       content += YAML.stringify({ "Current Loaded Variables": "NONE" });
     }
 
-    content += "---\n";
+    content += "------\n";
+    content += "# Captured Variables: variables stored as a result of captures\n";
     if (capSize > 0) {
       content += YAML.stringify({ "Captured Variables": capturedVars });
     } else {
       content += YAML.stringify({ "Captured Variables": "NONE" });
     }
-    content += "---";
-
-    language = "yaml";
+    content += "------\n";
   }
 
-  if (VAR_DOCUMENT === undefined || !isOpenAndUntitled(VAR_DOCUMENT)) {
-    commands.executeCommand("workbench.action.newGroupRight");
-
-    await openDocument(content, language);
-    if (window.activeTextEditor !== undefined) {
-      VAR_DOCUMENT = window.activeTextEditor.document;
-    }
-  } else {
-    await replaceContent(VAR_DOCUMENT, content, language);
-  }
+  getOutputChannel().append(content);
+  getOutputChannel().show();
 }
 
-let HEADERS_DOC: TextDocument | undefined = undefined;
-
 export async function showRecentHeaders() {
-  let [headers, headersLang] = getRecentHeadersData();
+  let [headers, reqName] = getRecentHeadersData();
   if (headers === undefined) {
     headers = "No headers stored, run a request and try again";
-    headersLang = undefined;
   }
 
-  if (HEADERS_DOC === undefined || !isOpenAndUntitled(HEADERS_DOC)) {
-    commands.executeCommand("workbench.action.newGroupRight");
-    await openDocument(headers, headersLang);
-
-    if (window.activeTextEditor !== undefined) {
-      HEADERS_DOC = window.activeTextEditor.document;
-    }
-  } else {
-    await replaceContent(HEADERS_DOC, headers, headersLang);
+  const outputChannel = getOutputChannel();
+  outputChannel.appendLine("------");
+  if(reqName !== undefined){
+    outputChannel.appendLine(`[debug] headers of ${reqName}`);
   }
+  outputChannel.append(headers);
+  outputChannel.appendLine("------");
+  outputChannel.show();
 }

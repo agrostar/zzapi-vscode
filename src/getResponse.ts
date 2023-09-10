@@ -60,22 +60,19 @@ export async function individualRequestWithProgress(
         const NUM_PASSED = NUM_TESTS - NUM_FAILED;
 
         if (NUM_FAILED == 0) {
-          outputChannel.appendLine(
-            `[info]  "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
-          );
+          outputChannel.append("[info]  ");
         } else {
-          outputChannel.appendLine(
-            `[error] "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
-          );
+          outputChannel.append("[error] ");
+        }
+        outputChannel.appendLine(
+          `'${requestData.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+        );
+        if (NUM_FAILED != 0) {
           outputChannel.append(testOutput);
         }
-        outputChannel.appendLine("");
 
-        const captureOutput = captureVariables(requestData, response);
-        if (captureOutput != "") {
-          outputChannel.append(captureOutput);
-          outputChannel.appendLine("");
-        }
+        captureVariables(requestData, response);
+        // outputChannel.append(captureOutput);
 
         outputChannel.show();
       }
@@ -147,22 +144,19 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           const NUM_PASSED = NUM_TESTS - NUM_FAILED;
 
           if (NUM_FAILED == 0) {
-            outputChannel.appendLine(
-              `[info]  "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
-            );
+            outputChannel.append("[info]  ");
           } else {
-            outputChannel.appendLine(
-              `[error] "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
-            );
+            outputChannel.append("[error] ");
+          }
+          outputChannel.appendLine(
+            `'${requestData.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+          );
+          if (NUM_FAILED != 0) {
             outputChannel.append(testOutput);
           }
-          outputChannel.appendLine("");
 
-          const captureOutput = captureVariables(requestData, response);
-          if (captureOutput != "") {
-            outputChannel.append(captureOutput);
-            outputChannel.appendLine("");
-          }
+          captureVariables(requestData, response);
+          // outputChannel.append(captureOutput);
 
           outputChannel.show();
         }
