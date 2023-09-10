@@ -66,11 +66,11 @@
     "yamlValidation":[
       {
         "fileMatch": ["*.zzb"],
-        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzb.schema.json"
+        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-bundle.schema.json"
       },
       {
         "fileMatch": ["*.zzv"],
-        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzv.schema.json"
+        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-varset.schema.json"
       }
     ],
     "languages": [
