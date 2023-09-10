@@ -1,14 +1,14 @@
 import { window, ProgressLocation } from "vscode";
 
 import { getOutputChannel } from "./extension";
-import { ResponseData, RequestData, GotRequest } from "./core/models";
+import { ResponseData, RequestSpec, GotRequest } from "./core/models";
 import { cancelGotRequest, constructGotRequest, executeGotRequest } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 import { replaceVariablesInRequest } from "./core/variables";
 
 export async function individualRequestWithProgress(
-  requestData: RequestData,
+  requestData: RequestSpec,
 ): Promise<[boolean, ResponseData]> {
   let seconds = 0;
 
@@ -65,7 +65,7 @@ export async function individualRequestWithProgress(
           outputChannel.append(`${new Date().toLocaleString()} [error] `);
         }
         outputChannel.appendLine(
-          `'${requestData.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+          `'${requestData.httpRequest.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
         );
         if (NUM_FAILED != 0) {
           outputChannel.append(testOutput);
@@ -84,7 +84,7 @@ export async function individualRequestWithProgress(
   return [cancelled, response];
 }
 
-export async function allRequestsWithProgress(allRequests: { [name: string]: RequestData }) {
+export async function allRequestsWithProgress(allRequests: { [name: string]: RequestSpec }) {
   let currHttpRequest: GotRequest;
   let currRequestName: string = "";
 
@@ -149,7 +149,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
             outputChannel.append(`${new Date().toLocaleString()} [error] `);
           }
           outputChannel.appendLine(
-            `'${requestData.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
+            `'${requestData.httpRequest.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
           );
           if (NUM_FAILED != 0) {
             outputChannel.append(testOutput);

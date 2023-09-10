@@ -6,7 +6,7 @@
 
 import * as YAML from "yaml";
 
-import { Request, RequestData, RequestPosition } from "./models";
+import { Request, RequestSpec, RequestPosition } from "./models";
 import { getMergedData } from "./combineData";
 import { checkCommonType, checkRequestType, checkVariables } from "./checkTypes";
 import { setVariables } from "./variables";
@@ -67,11 +67,11 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
 
 /**
  * @param document the yaml document to parse to form the requests
- * @param name optional parameter. If specified, we only store the RequestData of this request
- * @returns An object of type { [name: string]: RequestData } where each value is the data
+ * @param name optional parameter. If specified, we only store the RequestSpec of this request
+ * @returns An object of type { [name: string]: RequestSpec } where each value is the data
  *  of a request of the name key
  */
-export function getRequestsData(document: string, name?: string): { [name: string]: RequestData } {
+export function getRequestsData(document: string, name?: string): { [name: string]: RequestSpec } {
   const parsedData = YAML.parse(document);
   if (parsedData === undefined) {
     return {};
@@ -86,7 +86,7 @@ export function getRequestsData(document: string, name?: string): { [name: strin
     setVariables(variables);
   }
 
-  const requests: { [name: string]: RequestData } = {};
+  const requests: { [name: string]: RequestSpec } = {};
 
   const commonData = parsedData.common;
   if (commonData !== undefined) {
@@ -108,7 +108,7 @@ export function getRequestsData(document: string, name?: string): { [name: strin
     if (!valid) {
       throw new Error(`Error in request '${name}': ${error}`);
     }
-    const allData: RequestData = getMergedData(commonData, request);
+    const allData: RequestSpec = getMergedData(commonData, request);
     requests[name] = allData;
   }
 

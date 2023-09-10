@@ -7,7 +7,7 @@
 
 import got from "got";
 
-import { GotRequest, Param, RequestData } from "./models";
+import { GotRequest, Param, RequestSpec } from "./models";
 import { replaceVariables } from "./variables";
 
 let UNDEFINED_VARS = new Set<string>();
@@ -15,16 +15,20 @@ export function appendUndefinedVars(warning: string) {
   UNDEFINED_VARS.add(warning);
 }
 
-export function constructGotRequest(allData: RequestData): {
+export function constructGotRequest(allData: RequestSpec): {
   request: GotRequest;
   warnings: string;
 } {
-  const completeUrl = getURL(allData.url, "", getParamsForUrl(allData.params));
+  const completeUrl = getURL(
+    allData.httpRequest.url,
+    "",
+    getParamsForUrl(allData.httpRequest.params),
+  );
 
   const options = {
-    method: allData.method,
-    body: getBody(allData.body),
-    headers: allData.headers,
+    method: allData.httpRequest.method,
+    body: getBody(allData.httpRequest.body),
+    headers: allData.httpRequest.headers,
     followRedirect: allData.options?.follow,
 
     https: {

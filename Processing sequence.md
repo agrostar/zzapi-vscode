@@ -26,8 +26,12 @@ Processing sequence
 Structs
 -------
 RequestSpec: {
+    name: name
     httpRequest: {
         method, URL, headers, params, body
+    },
+    options: {
+        follow, verifySSL, showHeaders, formatJSON
     },
     tests: {
         status, body, json, headers

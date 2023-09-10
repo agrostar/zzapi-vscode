@@ -1,6 +1,6 @@
 import { replaceVariables } from "./variables";
 import {
-  RequestData,
+  RequestSpec,
   Request,
   Common,
   Header,
@@ -12,7 +12,7 @@ import {
 } from "./models";
 import { getURL } from "./executeRequest";
 
-export function getMergedData(common: Common | undefined, request: Request): RequestData {
+export function getMergedData(common: Common | undefined, request: Request): RequestSpec {
   // making deep copies of the objects because we will be deleting some data
   let commonData =
     common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as Common);
@@ -21,9 +21,9 @@ export function getMergedData(common: Common | undefined, request: Request): Req
   return getAllMergedData(commonData, requestData);
 }
 
-function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestData {
+function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestSpec {
   const name = requestData.name;
-  const completeUrl = getCompleteUrl(commonData, requestData); // variables replaced
+  const url = getCompleteUrl(commonData, requestData); // variables replaced
 
   const method = requestData.method;
   const params = getMergedParams(commonData?.params, requestData.params);
@@ -34,14 +34,15 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
   const tests = getMergedTests(commonData?.tests, requestData.tests); // variables replaced
   const captures = getMergedCaptures(commonData?.capture, requestData.capture);
 
-  const mergedData: RequestData = {
+  const mergedData: RequestSpec = {
     name: name,
-    url: completeUrl,
-
-    params: params,
-    method: method,
-    headers: headers,
-    body: body,
+    httpRequest: {
+      url: url,
+      method: method,
+      params: params,
+      headers: headers,
+      body: body,
+    },
     options: options,
     tests: tests,
     captures: captures,

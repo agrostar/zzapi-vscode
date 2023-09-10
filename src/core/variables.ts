@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as YAML from "yaml";
 
-import { RequestData } from "./models";
+import { RequestSpec } from "./models";
 import { appendUndefinedVars } from "./executeRequest";
 
 const VARFILE_EXTENSION = ".zzv";
@@ -99,7 +99,7 @@ function replaceVariablesInNonScalar(data: { [key: string]: any } | Array<any>) 
   }
 }
 
-function replaceVariablesInArray(data: Array<any>) {
+function replaceVariablesInArray(data: Array<any>): Array<any> {
   let newData: Array<any> = [];
 
   data.forEach((item) => {
@@ -136,15 +136,15 @@ function replaceVariablesInObject(objectData: { [key: string]: any }): {
   return objectData;
 }
 
-export function replaceVariablesInRequest(request: RequestData): RequestData {
-  type keyOfRequestData = keyof RequestData;
+export function replaceVariablesInRequest(request: RequestSpec): RequestSpec {
+  type keyOfRequestData = keyof RequestSpec;
   for (const key in request) {
     const reqVal = request[key as keyOfRequestData];
     if (typeof reqVal === "object") {
       if (Array.isArray(reqVal)) {
-        request[key as keyOfRequestData] = replaceVariablesInArray(reqVal);
+        (request as any)[key as keyOfRequestData] = replaceVariablesInArray(reqVal);
       } else {
-        request[key as keyOfRequestData] = replaceVariablesInObject(reqVal);
+        (request as any)[key as keyOfRequestData] = replaceVariablesInObject(reqVal);
       }
     } else if (typeof reqVal === "string") {
       request[key as keyOfRequestData] = replaceVariablesInString(reqVal as string);

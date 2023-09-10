@@ -1,20 +1,20 @@
 import { getBody, getParamsForUrl, getURL } from "./executeRequest";
-import { RequestData } from "./models";
+import { RequestSpec } from "./models";
 import { replaceVariablesInRequest } from "./variables";
 
-export function getCurlRequest(request: RequestData): string {
+export function getCurlRequest(request: RequestSpec): string {
   request = replaceVariablesInRequest(request);
 
-  const methodFlag = ` -X ${request.method.toUpperCase()}`;
+  const methodFlag = ` -X ${request.httpRequest.method.toUpperCase()}`;
   let headersFlag = "";
-  if (request.headers !== undefined) {
-    for (const header in request.headers) {
-      headersFlag += ` -H '${header}: ${request.headers[header]}'`;
+  if (request.httpRequest.headers !== undefined) {
+    for (const header in request.httpRequest.headers) {
+      headersFlag += ` -H '${header}: ${request.httpRequest.headers[header]}'`;
     }
   }
   let bodyFlag = "";
-  if (request.body !== undefined) {
-    bodyFlag += ` -d '${getBody(request.body)}'`;
+  if (request.httpRequest.body !== undefined) {
+    bodyFlag += ` -d '${getBody(request.httpRequest.body)}'`;
   }
 
   let followRedirectFlag = "";
@@ -27,7 +27,11 @@ export function getCurlRequest(request: RequestData): string {
     verifySSLFlag = " -k";
   }
 
-  const url = ` '${getURL(request.url, "", getParamsForUrl(request.params))}'`;
+  const url = ` '${getURL(
+    request.httpRequest.url,
+    "",
+    getParamsForUrl(request.httpRequest.params),
+  )}'`;
 
   const finalCurl =
     "curl" + methodFlag + headersFlag + bodyFlag + followRedirectFlag + verifySSLFlag + url;

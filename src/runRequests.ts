@@ -1,6 +1,6 @@
 import { window } from "vscode";
 
-import { RequestData, ResponseData } from "./core/models";
+import { RequestSpec, ResponseData } from "./core/models";
 import { getRequestsData } from "./core/parseBundle";
 import { loadVarSet } from "./core/variables";
 
@@ -15,14 +15,14 @@ export async function runIndividualRequest(text: string, name: string): Promise<
   /*
   Also loads the bundle vars, along with getting the data
   */
-  const allData: RequestData = getRequestsData(text, name)[name];
+  const allData: RequestSpec = getRequestsData(text, name)[name];
 
   if (allData === undefined) {
     return;
   }
-  allData.headers = Object.assign(
+  allData.httpRequest.headers = Object.assign(
     { "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string) },
-    allData.headers === undefined ? {} : allData.headers,
+    allData.httpRequest.headers === undefined ? {} : allData.httpRequest.headers,
   );
 
   const [cancelled, responseData] = await individualRequestWithProgress(allData);
@@ -45,9 +45,9 @@ export async function runAllRequests(text: string): Promise<void> {
   const allRequests = getRequestsData(text);
 
   for (const name in allRequests) {
-    allRequests[name].headers = Object.assign(
+    allRequests[name].httpRequest.headers = Object.assign(
       { "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string) },
-      allRequests[name].headers,
+      allRequests[name].httpRequest.headers,
     );
   }
 

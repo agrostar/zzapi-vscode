@@ -5,7 +5,7 @@
 
 import jp from "jsonpath";
 
-import { RequestData, ResponseData, Tests } from "./models";
+import { RequestSpec, ResponseData, Tests } from "./models";
 
 const GAP = "\t|";
 const FAIL = "[error] ";
@@ -23,7 +23,7 @@ function getStringIfNotScalar(data: any) {
 }
 
 export function runAllTests(
-  requestData: RequestData,
+  requestData: RequestSpec,
   responseData: ResponseData,
 ): [string, number, number] {
   const tests = requestData.tests;

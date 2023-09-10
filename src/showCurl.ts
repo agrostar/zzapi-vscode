@@ -5,9 +5,9 @@ import { getExtensionVersion, getOutputChannel } from "./extension";
 export function showCurl(text: string, name: string) {
   let request = getRequestsData(text, name)[name];
 
-  request.headers = Object.assign(
+  request.httpRequest.headers = Object.assign(
     { "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string) },
-    request.headers === undefined ? {} : request.headers,
+    request.httpRequest.headers === undefined ? {} : request.httpRequest.headers,
   );
   const curlCommand = getCurlRequest(request);
 

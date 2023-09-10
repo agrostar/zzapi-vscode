@@ -1,6 +1,6 @@
 /**
  * MODELS PROVIDED TO CALLER
- * @interface RequestData
+ * @interface RequestSpec
  * @type GotRequest
  */
 
@@ -76,14 +76,15 @@ export interface Request {
 }
 
 // the combined data that completely defines any request
-export interface RequestData {
+export interface RequestSpec {
   name: string;
-  url: string;
-
-  method: Method;
-  params?: Array<Param>,
-  headers?: { [key: string]: string };
-  body?: any;
+  httpRequest: {
+    url: string;
+    method: Method;
+    params?: Array<Param>;
+    headers?: { [key: string]: string };
+    body?: any;
+  };
   options: Options;
   tests?: Tests;
   captures?: Captures;

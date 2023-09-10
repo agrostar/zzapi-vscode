@@ -6,7 +6,7 @@
 import jp from "jsonpath";
 
 import { captureVariable } from "./variables";
-import { ResponseData, RequestData, Captures } from "./models";
+import { ResponseData, RequestSpec, Captures } from "./models";
 
 export function getStringIfNotScalar(data: any) {
   if (typeof data === "object") {
@@ -16,7 +16,7 @@ export function getStringIfNotScalar(data: any) {
   return data;
 }
 
-export function captureVariables(requestData: RequestData, responseData: ResponseData): string {
+export function captureVariables(requestData: RequestSpec, responseData: ResponseData): string {
   const name = requestData.name;
   const capture = requestData.captures;
 
