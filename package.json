@@ -9,15 +9,23 @@
     "vscode": "^1.79.0"
   },
   "categories": [
-    "Programming Languages", "Snippets", "Testing"
+    "Programming Languages",
+    "Snippets",
+    "Testing"
   ],
   "keywords": [
-    "api", "rest", "http", "client", "postman", "testing", "api documentation"
+    "api",
+    "rest",
+    "http",
+    "client",
+    "postman",
+    "testing",
+    "api documentation"
   ],
   "activationEvents": [
     "workspaceContains:**/*.zzb"
   ],
-  "main": "./out/extension.js",
+  "main": "out/extension.js",
   "icon": "images/zzapi.jpg",
   "contributes": {
     "commands": [
@@ -64,13 +72,17 @@
       ]
     },
     "configuration": {},
-    "yamlValidation":[
+    "yamlValidation": [
       {
-        "fileMatch": ["*.zzb"],
+        "fileMatch": [
+          "*.zzb"
+        ],
         "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-bundle.schema.json"
       },
       {
-        "fileMatch": ["*.zzv"],
+        "fileMatch": [
+          "*.zzv"
+        ],
         "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-varset.schema.json"
       }
     ],
@@ -78,7 +90,8 @@
       {
         "id": "yaml",
         "extensions": [
-          ".zzb", ".zzv"
+          ".zzb",
+          ".zzv"
         ]
       }
     ]

@@ -1,0 +1,10 @@
+.vscode
+src/
+tsconfig.json
+TODO.md
+.gitignore
+vsc-extension-quickstart.md
+**/tsconfig.json
+**/.eslintrc.json
+**/*.map
+**/*.ts
