@@ -52,7 +52,7 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             arguments: [name],
           });
           curlCodelens = new vscode.CodeLens(range, {
-            title: `Show curl`,
+            title: `➰ Show curl`,
             tooltip: `Click to show the curl of '${name}'`,
             command: "extension.showCurl",
             arguments: [name]

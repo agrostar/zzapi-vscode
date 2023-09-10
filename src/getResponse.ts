@@ -60,9 +60,9 @@ export async function individualRequestWithProgress(
         const NUM_PASSED = NUM_TESTS - NUM_FAILED;
 
         if (NUM_FAILED == 0) {
-          outputChannel.append("[info]  ");
+          outputChannel.append(`${new Date().toLocaleString()} [info]  `);
         } else {
-          outputChannel.append("[error] ");
+          outputChannel.append(`${new Date().toLocaleString()} [error] `);
         }
         outputChannel.appendLine(
           `'${requestData.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
@@ -144,9 +144,9 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           const NUM_PASSED = NUM_TESTS - NUM_FAILED;
 
           if (NUM_FAILED == 0) {
-            outputChannel.append("[info]  ");
+            outputChannel.append(`${new Date().toLocaleString()} [info]  `);
           } else {
-            outputChannel.append("[error] ");
+            outputChannel.append(`${new Date().toLocaleString()} [error] `);
           }
           outputChannel.appendLine(
             `'${requestData.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,

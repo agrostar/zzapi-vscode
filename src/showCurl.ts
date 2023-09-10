@@ -11,9 +11,9 @@ export function showCurl(text: string, name: string){
   const curlCommand = getCurlRequest(request);
 
   const outputChannel = getOutputChannel();
-  outputChannel.appendLine("------");
-  outputChannel.appendLine(`[info] CURL OF "${name}":`);
+  outputChannel.appendLine("----------");
+  outputChannel.appendLine(`${new Date().toLocaleString()} CURL OF "${name}":`);
   outputChannel.appendLine(curlCommand);
-  outputChannel.appendLine("------");
+  outputChannel.appendLine("----------");
   outputChannel.show();
 }

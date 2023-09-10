@@ -16,14 +16,14 @@ export async function showVariables() {
   let content: string = "";
 
   if (varSize <= 0 && capSize <= 0) {
-    content += "------\n";
+    content += "----------\n";
     content +=
       "No variables stored.\nRunning a request may store the associated variables, if any are defined";
-    content += "------\n";
+    content += "----------\n";
     } else {
     content = "";
 
-    content += "------\n";
+    content += "----------\n";
     if (varSize > 0) {
       content += "# Current Loaded Variables: variables currently considered by the bundle\n";
       content += YAML.stringify({ "Current Loaded Variables": variables });
@@ -31,14 +31,14 @@ export async function showVariables() {
       content += YAML.stringify({ "Current Loaded Variables": "NONE" });
     }
 
-    content += "------\n";
+    content += "----------\n";
     content += "# Captured Variables: variables stored as a result of captures\n";
     if (capSize > 0) {
       content += YAML.stringify({ "Captured Variables": capturedVars });
     } else {
       content += YAML.stringify({ "Captured Variables": "NONE" });
     }
-    content += "------\n";
+    content += "----------\n";
   }
 
   getOutputChannel().append(content);
@@ -52,11 +52,11 @@ export async function showRecentHeaders() {
   }
 
   const outputChannel = getOutputChannel();
-  outputChannel.appendLine("------");
+  outputChannel.appendLine("----------");
   if(reqName !== undefined){
     outputChannel.appendLine(`[debug] headers of ${reqName}`);
   }
   outputChannel.append(headers);
-  outputChannel.appendLine("------");
+  outputChannel.appendLine("----------");
   outputChannel.show();
 }

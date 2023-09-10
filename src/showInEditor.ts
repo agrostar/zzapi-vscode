@@ -4,6 +4,7 @@ import * as YAML from "yaml";
 
 import { getActiveVarSet } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
+import { getOutputChannel } from "./extension";
 
 const KEYS_IN_BODY = ["body"];
 const KEYS_IN_HEADERS = ["rawHeaders"];
@@ -84,8 +85,7 @@ function getDataOfIndReqAsString(
 
 let OPEN_DOCS: {
   body: TextDocument | undefined;
-  headers: TextDocument | undefined;
-} = { body: undefined, headers: undefined };
+} = { body: undefined };
 
 export async function openDocument(content: string, language?: string): Promise<void> {
   await workspace
@@ -160,24 +160,11 @@ async function showContent(
     }
   }
 
-  let headersLanguage: string | undefined = "yaml";
-
-  if (showHeaders) {
-    try {
-      YAML.parseAllDocuments(headersContent);
-    } catch {
-      headersLanguage = undefined;
-    }
-  }
-
   const bodyDoc = OPEN_DOCS.body;
-  const headersDoc = OPEN_DOCS.headers;
 
-  // remember to add flag for headers also here
   if (
     bodyDoc === undefined ||
-    !isOpenAndUntitled(bodyDoc) ||
-    (showHeaders && (headersDoc === undefined || !isOpenAndUntitled(headersDoc)))
+    !isOpenAndUntitled(bodyDoc)
   ) {
     // insert a new group to the right, insert the content
     commands.executeCommand("workbench.action.newGroupRight");
@@ -187,30 +174,19 @@ async function showContent(
       bodyDocument = window.activeTextEditor.document;
     }
     OPEN_DOCS.body = bodyDocument;
-
-    OPEN_DOCS.headers = undefined;
-    if (showHeaders) {
-      // insert a new group below, insert the content
-      commands.executeCommand("workbench.action.newGroupBelow");
-      await openDocument(headersContent, headersLanguage);
-      let headersDocument: TextDocument | undefined;
-      if (window.activeTextEditor !== undefined) {
-        headersDocument = window.activeTextEditor.document;
-      }
-      OPEN_DOCS.headers = headersDocument;
-    }
   } else {
     await replaceContent(bodyDoc, bodyContent, bodyLanguage);
     OPEN_DOCS.body = bodyDoc;
-
-    OPEN_DOCS.headers = undefined;
-    if (showHeaders && headersDoc !== undefined) {
-      await replaceContent(headersDoc, headersContent, headersLanguage);
-      OPEN_DOCS.headers = headersDoc;
-    }
   }
 
   if(name !== undefined){
+    if(showHeaders){
+      const outputChannel = getOutputChannel();
+
+      outputChannel.appendLine("----------");
+      outputChannel.appendLine(headersContent);
+      outputChannel.appendLine("----------");
+    }
     MOST_RECENT_HEADERS = headersContent;
     MOST_RECENT_REQUEST_NAME = name;
   }

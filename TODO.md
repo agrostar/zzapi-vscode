@@ -5,7 +5,7 @@
 * Fix circular dependencies (Varun)
 * Review READMEs, LICENCE and schemas one last time (Vasan)
 * Content-Type: application/json has set while importing Postman (Vasan)
-* Really need the curl command (to just know what will be done) (Varun)
+* Really need the curl command (to just know what will be done) (Varun) (Done)
 * Can make use of output window a lot more rather than new text editor windows (Varun) (Done)
 * Would be nice to warn to use $eq when using an object comparison (Varun) (Done)
 * Need not show headers on run all (Varun) (Done)
