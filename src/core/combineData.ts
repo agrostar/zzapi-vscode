@@ -10,6 +10,7 @@ import {
   RequestOptions,
   Options,
 } from "./models";
+import { getURL } from "./executeRequest";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestData {
   // making deep copies of the objects because we will be deleting some data
@@ -25,6 +26,7 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
   const completeUrl = getCompleteUrl(commonData, requestData); // variables replaced
 
   const method = requestData.method;
+  const params = getMergedParams(commonData?.params, requestData.params);
   const headers = getMergedHeaders(commonData, requestData); // variables replaced
   const body = requestData.body;
   const options = getMergedOptions(commonData?.options, requestData.options);
@@ -34,7 +36,9 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
 
   const mergedData: RequestData = {
     name: name,
-    completeUrl: completeUrl,
+    url: completeUrl,
+
+    params: params,
     method: method,
     headers: headers,
     body: body,
@@ -44,6 +48,23 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
   };
 
   return mergedData;
+}
+
+function getMergedParams(
+  commonParams: Array<Param> | undefined,
+  requestParams: Array<Param> | undefined,
+): Array<Param> | undefined {
+  let mixedParams: Array<Param> | undefined;
+
+  if (commonParams === undefined || !Array.isArray(commonParams)) {
+    mixedParams = requestParams;
+  } else if (requestParams === undefined || !Array.isArray(requestParams)) {
+    mixedParams = commonParams;
+  } else {
+    mixedParams = commonParams.concat(requestParams);
+  }
+
+  return mixedParams;
 }
 
 function getMergedHeaders(
@@ -71,12 +92,8 @@ function getCompleteUrl(commonData: Common | undefined, requestData: Request): s
     }
   }
   const requestUrl = replaceVariables(requestData.url as string);
-  const params = getParamsForUrl(
-    commonData === undefined ? undefined : commonData.params,
-    requestData.params,
-  );
 
-  const completeUrl = getURL(baseUrl, requestUrl, params);
+  const completeUrl = getURL(baseUrl, requestUrl, "");
   return completeUrl;
 }
 
@@ -210,59 +227,6 @@ function getArrayHeadersAsJSON(
   });
 
   return finalObject;
-}
-
-function getParamsForUrl(
-  commonParams: Array<Param> | undefined,
-  requestParams: Array<Param> | undefined,
-): string {
-  let mixedParams: Array<Param> | undefined;
-
-  if (commonParams === undefined || !Array.isArray(commonParams)) {
-    mixedParams = requestParams;
-  } else if (requestParams === undefined || !Array.isArray(requestParams)) {
-    mixedParams = commonParams;
-  } else {
-    mixedParams = commonParams.concat(requestParams);
-  }
-
-  if (mixedParams === undefined || !Array.isArray(mixedParams)) {
-    return "";
-  }
-
-  let params: Array<Param> = replaceVariables(mixedParams);
-  let paramArray: Array<string> = [];
-
-  params.forEach((param) => {
-    const key = param.name as string;
-    let value = param.value as string;
-    if (param.encode !== undefined && param.encode === false) {
-      paramArray.push(`${key}=${value}`);
-    } else {
-      paramArray.push(`${key}=${encodeURIComponent(value)}`);
-    }
-  });
-
-  const paramString = paramArray.join("&");
-  return `?${paramString}`;
-}
-
-function getURL(baseUrl: string | undefined, url: string, paramsForUrl: string): string {
-  if (paramsForUrl === undefined) {
-    paramsForUrl = "";
-  }
-
-  let completeUrl = "";
-  if (baseUrl !== undefined) {
-    completeUrl += baseUrl;
-  }
-  if (url !== "" && url[0] !== "/") {
-    return url + paramsForUrl;
-  } else {
-    completeUrl += url;
-  }
-
-  return completeUrl + paramsForUrl;
 }
 
 function setHeadersToLowerCase(

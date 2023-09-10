@@ -7,7 +7,7 @@
 
 import got from "got";
 
-import { GotRequest, RequestData } from "./models";
+import { GotRequest, Param, RequestData } from "./models";
 import { replaceVariables } from "./variables";
 
 let UNDEFINED_VARS = new Set<string>();
@@ -19,7 +19,7 @@ export function constructGotRequest(allData: RequestData): {
   request: GotRequest;
   warnings: string;
 } {
-  const completeUrl = allData.completeUrl;
+  const completeUrl = getURL(allData.url, "", getParamsForUrl(allData.params));
 
   const options = {
     method: allData.method,
@@ -90,4 +90,44 @@ export async function executeGotRequest(
 
 export function cancelGotRequest(httpRequest: GotRequest): void {
   httpRequest.cancel();
+}
+
+export function getParamsForUrl(paramsArray: Array<Param> | undefined): string {
+  if (paramsArray === undefined) {
+    return "";
+  }
+
+  let params: Array<Param> = replaceVariables(paramsArray);
+  let paramArray: Array<string> = [];
+
+  params.forEach((param) => {
+    const key = param.name as string;
+    let value = param.value as string;
+    if (param.encode !== undefined && param.encode === false) {
+      paramArray.push(`${key}=${value}`);
+    } else {
+      paramArray.push(`${key}=${encodeURIComponent(value)}`);
+    }
+  });
+
+  const paramString = paramArray.join("&");
+  return `?${paramString}`;
+}
+
+export function getURL(baseUrl: string | undefined, url: string, paramsForUrl: string): string {
+  if (paramsForUrl === undefined) {
+    paramsForUrl = "";
+  }
+
+  let completeUrl = "";
+  if (baseUrl !== undefined) {
+    completeUrl += baseUrl;
+  }
+  if (url !== "" && url[0] !== "/") {
+    return url + paramsForUrl;
+  } else {
+    completeUrl += url;
+  }
+
+  return completeUrl + paramsForUrl;
 }

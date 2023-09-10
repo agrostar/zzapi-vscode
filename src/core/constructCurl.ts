@@ -1,4 +1,4 @@
-import { getBody } from "./executeRequest";
+import { getBody, getParamsForUrl, getURL } from "./executeRequest";
 import { RequestData } from "./models";
 import { replaceVariablesInRequest } from "./variables";
 
@@ -9,12 +9,12 @@ export function getCurlRequest(request: RequestData): string {
   let headersFlag = "";
   if (request.headers !== undefined) {
     for (const header in request.headers) {
-      headersFlag += ` -H "${header}: ${request.headers[header]}"`;
+      headersFlag += ` -H '${header}: ${request.headers[header]}'`;
     }
   }
   let bodyFlag = "";
   if (request.body !== undefined) {
-    bodyFlag += ` -d ${getBody(request.body)}`;
+    bodyFlag += ` -d '${getBody(request.body)}'`;
   }
 
   let followRedirectFlag = "";
@@ -27,7 +27,7 @@ export function getCurlRequest(request: RequestData): string {
     verifySSLFlag = " -k";
   }
 
-  const url = ` '${request.completeUrl}'`;
+  const url = ` '${getURL(request.url, "", getParamsForUrl(request.params))}'`;
 
   const finalCurl =
     "curl" + methodFlag + headersFlag + bodyFlag + followRedirectFlag + verifySSLFlag + url;

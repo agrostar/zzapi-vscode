@@ -78,9 +78,10 @@ export interface Request {
 // the combined data that completely defines any request
 export interface RequestData {
   name: string;
-  completeUrl: string;
+  url: string;
 
   method: Method;
+  params?: Array<Param>,
   headers?: { [key: string]: string };
   body?: any;
   options: Options;
