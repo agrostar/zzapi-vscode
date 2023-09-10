@@ -18,6 +18,7 @@
     "workspaceContains:**/*.zzb"
   ],
   "main": "./out/extension.js",
+  "icon": "images/zzapi.jpg",
   "contributes": {
     "commands": [
       {
