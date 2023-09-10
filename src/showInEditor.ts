@@ -1,7 +1,5 @@
 import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, languages } from "vscode";
 
-import * as YAML from "yaml";
-
 import { getActiveVarSet } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
 import { getOutputChannel } from "./extension";
@@ -16,30 +14,38 @@ export async function openEditorForIndividualReq(
   showHeaders: boolean,
 ): Promise<void> {
   let [contentData, headersData] = getDataOfIndReqAsString(responseData, name, formatJSON);
-
   await showContent(contentData, headersData, showHeaders, name);
 }
 
 export async function openEditorForAllRequests(
   responses: Array<{ response: ResponseData; name: string }>,
-  showHeaders: boolean,
   formatJSON?: boolean,
 ): Promise<void> {
-  let formattedContent = "---\n";
-  let formattedHeaders = "---\n";
+  let allResponses: { [key: string]: any } = {};
 
   responses.forEach((responseObj) => {
-    formattedContent += `name: ${responseObj.name}\n\n`;
-    let [contentData, headersData] = getDataOfIndReqAsString(
+    let contentData = getDataOfIndReqAsString(
       responseObj.response,
       responseObj.name,
       formatJSON,
-    );
-    formattedContent += "response: " + contentData + "\n---\n";
-    formattedHeaders += headersData + "\n---\n";
+    )[0];
+
+    let canParse = true;
+    let parsedData = contentData;
+    try {
+      parsedData = JSON.parse(contentData);
+    } catch {
+      canParse = false;
+    }
+
+    if (canParse) {
+      contentData = parsedData;
+    }
+
+    allResponses[responseObj.name] = contentData;
   });
 
-  await showContent(formattedContent, formattedHeaders, showHeaders);
+  await showContent(JSON.stringify(allResponses, undefined, 2), "", false);
 }
 
 function getDataOfIndReqAsString(
@@ -144,20 +150,11 @@ async function showContent(
   }
 
   let bodyLanguage: string | undefined;
-  if (name !== undefined) {
-    bodyLanguage = "json";
-    try {
-      JSON.parse(bodyContent);
-    } catch {
-      bodyLanguage = undefined;
-    }
-  } else {
-    bodyLanguage = "yaml";
-    try {
-      YAML.parseAllDocuments(bodyContent);
-    } catch {
-      bodyLanguage = undefined;
-    }
+  bodyLanguage = "json";
+  try {
+    JSON.parse(bodyContent);
+  } catch {
+    bodyLanguage = undefined;
   }
 
   const bodyDoc = OPEN_DOCS.body;

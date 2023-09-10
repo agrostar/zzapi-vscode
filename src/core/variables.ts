@@ -210,7 +210,7 @@ function replaceVariablesInString(text: string): any {
         return getStrictStringValue(varVal);
       }
       appendUndefinedVars(variable);
-      return `$(${variable})`;
+      return match;
     });
 
   if (variableIsFullText) {

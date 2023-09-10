@@ -68,7 +68,7 @@ export async function runAllRequests(text: string): Promise<void> {
   });
 
   if (atleastOneExecuted) {
-    await openEditorForAllRequests(responses, false);
+    await openEditorForAllRequests(responses);
   } else {
     window.showInformationMessage("ALL REQUESTS WERE CANCELLED");
   }
