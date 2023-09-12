@@ -24,6 +24,7 @@ function addRequest(prefix: string, element: any, requests: any) {
   const name = `${prefix}${element.name}`;
   requests[name] = request;
   const r = element.request;
+  let contentTypeAdded = false;
 
   request.method = r.method;
 
@@ -38,6 +39,10 @@ function addRequest(prefix: string, element: any, requests: any) {
         value: reformatVariables(h.value),
       };
     });
+    const ct = request.headers.find((h: any) => h.name.toLowerCase() == 'content-type');
+    if (ct) {
+      contentTypeAdded = true;
+    }
   }
 
   if (r.url && r.url.query) {
@@ -53,6 +58,10 @@ function addRequest(prefix: string, element: any, requests: any) {
     if (r.body?.options?.raw?.language == "json") {
       request.body = JSON.parse(r.body.raw);
       reformatVariablesInObject(request.body);
+      if (!contentTypeAdded) {
+        if (!request.headers) request.headers = [];
+        request.headers.push({name: 'Content-Type', value: 'application/json'});
+      }
     } else {
       request.body = reformatVariables(r.body.raw);
     }

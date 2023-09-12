@@ -1,7 +1,6 @@
 # Before first release
 
-* Review READMEs, LICENCE and schemas one last time (Vasan)
-* Content-Type: application/json has set while importing Postman (Vasan)
+* Review READMEs, LICENCE and schemas one last time (Vasan) - split zzv and zzb READMEs
 
 # Improvements
 

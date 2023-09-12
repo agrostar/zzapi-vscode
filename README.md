@@ -16,12 +16,16 @@ This Visual Studio Code extension makes it easy to create, document and test API
 1. Install the Redhat YAML extension: this is not strictly needed, but you will formatting and schema validation for the files is really helpful and useful
 1. Install the extension from the VS Code market place
 2. Start creating a request bundle according to the schema specification in [zzAPI core](https://github.com/agrostar/zzapi/). Here is a very simple example:
+
 ```
-requests:
-  simple-get:
-    method: GET
-    url: https://postman-echo.com/GET
+    requests:
+      simple-get:
+        method: GET
+        url: https://postman-echo.com/get
+        params:
+          - { name: foo1, value: bar1 }
 ```
+
 4. Save the The file with a `.zzb` file extension to activate the extension.
 4. Alternatively import a Postman collection:
    * Export the Postman collection as a JSON (v2.0.1) schema
