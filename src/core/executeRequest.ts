@@ -38,7 +38,7 @@ export function constructGotRequest(allData: RequestSpec): {
 
   let warnings = "";
   UNDEFINED_VARS.forEach((variable) => {
-    warnings += `WARNING: variable '${variable}' is not defined\n`;
+    warnings += `WARNING: variable '${variable}' is not defined (Did you choose an env?)\n`;
   });
 
   UNDEFINED_VARS.clear(); //reset the warnings

@@ -11,11 +11,11 @@ This Visual Studio Code extension makes it easy to create, document and test API
 * In conjunction with [RedHat YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) provides schema validation for the .`zzb` file extension.
 * Request responses are shown in an editor window. Other output such as status and test results are shown in the ouptput window.
 
-## Basic Usage
+## Getting Started
 
 1. Install the Redhat YAML extension: this is not strictly needed, but you will formatting and schema validation for the files is really helpful and useful
 1. Install the extension from the VS Code market place
-2. Start creating a request bundle according to the schema specification in [zzAPI core](https://github.com/agrostar/zzapi/). Here is a very simple example:
+2. Start creating a request bundle. Here is a very simple example:
 
 ```
     requests:
@@ -39,6 +39,12 @@ This Visual Studio Code extension makes it easy to create, document and test API
 6. Clicking on these will execture the API requests and show the response in a new editor window.
 7. This window is reused for other request runs
 8. Use Save to save the editor window into a file as a sample response. Now the window will not be reused.
+
+## Usage
+
+The extension works with `.zzb` files, which are YAML request bundles as [described here](https://github.com/agrostar/zzapi/zzapi-bundle-description.md).
+
+You can use variables within the bundle, and also common variable set files and environments as [described here]((https://github.com/agrostar/zzapi/zzapi-varset-description.md)
 
 ## Tips and Tricks
 
