@@ -20,6 +20,7 @@ export function resetCapturedVariables() {
   CAPTURED_VARIABLES = {};
 }
 
+let ENV_VARIABLES: {[key: string] : any} = {};
 let BUNDLE_VARIABLES: { [key: string]: any } = {};
 
 function getStrictStringValue(value: any): string {
@@ -56,26 +57,26 @@ export function getVarSetNames(dirPath: string): string[] {
 // and pass it through to requests.
 export function loadVarSet(dirPath: string, setName: string) {
   if (!dirPath) return {};
-  VARIABLES = {};
+  ENV_VARIABLES = {};
   getVarFilePaths(dirPath).forEach((varFilePath) => {
     const fileData = fs.readFileSync(varFilePath, "utf-8");
     const varSets = YAML.parse(fileData);
     if (varSets[setName]) {
-      VARIABLES = Object.assign(VARIABLES, varSets[setName]);
+      ENV_VARIABLES = Object.assign(ENV_VARIABLES, varSets[setName]);
     }
   });
 
-  VARIABLES = Object.assign(VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
+  VARIABLES = Object.assign(ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
 }
 
 export function setVariables(varSet: { [key: string]: any }) {
   BUNDLE_VARIABLES = varSet;
-  VARIABLES = Object.assign(VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
+  VARIABLES = Object.assign(ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
 }
 
 export function captureVariable(key: any, value: any): void {
   CAPTURED_VARIABLES[key] = value;
-  VARIABLES = Object.assign(VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
+  VARIABLES = Object.assign(ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
 }
 
 export function replaceVariables(data: any): any {
