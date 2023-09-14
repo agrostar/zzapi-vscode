@@ -6,8 +6,8 @@ import { getOutputChannel } from "./extension";
 
 export function showCurl(text: string, name: string) {
   loadVarSet(getCurrDirPath(), getActiveVarSet());
-  
-  let request = getRequestsData(text, name)[name];
+
+  let request = getRequestsData(text, getActiveVarSet(), name)[name];
   const curlCommand = getCurlRequest(request);
 
   const outputChannel = getOutputChannel();

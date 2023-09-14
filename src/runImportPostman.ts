@@ -13,7 +13,7 @@ export async function importPostmanCommand(): Promise<void> {
   }
 
   const path = file[0].path;
-  const pathParsed = path.split('\\').join('/');
+  const pathParsed = path.split("\\").join("/");
   const pathUri = Uri.file(pathParsed);
   const pathStr = pathUri.fsPath;
 

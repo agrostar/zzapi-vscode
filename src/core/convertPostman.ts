@@ -39,7 +39,7 @@ function addRequest(prefix: string, element: any, requests: any) {
         value: reformatVariables(h.value),
       };
     });
-    const ct = request.headers.find((h: any) => h.name.toLowerCase() == 'content-type');
+    const ct = request.headers.find((h: any) => h.name.toLowerCase() == "content-type");
     if (ct) {
       contentTypeAdded = true;
     }
@@ -60,7 +60,7 @@ function addRequest(prefix: string, element: any, requests: any) {
       reformatVariablesInObject(request.body);
       if (!contentTypeAdded) {
         if (!request.headers) request.headers = [];
-        request.headers.push({name: 'Content-Type', value: 'application/json'});
+        request.headers.push({ name: "Content-Type", value: "application/json" });
       }
     } else {
       request.body = reformatVariables(r.body.raw);

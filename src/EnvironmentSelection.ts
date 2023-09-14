@@ -65,7 +65,7 @@ export function createEnvironmentSelector(
 
 export function setWorkingDir(dir: string): void {
   const path = dir;
-  const pathParsed = path.split('\\').join('/');
+  const pathParsed = path.split("\\").join("/");
   const pathUri = Uri.file(pathParsed);
   const pathStr = pathUri.fsPath;
 
