@@ -1,4 +1,4 @@
-import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "vscode";
+import { ExtensionContext, commands, window, StatusBarItem, ThemeColor, Uri } from "vscode";
 
 import { getVarSetNames, loadBundleVariables } from "./core/variables";
 
@@ -64,7 +64,12 @@ export function createEnvironmentSelector(
 }
 
 export function setWorkingDir(dir: string): void {
-  WORKING_DIR = dir;
+  const path = dir;
+  const pathParsed = path.split('\\').join('/');
+  const pathUri = Uri.file(pathParsed);
+  const pathStr = pathUri.fsPath;
+
+  WORKING_DIR = pathStr;
 }
 
 export function setCurrentVarSetName(statusBar: StatusBarItem, varSetName: string): void {
