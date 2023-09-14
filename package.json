@@ -4,7 +4,7 @@
   "publisher": "AgroStar",
   "description": "Tool for testing and documenting REST APIs",
   "repository": "https://github.com/agrostar/zzapi-vscode",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "engines": {
     "vscode": "^1.79.0"
   },
@@ -77,7 +77,7 @@
         "fileMatch": [
           "*.zzb"
         ],
-        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-bundle.schema.json"
+        "url": "https://agrostar.in/schemas/zzapi-bundle.schema.json"
       },
       {
         "fileMatch": [
@@ -91,7 +91,8 @@
         "id": "yaml",
         "extensions": [
           ".zzb",
-          ".zzv"
+          ".zzv",
+          ".zzx"
         ]
       }
     ]
