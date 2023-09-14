@@ -235,13 +235,27 @@ export function checkVariables(obj: any) {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [
       false,
-      "Variables must be defined as an object with keys as variables names, and values as their values",
+      "Variables must be defined as an object with keys as environment names, and values as variable sets",
     ];
   }
 
   for (const key in obj) {
     if (typeof key !== "string") {
-      return [false, "Variable names must be a string"];
+      return [false, `Environment names must be a string: ${key} is not a string`];
+    }
+
+    const variables = obj[key];
+    if (typeof variables !== "object" || Array.isArray(variables)) {
+      return [
+        false,
+        `Variable set corresponding to env ${key} is not an object with key: value pairs`,
+      ];
+    }
+
+    for (const varName in variables) {
+      if (typeof varName !== "string") {
+        return [false, `variable names must be a string: ${varName} is not a string`];
+      }
     }
   }
 

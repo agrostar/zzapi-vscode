@@ -4,6 +4,16 @@ import * as YAML from "yaml";
 
 import { RequestSpec } from "./models";
 import { appendUndefinedVars } from "./executeRequest";
+import { checkVariables } from "./checkTypes";
+
+/*
+Creating a master function so it is easy to adjust order if reqd
+If we want to append to vars instead of refresh, then make 
+  VARIABLES the source (useful when it becomes non-global)
+*/
+function reloadVariables() {
+  VARIABLES = Object.assign({}, ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
+}
 
 const VARFILE_EXTENSION = ".zzv";
 
@@ -20,7 +30,9 @@ export function resetCapturedVariables() {
   CAPTURED_VARIABLES = {};
 }
 
-let ENV_VARIABLES: {[key: string] : any} = {};
+let ENV_VARIABLES: { [key: string]: any } = {};
+
+let BUNDLE_VAR_DATA: { [key: string]: { [key: string]: any } } = {};
 let BUNDLE_VARIABLES: { [key: string]: any } = {};
 
 function getStrictStringValue(value: any): string {
@@ -50,7 +62,9 @@ export function getVarSetNames(dirPath: string): string[] {
     const varSets = YAML.parse(fileData);
     allVarSets = Object.assign(allVarSets, varSets);
   });
-  return Object.keys(allVarSets);
+
+  const uniqueNames = new Set([...Object.keys(allVarSets), ...Object.keys(BUNDLE_VAR_DATA)]);
+  return [...uniqueNames];
 }
 
 // TODO: not happy with global here. Need to create an instance or object
@@ -62,21 +76,52 @@ export function loadVarSet(dirPath: string, setName: string) {
     const fileData = fs.readFileSync(varFilePath, "utf-8");
     const varSets = YAML.parse(fileData);
     if (varSets[setName]) {
-      ENV_VARIABLES = Object.assign(ENV_VARIABLES, varSets[setName]);
+      Object.assign(ENV_VARIABLES, varSets[setName]);
     }
   });
 
-  VARIABLES = Object.assign(ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
-}
-
-export function setVariables(varSet: { [key: string]: any }) {
-  BUNDLE_VARIABLES = varSet;
-  VARIABLES = Object.assign(ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
+  reloadVariables();
 }
 
 export function captureVariable(key: any, value: any): void {
   CAPTURED_VARIABLES[key] = value;
-  VARIABLES = Object.assign(ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
+  reloadVariables();
+}
+
+/**
+ *
+ * @param document the bundle containing the variables
+ * @param env Optional param: if set, then sets BUNDLE_VARIABLES according to env set.
+ *  If not set, then do not set BUNDLE_VARIABLES, just store the entire variables object
+ *  from the bundle to memory. Use case of the latter: retrieving environment names, without
+ *  running a request yet.
+ * @returns
+ */
+export function loadBundleVariables(document: string, env?: string) {
+  BUNDLE_VAR_DATA = {};
+  const parsedData = YAML.parse(document);
+  if (parsedData === undefined) {
+    return;
+  }
+
+  const variables = parsedData.variables;
+  if (variables !== undefined) {
+    const [valid, error] = checkVariables(variables);
+    if (!valid) {
+      throw new Error(`Error in variables: ${error}`);
+    }
+    BUNDLE_VAR_DATA = variables;
+  }
+
+  if (env !== undefined) {
+    if (BUNDLE_VAR_DATA.hasOwnProperty(env)) {
+      BUNDLE_VARIABLES = BUNDLE_VAR_DATA[env];
+    } else {
+      BUNDLE_VARIABLES = {};
+    }
+
+    reloadVariables();
+  }
 }
 
 export function replaceVariables(data: any): any {
@@ -84,10 +129,10 @@ export function replaceVariables(data: any): any {
     return undefined;
   }
   if (typeof data === "object") {
-    return replaceVariablesInNonScalar(data as object);
+    return replaceVariablesInNonScalar(data);
   }
   if (typeof data === "string") {
-    return replaceVariablesInString(data as string);
+    return replaceVariablesInString(data);
   }
   return data;
 }
@@ -131,7 +176,7 @@ function replaceVariablesInObject(objectData: { [key: string]: any }): {
         objectData[key] = replaceVariablesInObject(objectData[key]);
       }
     } else if (typeof objectData[key] === "string") {
-      objectData[key] = replaceVariablesInString(objectData[key] as string);
+      objectData[key] = replaceVariablesInString(objectData[key]);
     }
   }
   return objectData;
@@ -143,12 +188,12 @@ export function replaceVariablesInRequest(request: RequestSpec): RequestSpec {
     const reqVal = request[key as keyOfRequestData];
     if (typeof reqVal === "object") {
       if (Array.isArray(reqVal)) {
-        (request as any)[key as keyOfRequestData] = replaceVariablesInArray(reqVal);
+        (request as any)[key] = replaceVariablesInArray(reqVal);
       } else {
-        (request as any)[key as keyOfRequestData] = replaceVariablesInObject(reqVal);
+        (request as any)[key] = replaceVariablesInObject(reqVal);
       }
     } else if (typeof reqVal === "string") {
-      request[key as keyOfRequestData] = replaceVariablesInString(reqVal as string);
+      request[key as keyOfRequestData] = replaceVariablesInString(reqVal);
     }
   }
   return request;

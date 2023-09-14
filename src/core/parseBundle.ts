@@ -8,8 +8,8 @@ import * as YAML from "yaml";
 
 import { Request, RequestSpec, RequestPosition } from "./models";
 import { getMergedData } from "./combineData";
-import { checkCommonType, checkRequestType, checkVariables } from "./checkTypes";
-import { setVariables } from "./variables";
+import { checkCommonType, checkRequestType } from "./checkTypes";
+import { loadBundleVariables } from "./variables";
 
 /*
  * Returns an array of requestPosition objects. If the name of a
@@ -71,20 +71,17 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
  * @returns An object of type { [name: string]: RequestSpec } where each value is the data
  *  of a request of the name key
  */
-export function getRequestsData(document: string, name?: string): { [name: string]: RequestSpec } {
+export function getRequestsData(
+  document: string,
+  env: string,
+  name?: string,
+): { [name: string]: RequestSpec } {
   const parsedData = YAML.parse(document);
   if (parsedData === undefined) {
     return {};
   }
 
-  const variables = parsedData.variables;
-  if (variables !== undefined) {
-    const [valid, error] = checkVariables(variables);
-    if (!valid) {
-      throw new Error(`Error in variables: ${error}`);
-    }
-    setVariables(variables);
-  }
+  loadBundleVariables(document, env);
 
   const requests: { [name: string]: RequestSpec } = {};
 

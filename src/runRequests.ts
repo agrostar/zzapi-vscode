@@ -15,7 +15,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
   /*
   Also loads the bundle vars, along with getting the data
   */
-  const allData: RequestSpec = getRequestsData(text, name)[name];
+  const allData: RequestSpec = getRequestsData(text, getActiveVarSet(), name)[name];
 
   if (allData === undefined) {
     return;
@@ -42,7 +42,7 @@ export async function runAllRequests(text: string): Promise<void> {
   /*
   Also loads the bundle vars, along with getting the data
   */
-  const allRequests = getRequestsData(text);
+  const allRequests = getRequestsData(text, getActiveVarSet());
 
   for (const name in allRequests) {
     allRequests[name].httpRequest.headers = Object.assign(

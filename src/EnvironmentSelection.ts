@@ -1,5 +1,8 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "vscode";
-import { getVarSetNames } from "./core/variables";
+
+import { getVarSetNames, loadBundleVariables } from "./core/variables";
+
+import { documentIsBundle } from "./extension";
 
 const NO_VARSET = "-- None --";
 
@@ -32,6 +35,14 @@ export function createEnvironmentSelector(
   statusBar: StatusBarItem,
 ): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
+    const activeEditor = window.activeTextEditor;
+    if (activeEditor !== undefined) {
+      const activeDoc = activeEditor.document;
+      if (documentIsBundle(activeDoc)) {
+        const contents = activeDoc.getText();
+        loadBundleVariables(contents);
+      }
+    }
     const varSetNames = getVarSetNames(WORKING_DIR);
     varSetNames.push(NO_VARSET);
     window
