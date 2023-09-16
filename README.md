@@ -1,20 +1,21 @@
 # zzAPI Visual Studio Code Extension
 
-zzAPI (prounounced like pizza, the syllables interchanged) is an API documentation and testing tool set, a very simplified version of Postman. [See zzAPI core](https://github.com/agrostar/zzapi/) to learn about the zzAPI file formats (`.zzb` and `.zzv` files) and philosophy.
+zzAPI (prounounced like pizza, the syllables interchanged) is an HTTP (REST) API documentation and testing tool, a very simplified version of Postman. [See zzAPI core](https://github.com/agrostar/zzapi/) to learn about the zzAPI file formats (`.zzb` and `.zzv` files) and philosophy.
 
-This Visual Studio Code extension makes it easy to create, document and test API requests from within the IDE. Request bundles are YAML files with the `.zzb` extension.
+This extension makes it easy to create, document and test API requests from within the IDE. Request bundles are YAML files with the `.zzb` extension.
 
 ## Features
 
 * Provides Code Lenses above requests when a `.zzb` file is opened. These are mini-buttons that execute a request or all requests in a bundle.
 * Provides the ability to choose environments (sets of variables) to use when running requests.
-* In conjunction with [RedHat YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) provides schema validation for the .`zzb` file extension.
+* In conjunction with [RedHat YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) provides schema validation for the `.zzb` file extension.
 * Request responses are shown in an editor window. Other response elements such as status, headers and test results are shown in the ouptput window.
+* Tests can be run against the responses. The test specification is simple and needs no coding.
 
 ## Getting Started
 
 1. Install the [RedHat YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) extension. This is not strictly needed, but the formatting and schema validation is really helpful and useful.
-1. Install the extension from the VS Code market place
+1. Install this extension
 2. Start creating a request bundle. Here is a very simple example:
 
 ```
@@ -32,10 +33,10 @@ This Visual Studio Code extension makes it easy to create, document and test API
    * Use the command pallete in VS Code (Cmd-Shift-P or Ctrl-Shift-P) and choose `zzAPI: Import Postman collection`
    * In the File Open dialog, choose the Postman collection you exported in the first step
    * The command will open a new editor window and place the converted YAML. Save it to a file with a `.zzb` extension
-   * If you have used variables in Postman, you have to create a `.zzv` file (or a variables block in the bundle itself). Sorry, we don't support importing Postman environment yet.
-5. You will see a Code Lense above each request, and one in the top of the file, for running all requests. Click on these to execute a request and see the response.
+   * If you have used variables in Postman, you have to create a `.zzv` file (or a `variables` block in the bundle itself). Sorry, we don't support importing Postman environment yet.
+5. You will see a Code Lense above each named request for running the request. You will also see a Code Lens above the `requests` node, to run all the requests sequenctially. Click on these to execute them and see the response.
 
-## Usage
+## Detailed Usage
 
 The extension works with `.zzb` files, which are YAML request bundles as [described here](https://github.com/agrostar/zzapi/blob/main/zzapi-bundle-description.md).
 
@@ -47,6 +48,8 @@ You can use variables within the bundle, and also common variable set files and 
 
 * Instead of the raw body, the request body can be a YAML/JSON object. This is a great convenience compared to other API tools, that need you to create valid JSONs with quotes around every key and string. YAML is much easier to hand-create.
 
-* Save the bundles along with your code and commit them to youre repo. This is how you share the bundles with your team.
+* Save the bundles along with your code and commit them to your repo. This is how you share them with your team. Also keep the tests right next to the code.
 
-* Create *secrets* or *personal* and *environment* specific (eg, staging, production) variables and mix and match them in inventive ways to share public variables at the same time not expose secrets and personal variable values.
+* Multiple variable set files are merged. Keep one set as your *secrets* or *personal* set where you specify your passwords etc. needed for the requests. Do not commit this to your repo.
+
+* Create multiple bundles (eg, some for documentation and some for tests) within the same directory and share the variable sets among them. Or, if you prefer, declare variable sets within the bundle itself for easy visibility.

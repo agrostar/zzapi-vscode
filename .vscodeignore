@@ -1,8 +1,9 @@
 .vscode
+.gitignore
 src/
+node_modules/
 tsconfig.json
 TODO.md
-.gitignore
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
