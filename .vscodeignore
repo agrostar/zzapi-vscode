@@ -1,6 +1,7 @@
 .vscode
 .gitignore
 src/
+out/
 node_modules/
 tsconfig.json
 TODO.md
