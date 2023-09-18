@@ -29,7 +29,10 @@ function addRequest(prefix: string, element: any, requests: any) {
   request.method = r.method;
 
   if (r.url) {
-    request.url = reformatVariables([...r.url.host, ...r.url.path].join("/"));
+    const protocol = r.url.protocol || '';
+    const host = (r.url.host || '').join('.');
+    const path = (r.url.path || '').join('/');
+    request.url = reformatVariables(`${protocol}://${host}/${path}`);
   }
 
   if (r.header) {
