@@ -52,7 +52,7 @@ function addRequest(prefix: string, element: any, requests: any) {
     request.params = r.url.query.map((q: any) => {
       return {
         name: q.key,
-        value: reformatVariables(q.value),
+        value: reformatVariables(q.value ||''),
       };
     });
   }
