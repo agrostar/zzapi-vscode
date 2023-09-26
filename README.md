@@ -34,7 +34,7 @@ This extension makes it easy to create, document and test API requests from with
    * In the File Open dialog, choose the Postman collection you exported in the first step
    * The command will open a new editor window and place the converted YAML. Save it to a file with a `.zzb` extension
    * If you have used variables in Postman, you have to create a `.zzv` file (or a `variables` block in the bundle itself). Sorry, we don't support importing Postman environment yet.
-5. You will see a Code Lense above each named request for running the request. You will also see a Code Lens above the `requests` node, to run all the requests sequenctially. Click on these to execute them and see the response.
+5. You will see a Code Lense above each named request for running the request. You will also see a Code Lens above the `requests` node, to run all the requests sequentially. Click on these to execute them and see the response.
 
 ## Detailed Usage
 

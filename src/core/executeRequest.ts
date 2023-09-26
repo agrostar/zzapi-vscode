@@ -30,6 +30,7 @@ export function constructGotRequest(allData: RequestSpec): {
     body: getBody(allData.httpRequest.body),
     headers: allData.httpRequest.headers,
     followRedirect: allData.options?.follow,
+    retry: { limit: 0 },
 
     https: {
       rejectUnauthorized: allData.options?.verifySSL,
