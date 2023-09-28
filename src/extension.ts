@@ -12,7 +12,7 @@ import {
 
 import { CodeLensProvider } from "./CodeLensProviders";
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./registerRequests";
-import { importPostmanCommand } from "./runImportPostman";
+import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import {
   createEnvironmentSelector,
   getCurrDirPath,
@@ -64,6 +64,9 @@ export function activate(context: ExtensionContext): void {
   });
   commands.registerCommand("extension.importPostman", async () => {
     await importPostmanCommand();
+  });
+  commands.registerCommand("extension.importEnvironment", async () => {
+    await importPostmanEnvironment();
   });
   commands.registerCommand("extension.showVariables", async () => {
     await showVariables();

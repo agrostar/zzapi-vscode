@@ -29,9 +29,9 @@ function addRequest(prefix: string, element: any, requests: any) {
   request.method = r.method;
 
   if (r.url) {
-    const protocol = r.url.protocol || '';
-    const host = (r.url.host || '').join('.');
-    const path = (r.url.path || '').join('/');
+    const protocol = r.url.protocol || "";
+    const host = (r.url.host || "").join(".");
+    const path = (r.url.path || "").join("/");
     request.url = reformatVariables(`${protocol}://${host}/${path}`);
   }
 
@@ -52,7 +52,7 @@ function addRequest(prefix: string, element: any, requests: any) {
     request.params = r.url.query.map((q: any) => {
       return {
         name: q.key,
-        value: reformatVariables(q.value ||''),
+        value: reformatVariables(q.value || ""),
       };
     });
   }
@@ -119,4 +119,40 @@ export default function convertPostman(filePath: string): string {
     },
   });
   return YAML.stringify(yamlDoc);
+}
+
+export function convertEnvironment(filePath: string): string {
+  const contents = fs.readFileSync(filePath, "utf-8");
+  const environment = JSON.parse(contents);
+
+  // checking that it is actually an environment, find a better way to do this
+  const essentialKeys = ["name", "_postman_variable_scope", "values"] as const;
+  essentialKeys.forEach((key) => {
+    if (!environment.hasOwnProperty(key)) {
+      throw Error(`Did you select an exported postman environment?`);
+    }
+  });
+
+  const name = environment.name;
+
+  const variables: { [envName: string]: { [varName: string]: any } } = {};
+  variables[name] = {};
+
+  const postmanVars: Array<{ [key: string]: any }> = environment.values;
+  postmanVars.forEach((item) => {
+    variables[name][item.key] = item.value;
+  });
+
+  let varset: string = "";
+  varset +=
+    "# The variable set corresponding to the environment is below\n" +
+    "# Add it to a .zzv file, or embed it into your bundle in" +
+    "#\t the top level variables object\n";
+  if (environment._postman_variable_scope === "globals") {
+    varset +=
+      "# if this collection is intended to be global," + "#\t add the variables to each varset\n";
+  }
+  varset += "\n" + YAML.stringify(variables);
+
+  return varset;
 }

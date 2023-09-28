@@ -38,6 +38,10 @@
         "title": "zzAPI: Import Postman collection"
       },
       {
+        "command": "extension.importEnvironment",
+        "title": "zzAPI: Import Postman Environment"
+      },
+      {
         "command": "extension.showVariables",
         "title": "zzAPI: Show Variables"
       },
@@ -62,6 +66,9 @@
       "zzapi_submenu": [
         {
           "command": "extension.importPostman"
+        },
+        {
+          "command": "extension.importEnvironment"
         },
         {
           "command": "extension.showVariables"
