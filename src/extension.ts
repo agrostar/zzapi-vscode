@@ -21,6 +21,7 @@ import {
 } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
 import { resetCapturedVariables } from "./core/variables";
+import { addSampleGet, addSamplePost } from "./addSamples";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -76,6 +77,12 @@ export function activate(context: ExtensionContext): void {
   });
   commands.registerCommand("extension.showCurl", (name) => {
     showCurlCommand(name);
+  });
+  commands.registerCommand("extension.showSampleGET", () => {
+    addSampleGet();
+  });
+  commands.registerCommand("extension.showSamplePOST", () => {
+    addSamplePost();
   });
 }
 

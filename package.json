@@ -48,6 +48,14 @@
       {
         "command": "extension.showRecentHeaders",
         "title": "zzAPI: Show Recent Reponse Headers"
+      },
+      {
+        "command": "extension.showSampleGET",
+        "title": "zzAPI: Add Sample GOT Request"
+      },
+      {
+        "command": "extension.showSamplePOST",
+        "title": "zzAPI: Add Sample POST Request"
       }
     ],
     "submenus": [
@@ -75,6 +83,14 @@
         },
         {
           "command": "extension.showRecentHeaders"
+        },
+        {
+          "command": "extension.showSampleGET",
+          "when": "resourceExtname == .zzb"
+        },
+        {
+          "command": "extension.showSamplePOST",
+          "when": "resourceExtname == .zzb"
         }
       ]
     },

@@ -16,7 +16,7 @@ export async function showVariables() {
   if (varSize <= 0 && capSize <= 0) {
     content += "----------\n";
     content +=
-      "No variables stored.\nRunning a request may store the associated variables, if any are defined";
+      "No variables stored.\nRunning a request may store the associated variables, if any are defined\n";
     content += "----------\n";
   } else {
     content = "";
@@ -46,7 +46,7 @@ export async function showVariables() {
 export async function showRecentHeaders() {
   let [headers, reqName] = getRecentHeadersData();
   if (headers === undefined) {
-    headers = "No headers stored, run a request and try again";
+    headers = "No headers stored, run a request and try again\n";
   }
 
   const outputChannel = getOutputChannel();
