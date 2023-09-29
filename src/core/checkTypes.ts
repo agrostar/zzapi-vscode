@@ -177,9 +177,21 @@ function checkOptions(obj: any) {
   return [true, undefined];
 }
 
+const VALID_COMMON_KEYS = ["baseUrl", "headers", "params", "options", "tests", "capture"];
 export function checkCommonType(obj: any): [boolean, string | undefined] {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [false, "Common must be of type object"];
+  }
+
+  for (const key in obj) {
+    if (!VALID_COMMON_KEYS.includes(key)) {
+      return [
+        false,
+        `Key '${key}' does not exist in common type. Key must be among ${getStringIfNotScalar(
+          VALID_COMMON_KEYS,
+        )}`,
+      ];
+    }
   }
 
   if (obj.hasOwnProperty("baseUrl") && typeof obj.baseUrl !== "string") {
@@ -194,7 +206,7 @@ export function checkCommonType(obj: any): [boolean, string | undefined] {
   return [true, undefined];
 }
 
-const validMethods = [
+const VALID_METHODS = [
   "options",
   "GET",
   "POST",
@@ -212,9 +224,31 @@ const validMethods = [
   "delete",
   "trace",
 ] as const;
+const VALID_REQUEST_KEYS = [
+  "name",
+  "url",
+  "method",
+  "headers",
+  "params",
+  "body",
+  "options",
+  "tests",
+  "capture",
+];
 export function checkRequestType(obj: any): [boolean, string | undefined] {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [false, "Request must be of type object"];
+  }
+
+  for (const key in obj) {
+    if (!VALID_REQUEST_KEYS.includes(key)) {
+      return [
+        false,
+        `Key '${key}' does not exist in request type. Key must be among ${getStringIfNotScalar(
+          VALID_REQUEST_KEYS,
+        )}`,
+      ];
+    }
   }
 
   let [valid, error] = checkHeadersParamsOptionsTestsCaptures(obj);
@@ -224,8 +258,8 @@ export function checkRequestType(obj: any): [boolean, string | undefined] {
   if (!(obj.hasOwnProperty("url") && typeof obj.url === "string")) {
     return [false, `url must exist in request with type string`];
   }
-  if (!(obj.hasOwnProperty("method") && validMethods.includes(obj.method))) {
-    return [false, `method must exist and be one of ${getStringIfNotScalar(validMethods)}`];
+  if (!(obj.hasOwnProperty("method") && VALID_METHODS.includes(obj.method))) {
+    return [false, `method must exist and be one of ${getStringIfNotScalar(VALID_METHODS)}`];
   }
 
   return [true, undefined];
