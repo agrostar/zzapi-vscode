@@ -1,4 +1,4 @@
-import { Uri, commands, window, workspace } from "vscode";
+import { Uri, window, workspace } from "vscode";
 import convertPostman, { convertEnvironment } from "./core/convertPostman";
 import { openDocument } from "./showInEditor";
 
@@ -48,8 +48,6 @@ export async function importPostmanEnvironment(): Promise<void> {
 
   try {
     const content = convertEnvironment(pathStr);
-
-    commands.executeCommand("workbench.action.newGroupRight");
     await openDocument(content, "yaml");
   } catch (e: any) {
     console.log(e);

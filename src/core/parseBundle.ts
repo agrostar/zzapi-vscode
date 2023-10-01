@@ -76,10 +76,14 @@ export function getRequestsData(
   env: string,
   name?: string,
 ): { [name: string]: RequestSpec } {
-  const parsedData = YAML.parse(document);
-  if (parsedData === undefined) {
+  let parsedData = YAML.parse(document);
+  if(parsedData === null){
     return {};
   }
+  if(typeof parsedData !== "object" || Array.isArray(parsedData)){
+    throw new Error("Bundle must be an object with key value pairs");
+  }
+
 
   loadBundleVariables(document, env);
 
@@ -93,6 +97,11 @@ export function getRequestsData(
     }
   }
   const allRequests = parsedData.requests;
+  if (allRequests === undefined) {
+    return {};
+  } else if(typeof allRequests !== "object" || Array.isArray(allRequests)){
+    throw new Error("requests must be an object with keys as request names");
+  }
 
   function getAllData(name: string) {
     let request: Request = allRequests[name];

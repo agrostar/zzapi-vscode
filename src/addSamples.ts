@@ -1,5 +1,6 @@
-import { Range, window } from "vscode";
+import { window } from "vscode";
 import { documentIsBundle } from "./extension";
+import { getRequestsData } from "./core/parseBundle";
 
 const TAB = "  ";
 
@@ -25,8 +26,8 @@ const SAMPLE_GET =
   `${TAB}${TAB}${TAB}${TAB}# Captures the value of the field args.foo1 into the variable called SAMPLE_VAR\n` +
   `${TAB}${TAB}${TAB}${TAB}$.args.foo1: SAMPLE_VAR\n`;
 
-export function addSampleGet() {
-  appendContent(SAMPLE_GET);
+export async function addSampleGet() {
+  await appendContent(SAMPLE_GET);
 }
 
 const SAMPLE_POST =
@@ -52,22 +53,42 @@ const SAMPLE_POST =
   `${TAB}${TAB}${TAB}${TAB}# Captures the value of the field data.foo1 into the variable called SAMPLE_VAR\n` +
   `${TAB}${TAB}${TAB}${TAB}$.data.foo1: SAMPLE_VAR\n`;
 
-export function addSamplePost() {
-  appendContent(SAMPLE_POST);
+export async function addSamplePost() {
+  await appendContent(SAMPLE_POST);
 }
 
-function appendContent(content: string){
+async function appendContent(content: string) {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && documentIsBundle(activeEditor.document)) {
     const document = activeEditor.document;
-    const lastLine = document.lineAt(document.lineCount - 1);
 
-    const range = new Range(lastLine.range.start, lastLine.range.end);
+    /*
+    Adding `requests:` to content if it is not in the bundle already
+    */
+    const text = document.getText();
+    let reqs = getRequestsData(text, "");
+    if (Object.keys(reqs).length <= 0) {
+      content = "requests:\n" + content;
+    }
 
-    activeEditor.edit((e) => {
-      e.insert(range.end, "\n\n" + content);
+    /*
+    Inserting the content
+    */
+    let lastLine = document.lineAt(document.lineCount - 1);
+    await activeEditor.edit((e) => {
+      e.insert(lastLine.range.end, "\n\n" + content);
     });
+    
+    lastLine = document.lineAt(document.lineCount - 1);
+    const lineToCheck = lastLine.lineNumber + 5;
+    const isVisible = activeEditor.visibleRanges.some((range) => {
+      return lineToCheck >= range.start.line && lineToCheck <= range.end.line;
+    });
+
+    if (!isVisible) {
+      window.showInformationMessage("Sample request appended to bundle");
+    }
   } else {
-    throw Error("add sample request must be called on a bundle");
+    throw new Error("Add sample request must be called on a bundle");
   }
 }

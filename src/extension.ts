@@ -78,11 +78,11 @@ export function activate(context: ExtensionContext): void {
   commands.registerCommand("extension.showCurl", (name) => {
     showCurlCommand(name);
   });
-  commands.registerCommand("extension.showSampleGET", () => {
-    addSampleGet();
+  commands.registerCommand("extension.showSampleGET", async () => {
+    await addSampleGet();
   });
-  commands.registerCommand("extension.showSamplePOST", () => {
-    addSamplePost();
+  commands.registerCommand("extension.showSamplePOST", async () => {
+    await addSamplePost();
   });
 }
 
