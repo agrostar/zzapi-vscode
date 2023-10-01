@@ -78,12 +78,12 @@ export function getRequestsData(
   name?: string,
 ): { [name: string]: RequestSpec } {
   let parsedData = YAML.parse(document);
-  if(typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null){
+  if (typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null) {
     throw new Error("Bundle must be an object with key value pairs");
   }
 
-  for(const key in parsedData){
-    if(!VALID_KEYS.includes(key)){
+  for (const key in parsedData) {
+    if (!VALID_KEYS.includes(key)) {
       throw new Error(`Invalid key: ${key}`);
     }
   }
@@ -100,7 +100,7 @@ export function getRequestsData(
     }
   }
   const allRequests = parsedData.requests;
-  if(typeof allRequests !== "object" || Array.isArray(allRequests) || allRequests === null){
+  if (typeof allRequests !== "object" || Array.isArray(allRequests) || allRequests === null) {
     throw new Error("requests must be an object with keys as request names");
   }
 

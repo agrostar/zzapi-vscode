@@ -1,9 +1,7 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor, Uri } from "vscode";
 
 import { getVarSetNames, loadBundleVariables } from "./core/variables";
-
 import { documentIsBundle } from "./extension";
-import { resetUndefinedVars } from "./core/executeRequest";
 
 const NO_VARSET = "-- None --";
 
@@ -77,5 +75,4 @@ export function setCurrentVarSetName(statusBar: StatusBarItem, varSetName: strin
   ACTIVE_VARSET = varSetName;
   statusBar.text = `zzAPI var set: ${ACTIVE_VARSET}`;
   statusBar.backgroundColor = undefined;
-  resetUndefinedVars();
 }

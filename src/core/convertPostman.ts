@@ -149,8 +149,7 @@ export function convertEnvironment(filePath: string): string {
     "# Save it as a .zzv file, or copy-paste it into an existing .zzv file,\n" +
     "# or paste it into your bundle under the top level 'variables' object.\n";
   if (environment._postman_variable_scope === "globals") {
-    varset +=
-      "# If these variables are intended to be global, add them to each varset\n";
+    varset += "# If these variables are intended to be global, add them to each varset\n";
   }
   varset += "\n" + YAML.stringify(variables);
 
