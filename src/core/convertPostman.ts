@@ -145,12 +145,12 @@ export function convertEnvironment(filePath: string): string {
 
   let varset: string = "";
   varset +=
-    "# The variable set corresponding to the environment is below\n" +
-    "# Add it to a .zzv file, or embed it into your bundle in" +
-    "#\t the top level variables object\n";
+    "# The variable set corresponding to the environment is below.\n" +
+    "# Save it as a .zzv file, or copy-paste it into an existing .zzv file,\n" +
+    "# or paste it into your bundle under the top level 'variables' object.\n";
   if (environment._postman_variable_scope === "globals") {
     varset +=
-      "# if this collection is intended to be global," + "#\t add the variables to each varset\n";
+      "# If these variables are intended to be global, add them to each varset\n";
   }
   varset += "\n" + YAML.stringify(variables);
 

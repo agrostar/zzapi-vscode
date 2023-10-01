@@ -59,7 +59,7 @@ function getDataOfIndReqAsString(
   }
 
   let contentData = "";
-  let headersData = `${name}: headers\nEnvironment: ${currentEnvironment}\n\n`;
+  let headersData = `${name}: headers\nVar-set: ${currentEnvironment}\n\n`;
 
   for (const key in responseData) {
     let value = responseData[key as keyof ResponseData];

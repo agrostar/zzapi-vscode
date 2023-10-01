@@ -35,7 +35,7 @@
       },
       {
         "command": "extension.importPostman",
-        "title": "zzAPI: Import Postman collection"
+        "title": "zzAPI: Import Postman Collection"
       },
       {
         "command": "extension.importEnvironment",
@@ -51,7 +51,7 @@
       },
       {
         "command": "extension.showSampleGET",
-        "title": "zzAPI: Add Sample GOT Request"
+        "title": "zzAPI: Add Sample GET Request"
       },
       {
         "command": "extension.showSamplePOST",
