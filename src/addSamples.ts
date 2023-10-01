@@ -74,13 +74,12 @@ async function appendContent(content: string) {
     /*
     Inserting the content
     */
-    let lastLine = document.lineAt(document.lineCount - 1);
+    const lastLine = document.lineAt(document.lineCount - 1);
     await activeEditor.edit((e) => {
       e.insert(lastLine.range.end, "\n\n" + content);
     });
     
-    lastLine = document.lineAt(document.lineCount - 1);
-    const lineToCheck = lastLine.lineNumber + 5;
+    const lineToCheck = lastLine.lineNumber;
     const isVisible = activeEditor.visibleRanges.some((range) => {
       return lineToCheck >= range.start.line && lineToCheck <= range.end.line;
     });
