@@ -1,6 +1,7 @@
 import { window } from "vscode";
+import * as YAML from "yaml";
+
 import { documentIsBundle } from "./extension";
-import { getRequestsData } from "./core/parseBundle";
 
 const TAB = "  ";
 
@@ -66,8 +67,17 @@ async function appendContent(content: string) {
     Adding `requests:` to content if it is not in the bundle already
     */
     const text = document.getText();
-    let reqs = getRequestsData(text, "");
-    if (Object.keys(reqs).length <= 0) {
+    try {
+      const parsedDoc = YAML.parse(text);
+      if (
+        typeof parsedDoc !== "object" ||
+        Array.isArray(parsedDoc) ||
+        parsedDoc === null ||
+        !parsedDoc.hasOwnProperty("requests")
+      ) {
+        content = "requests:\n" + content;
+      }
+    } catch {
       content = "requests:\n" + content;
     }
 
@@ -78,7 +88,7 @@ async function appendContent(content: string) {
     await activeEditor.edit((e) => {
       e.insert(lastLine.range.end, "\n\n" + content);
     });
-    
+
     const lineToCheck = lastLine.lineNumber;
     const isVisible = activeEditor.visibleRanges.some((range) => {
       return lineToCheck >= range.start.line && lineToCheck <= range.end.line;

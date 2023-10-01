@@ -14,6 +14,9 @@ let UNDEFINED_VARS = new Set<string>();
 export function appendUndefinedVars(warning: string) {
   UNDEFINED_VARS.add(warning);
 }
+export function resetUndefinedVars(){
+  UNDEFINED_VARS.clear();
+}
 
 export function constructGotRequest(allData: RequestSpec): {
   request: GotRequest;

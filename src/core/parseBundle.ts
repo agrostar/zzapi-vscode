@@ -71,19 +71,22 @@ export function getRequestPositions(document: string): Array<RequestPosition> {
  * @returns An object of type { [name: string]: RequestSpec } where each value is the data
  *  of a request of the name key
  */
+const VALID_KEYS = ["requests", "common", "variables"];
 export function getRequestsData(
   document: string,
   env: string,
   name?: string,
 ): { [name: string]: RequestSpec } {
   let parsedData = YAML.parse(document);
-  if(parsedData === null){
-    return {};
-  }
-  if(typeof parsedData !== "object" || Array.isArray(parsedData)){
+  if(typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null){
     throw new Error("Bundle must be an object with key value pairs");
   }
 
+  for(const key in parsedData){
+    if(!VALID_KEYS.includes(key)){
+      throw new Error(`Invalid key: ${key}`);
+    }
+  }
 
   loadBundleVariables(document, env);
 
@@ -97,9 +100,7 @@ export function getRequestsData(
     }
   }
   const allRequests = parsedData.requests;
-  if (allRequests === undefined) {
-    return {};
-  } else if(typeof allRequests !== "object" || Array.isArray(allRequests)){
+  if(typeof allRequests !== "object" || Array.isArray(allRequests) || allRequests === null){
     throw new Error("requests must be an object with keys as request names");
   }
 
