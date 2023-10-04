@@ -8,7 +8,6 @@
 import got from "got";
 
 import { GotRequest, Param, RequestSpec } from "./models";
-import { replaceVariables } from "./variables";
 
 let UNDEFINED_VARS = new Set<string>();
 export function appendUndefinedVars(warning: string) {
@@ -20,8 +19,8 @@ export function constructGotRequest(allData: RequestSpec): {
   warnings: string;
 } {
   const completeUrl = getURL(
+    allData.httpRequest.baseUrl,
     allData.httpRequest.url,
-    "",
     getParamsForUrl(allData.httpRequest.params),
   );
 
@@ -41,20 +40,19 @@ export function constructGotRequest(allData: RequestSpec): {
   UNDEFINED_VARS.forEach((variable) => {
     warnings += `WARNING: variable '${variable}' is not defined (Did you choose an env?)\n`;
   });
-
   UNDEFINED_VARS.clear(); //reset the warnings
+
   return { request: got(completeUrl, options), warnings: warnings };
 }
 
 export function getBody(body: any): string | undefined {
   if (body === undefined) {
     return undefined;
+  } else if (typeof body === "object") {
+    return JSON.stringify(body);
+  } else {
+    return body.toString();
   }
-  if (typeof body === "object") {
-    return JSON.stringify(replaceVariables(body));
-  }
-
-  return replaceVariables(body.toString() as string);
 }
 
 export async function executeGotRequest(
@@ -102,7 +100,7 @@ export function getParamsForUrl(paramsArray: Array<Param> | undefined): string {
     return "";
   }
 
-  let params: Array<Param> = replaceVariables(paramsArray);
+  let params: Array<Param> = paramsArray;
   let paramArray: Array<string> = [];
 
   params.forEach((param) => {

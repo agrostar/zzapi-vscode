@@ -1,4 +1,3 @@
-import { replaceVariables } from "./variables";
 import {
   RequestSpec,
   Request,
@@ -10,7 +9,6 @@ import {
   RequestOptions,
   Options,
 } from "./models";
-import { getURL } from "./executeRequest";
 
 export function getMergedData(common: Common | undefined, request: Request): RequestSpec {
   // making deep copies of the objects because we will be deleting some data
@@ -23,21 +21,21 @@ export function getMergedData(common: Common | undefined, request: Request): Req
 
 function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestSpec {
   const name = requestData.name;
-  const url = getCompleteUrl(commonData, requestData); // variables replaced
 
   const method = requestData.method;
   const params = getMergedParams(commonData?.params, requestData.params);
-  const headers = getMergedHeaders(commonData, requestData); // variables replaced
+  const headers = getMergedHeaders(commonData, requestData);
   const body = requestData.body;
   const options = getMergedOptions(commonData?.options, requestData.options);
 
-  const tests = getMergedTests(commonData?.tests, requestData.tests); // variables replaced
+  const tests = getMergedTests(commonData?.tests, requestData.tests);
   const captures = getMergedCaptures(commonData?.capture, requestData.capture);
 
   const mergedData: RequestSpec = {
     name: name,
     httpRequest: {
-      url: url,
+      baseUrl: commonData?.baseUrl,
+      url: requestData.url,
       method: method,
       params: params,
       headers: headers,
@@ -78,24 +76,7 @@ function getMergedHeaders(
   commonHeaders = setHeadersToLowerCase(commonHeaders);
   requestHeaders = setHeadersToLowerCase(requestHeaders);
 
-  return replaceVariables(Object.assign({}, commonHeaders, requestHeaders));
-}
-
-function getCompleteUrl(commonData: Common | undefined, requestData: Request): string {
-  let baseUrl: string | undefined;
-  if (commonData === undefined) {
-    baseUrl = undefined;
-  } else {
-    if (commonData.baseUrl === undefined) {
-      baseUrl = undefined;
-    } else {
-      baseUrl = replaceVariables(commonData.baseUrl as string);
-    }
-  }
-  const requestUrl = replaceVariables(requestData.url as string);
-
-  const completeUrl = getURL(baseUrl, requestUrl, "");
-  return completeUrl;
+  return Object.assign({}, commonHeaders, requestHeaders);
 }
 
 function getMergedOptions(
@@ -201,7 +182,7 @@ function getMergedTests(common: Tests | undefined, request: Tests | undefined): 
     }
   }
 
-  return replaceVariables(mergedData);
+  return mergedData;
 }
 
 function getTest(commonTest: any, requestTest: any) {

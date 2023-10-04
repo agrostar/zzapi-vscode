@@ -46,7 +46,7 @@ export function activate(context: ExtensionContext): void {
 
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
     if (activeEditor && documentIsBundle(activeEditor.document)) {
-      //if we are referring to a new bundle, then we have to reload environments
+      //if we are referring to a new dir
       if (path.dirname(activeEditor.document.uri.path) !== getCurrDirPath()) {
         setWorkingDir(path.dirname(activeEditor.document.uri.path));
         resetCapturedVariables();

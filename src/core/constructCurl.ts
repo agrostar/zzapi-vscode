@@ -1,10 +1,7 @@
 import { getBody, getParamsForUrl, getURL } from "./executeRequest";
 import { RequestSpec } from "./models";
-import { replaceVariablesInRequest } from "./variables";
 
 export function getCurlRequest(request: RequestSpec): string {
-  request = replaceVariablesInRequest(request);
-
   const methodFlag = ` -X ${request.httpRequest.method.toUpperCase()}`;
   let headersFlag = "";
   if (request.httpRequest.headers !== undefined) {

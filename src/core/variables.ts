@@ -125,10 +125,7 @@ export function loadBundleVariables(document: string, env?: string) {
 }
 
 export function replaceVariables(data: any): any {
-  if (data === undefined) {
-    return undefined;
-  }
-  if (typeof data === "object") {
+  if (typeof data === "object" && data != null) {
     return replaceVariablesInNonScalar(data);
   }
   if (typeof data === "string") {
@@ -182,21 +179,14 @@ function replaceVariablesInObject(objectData: { [key: string]: any }): {
   return objectData;
 }
 
-export function replaceVariablesInRequest(request: RequestSpec): RequestSpec {
-  type keyOfRequestData = keyof RequestSpec;
-  for (const key in request) {
-    const reqVal = request[key as keyOfRequestData];
-    if (typeof reqVal === "object") {
-      if (Array.isArray(reqVal)) {
-        (request as any)[key] = replaceVariablesInArray(reqVal);
-      } else {
-        (request as any)[key] = replaceVariablesInObject(reqVal);
-      }
-    } else if (typeof reqVal === "string") {
-      request[key as keyOfRequestData] = replaceVariablesInString(reqVal);
-    }
-  }
-  return request;
+export function replaceVariablesInRequest(request: RequestSpec): void {
+  request.httpRequest.baseUrl = replaceVariables(request.httpRequest.baseUrl);
+  request.httpRequest.url = replaceVariables(request.httpRequest.url);
+  request.httpRequest.params = replaceVariables(request.httpRequest.params);
+  request.httpRequest.headers = replaceVariables(request.httpRequest.headers);
+  request.httpRequest.body = replaceVariables(request.httpRequest.body);
+
+  request.tests = replaceVariables(request.tests);
 }
 
 /**

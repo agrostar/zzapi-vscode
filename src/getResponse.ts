@@ -31,7 +31,8 @@ export async function individualRequestWithProgress(
 
         clearInterval(interval);
       });
-
+      
+      replaceVariablesInRequest(requestData);
       const requestWithWarnings = constructGotRequest(requestData);
       const httpRequest = requestWithWarnings.request;
       const warnings = requestWithWarnings.warnings;
@@ -120,8 +121,8 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         currRequestName = `(Running '${name}')`;
 
         let requestData = allRequests[name];
-        requestData = replaceVariablesInRequest(requestData);
 
+        replaceVariablesInRequest(requestData);
         const requestWithWarnings = constructGotRequest(requestData);
         currHttpRequest = requestWithWarnings.request;
         const warning = requestWithWarnings.warnings;

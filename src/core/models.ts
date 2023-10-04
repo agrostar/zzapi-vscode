@@ -79,6 +79,7 @@ export interface Request {
 export interface RequestSpec {
   name: string;
   httpRequest: {
+    baseUrl?: string,
     url: string;
     method: Method;
     params?: Array<Param>;
