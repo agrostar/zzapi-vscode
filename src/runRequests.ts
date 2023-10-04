@@ -25,7 +25,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
     "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string),
   };
 
-  if (allData.httpRequest.body && (typeof allData.httpRequest.body == "object")) {
+  if (allData.httpRequest.body && typeof allData.httpRequest.body == "object") {
     autoHeaders["content-type"] = "application/json";
   }
 
@@ -57,14 +57,19 @@ export async function runAllRequests(text: string): Promise<void> {
     const autoHeaders: { [key: string]: string } = {
       "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string),
     };
-  
-    if (allRequests[name].httpRequest.body && (typeof allRequests[name].httpRequest.body == "object")) {
+
+    if (
+      allRequests[name].httpRequest.body &&
+      typeof allRequests[name].httpRequest.body == "object"
+    ) {
       autoHeaders["content-type"] = "application/json";
     }
-  
+
     allRequests[name].httpRequest.headers = Object.assign(
       autoHeaders,
-      allRequests[name].httpRequest.headers === undefined ? {} : allRequests[name].httpRequest.headers,
+      allRequests[name].httpRequest.headers === undefined
+        ? {}
+        : allRequests[name].httpRequest.headers,
     );
   }
 

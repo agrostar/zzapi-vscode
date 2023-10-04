@@ -31,7 +31,7 @@ export async function individualRequestWithProgress(
 
         clearInterval(interval);
       });
-      
+
       replaceVariablesInRequest(requestData);
       const requestWithWarnings = constructGotRequest(requestData);
       const httpRequest = requestWithWarnings.request;

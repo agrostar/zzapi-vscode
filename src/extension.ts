@@ -17,6 +17,7 @@ import {
   createEnvironmentSelector,
   getCurrDirPath,
   initialiseStatusBar,
+  resetActiveVarSet,
   setWorkingDir,
 } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
@@ -31,6 +32,7 @@ let DISPOSABLES: Disposable[] = [];
  * ANY CHANGES HERE MUST REFLECT IN yamlValidation IN package.json
  */
 const BUNDLE_FILE_NAME_ENDINGS = [".zzb"] as const;
+let CURR_BUNDLE_PATH: string | undefined = undefined;
 
 export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
@@ -46,10 +48,17 @@ export function activate(context: ExtensionContext): void {
 
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
     if (activeEditor && documentIsBundle(activeEditor.document)) {
-      //if we are referring to a new dir
-      if (path.dirname(activeEditor.document.uri.path) !== getCurrDirPath()) {
-        setWorkingDir(path.dirname(activeEditor.document.uri.path));
+      // if we are referring to a new bundle
+      const editorPath = activeEditor.document.uri.path;
+      if (editorPath !== CURR_BUNDLE_PATH) {
+        CURR_BUNDLE_PATH = editorPath;
         resetCapturedVariables();
+        resetActiveVarSet(statusBar);
+      }
+      //if we are referring to a new dir
+      const dirName = path.dirname(editorPath);
+      if (dirName !== getCurrDirPath()) {
+        setWorkingDir(dirName);
       }
     }
   });
