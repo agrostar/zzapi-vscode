@@ -30,8 +30,8 @@ function addRequest(prefix: string, element: any, requests: any) {
 
   if (r.url) {
     const protocol = r.url.protocol || "";
-    const host = (r.url.host || "").join(".");
-    const path = (r.url.path || "").join("/");
+    const host = (r.url.host || []).join(".");
+    const path = (r.url.path || []).join("/");
     if (protocol) {
       request.url = reformatVariables(`${protocol}://${host}/${path}`);
     } else {
