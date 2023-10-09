@@ -5,7 +5,7 @@ function checkHeaderItem(obj: any): [boolean, string | undefined] {
     return [false, `Header item is not an object of type {name: string; value: string}`];
   }
   const keys = Object.keys(obj);
-  if (keys.length !== 2) {
+  if (keys.length < 2) {
     return [false, `Each header must be an object of type {name: string; value: string}`];
   }
   if (!(keys.includes("name") && typeof obj.name === "string")) {
@@ -22,21 +22,18 @@ function checkParamItem(obj: any) {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [
       false,
-      `Param item is not an object of type {name: string; value: string; encode?: boolean}`,
+      `Param item is not an object of type {name: string; value: scalar; encode?: boolean}`,
     ];
   }
   const keys = Object.keys(obj);
-  if (!(keys.length === 2 || keys.length === 3)) {
+  if (keys.length < 2) {
     return [
       false,
-      `Each param must be an object of type {name: string; value: string; encode?: boolean}`,
+      `Each param must be an object of type {name: string; value: scalar; encode?: boolean}`,
     ];
   }
   if (!(keys.includes("name") && typeof obj.name === "string")) {
     return [false, `name property of each param item must exist as a string`];
-  }
-  if (!(keys.includes("value") && typeof obj.value === "string")) {
-    return [false, `value property of each param item must exist as a string`];
   }
   if (keys.includes("encode") && typeof obj.encode !== "boolean") {
     return [false, `encode property of each param item must be a boolean`];
@@ -177,21 +174,9 @@ function checkOptions(obj: any) {
   return [true, undefined];
 }
 
-const VALID_COMMON_KEYS = ["baseUrl", "headers", "params", "options", "tests", "capture"];
 export function checkCommonType(obj: any): [boolean, string | undefined] {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [false, "Common must be of type object"];
-  }
-
-  for (const key in obj) {
-    if (!VALID_COMMON_KEYS.includes(key)) {
-      return [
-        false,
-        `Key '${key}' does not exist in common type. Key must be among ${getStringIfNotScalar(
-          VALID_COMMON_KEYS,
-        )}`,
-      ];
-    }
   }
 
   if (obj.hasOwnProperty("baseUrl") && typeof obj.baseUrl !== "string") {
@@ -224,31 +209,10 @@ const VALID_METHODS = [
   "delete",
   "trace",
 ] as const;
-const VALID_REQUEST_KEYS = [
-  "name",
-  "url",
-  "method",
-  "headers",
-  "params",
-  "body",
-  "options",
-  "tests",
-  "capture",
-];
+
 export function checkRequestType(obj: any): [boolean, string | undefined] {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [false, "Request must be of type object"];
-  }
-
-  for (const key in obj) {
-    if (!VALID_REQUEST_KEYS.includes(key)) {
-      return [
-        false,
-        `Key '${key}' does not exist in request type. Key must be among ${getStringIfNotScalar(
-          VALID_REQUEST_KEYS,
-        )}`,
-      ];
-    }
   }
 
   let [valid, error] = checkHeadersParamsOptionsTestsCaptures(obj);

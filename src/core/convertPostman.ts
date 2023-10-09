@@ -32,7 +32,11 @@ function addRequest(prefix: string, element: any, requests: any) {
     const protocol = r.url.protocol || "";
     const host = (r.url.host || "").join(".");
     const path = (r.url.path || "").join("/");
-    request.url = reformatVariables(`${protocol}://${host}/${path}`);
+    if (protocol) {
+      request.url = reformatVariables(`${protocol}://${host}/${path}`);
+    } else {
+      request.url = reformatVariables(`${host}/${path}`);
+    }
   }
 
   if (r.header) {
@@ -59,8 +63,13 @@ function addRequest(prefix: string, element: any, requests: any) {
 
   if (r.body && r.body.mode == "raw") {
     if (r.body?.options?.raw?.language == "json") {
-      request.body = JSON.parse(r.body.raw);
-      reformatVariablesInObject(request.body);
+      try {
+        request.body = JSON.parse(r.body.raw);
+        reformatVariablesInObject(request.body);
+      } catch (e) {
+        // due to variables, the JSON may not be parseable. Use raw in that case.
+        request.body = reformatVariables(r.body.raw);
+      }
       if (!contentTypeAdded) {
         if (!request.headers) request.headers = [];
         request.headers.push({ name: "Content-Type", value: "application/json" });
