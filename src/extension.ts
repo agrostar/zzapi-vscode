@@ -15,14 +15,16 @@ import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./reg
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import {
   createEnvironmentSelector,
+  getActiveVarSet,
   getCurrDirPath,
+  getDefaultEnv,
   initialiseStatusBar,
-  resetActiveVarSet,
+  setEnvironment,
   setWorkingDir,
 } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
-import { resetCapturedVariables } from "./core/variables";
 import { addSampleGet, addSamplePost } from "./addSamples";
+import { resetCapturedVariables } from "./core/variables";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -32,7 +34,18 @@ let DISPOSABLES: Disposable[] = [];
  * ANY CHANGES HERE MUST REFLECT IN yamlValidation IN package.json
  */
 const BUNDLE_FILE_NAME_ENDINGS = [".zzb"] as const;
-let CURR_BUNDLE_PATH: string | undefined = undefined;
+let CURR_BUNDLE_PATH: string = "";
+
+let SELECTED_ENVS: { [bundlePath: string]: string } = {};
+export function storeEnv(): void {
+  const activeEditor = window.activeTextEditor;
+  if (!(activeEditor && documentIsBundle(activeEditor.document))) {
+    return;
+  }
+
+  const envPath = activeEditor.document.uri.path;
+  SELECTED_ENVS[envPath] = getActiveVarSet();
+}
 
 export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
@@ -48,13 +61,20 @@ export function activate(context: ExtensionContext): void {
 
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
     if (activeEditor && documentIsBundle(activeEditor.document)) {
-      // if we are referring to a new bundle
       const editorPath = activeEditor.document.uri.path;
+
+      // if we are referring to a new bundle
       if (editorPath !== CURR_BUNDLE_PATH) {
         CURR_BUNDLE_PATH = editorPath;
+
+        if (!SELECTED_ENVS.hasOwnProperty(editorPath)) {
+          SELECTED_ENVS[editorPath] = getDefaultEnv();
+        }
+        setEnvironment(statusBar, SELECTED_ENVS[editorPath]);
+
         resetCapturedVariables();
-        resetActiveVarSet(statusBar);
       }
+
       //if we are referring to a new dir
       const dirName = path.dirname(editorPath);
       if (dirName !== getCurrDirPath()) {

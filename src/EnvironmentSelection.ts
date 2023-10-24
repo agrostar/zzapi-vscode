@@ -1,9 +1,12 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor, Uri } from "vscode";
 
 import { getVarSetNames, loadBundleVariables } from "./core/variables";
-import { documentIsBundle } from "./extension";
+import { documentIsBundle, storeEnv } from "./extension";
 
 const NO_VARSET = "-- None --";
+export function getDefaultEnv(): string {
+  return NO_VARSET;
+}
 
 let ACTIVE_VARSET: string = "";
 let WORKING_DIR: string;
@@ -18,6 +21,7 @@ export function getActiveVarSet(): string {
 
 export function resetActiveVarSet(statusBar: StatusBarItem): void {
   ACTIVE_VARSET = NO_VARSET;
+  storeEnv();
   statusBar.text = "zzAPI: no var-set";
   statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
 }
@@ -27,6 +31,14 @@ export function initialiseStatusBar(context: ExtensionContext, statusBar: Status
   statusBar.command = "extension.clickEnvSelector";
   statusBar.show();
   context.subscriptions.push(statusBar);
+}
+
+export function setEnvironment(statusBar: StatusBarItem, env: string): void {
+  if (env === NO_VARSET) {
+    resetActiveVarSet(statusBar);
+  } else {
+    setCurrentVarSetName(statusBar, env);
+  }
 }
 
 export function createEnvironmentSelector(
@@ -52,11 +64,7 @@ export function createEnvironmentSelector(
       })
       .then((selectedVarSetName) => {
         if (!selectedVarSetName) return;
-        if (selectedVarSetName === NO_VARSET) {
-          resetActiveVarSet(statusBar);
-        } else {
-          setCurrentVarSetName(statusBar, selectedVarSetName);
-        }
+        setEnvironment(statusBar, selectedVarSetName);
       });
   });
   context.subscriptions.push(statusClick);
@@ -73,6 +81,7 @@ export function setWorkingDir(dir: string): void {
 
 export function setCurrentVarSetName(statusBar: StatusBarItem, varSetName: string): void {
   ACTIVE_VARSET = varSetName;
+  storeEnv();
   statusBar.text = `zzAPI var set: ${ACTIVE_VARSET}`;
   statusBar.backgroundColor = undefined;
 }
