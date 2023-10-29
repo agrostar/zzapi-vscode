@@ -23,7 +23,7 @@
     "api documentation"
   ],
   "activationEvents": [
-    "workspaceContains:**/*.zzb"
+    "*"
   ],
   "main": "dist/extension.js",
   "icon": "images/zzapi.png",
