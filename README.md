@@ -6,6 +6,8 @@ This extension makes it easy to create, document and test API requests from with
 
 ## Features
 
+![screencast](https://raw.githubusercontent.com/agrostar/zzapi-vscode/main/images/screencast.gif)
+
 * Provides Code Lenses above requests when a `.zzb` file is opened. These are mini-buttons that execute a request or all requests in a bundle.
 * Provides the ability to choose environments (sets of variables) to use when running requests.
 * In conjunction with [RedHat YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) provides schema validation for the `.zzb` file extension.
@@ -33,8 +35,8 @@ This extension makes it easy to create, document and test API requests from with
    * Use the command pallete in VS Code (Cmd-Shift-P or Ctrl-Shift-P) and choose `zzAPI: Import Postman collection`
    * In the File Open dialog, choose the Postman collection you exported in the first step
    * The command will open a new editor window and place the converted YAML. Save it to a file with a `.zzb` extension
-   * If you have used variables in Postman, you have to create a `.zzv` file (or a `variables` block in the bundle itself). Sorry, we don't support importing Postman environment yet.
-5. You will see a Code Lense above each named request for running the request. You will also see a Code Lens above the `requests` node, to run all the requests sequentially. Click on these to execute them and see the response.
+   * If you have used variables in Postman, you can also import the environments in a similar manner: export them in Postman and import them in VS Code.
+5. You will see a CodeLens above each named request for running the request. You will also see a CodeLens above the `requests` node, to run all the requests sequentially. Click on these to execute them and see the response.
 
 ## Detailed Usage
 

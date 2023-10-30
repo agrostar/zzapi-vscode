@@ -23,7 +23,10 @@ export function resetActiveVarSet(statusBar: StatusBarItem): void {
   ACTIVE_VARSET = NO_VARSET;
   storeEnv();
   statusBar.text = "zzAPI: no var-set";
-  statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor && documentIsBundle(activeEditor.document)) {
+    statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
+  }
 }
 
 export function initialiseStatusBar(context: ExtensionContext, statusBar: StatusBarItem): void {
