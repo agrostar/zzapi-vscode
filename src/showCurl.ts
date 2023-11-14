@@ -1,13 +1,13 @@
 import { getActiveVarSet, getCurrDirPath } from "./EnvironmentSelection";
 import { getCurlRequest } from "./core/constructCurl";
-import { getRequestsData } from "./core/parseBundle";
+import { getRequestSpec } from "./core/parseBundle";
 import { loadVarSet, replaceVariablesInRequest } from "./core/variables";
 import { getOutputChannel } from "./extension";
 
 export function showCurl(text: string, name: string) {
   loadVarSet(getCurrDirPath(), getActiveVarSet());
 
-  let request = getRequestsData(text, getActiveVarSet(), name)[name];
+  let request = getRequestSpec(text, getActiveVarSet(), name);
 
   replaceVariablesInRequest(request);
   const curlCommand = getCurlRequest(request);

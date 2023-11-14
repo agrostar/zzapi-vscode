@@ -26,7 +26,7 @@ This extension makes it easy to create, document and test API requests from with
         method: GET
         url: https://postman-echo.com/get
         params:
-          - { name: foo1, value: bar1 }
+          foo1: bar1
 ```
 
 4. Save the The file with a `.zzb` file extension to activate the extension.

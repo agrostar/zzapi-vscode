@@ -5,9 +5,6 @@ function checkHeaderItem(obj: any): [boolean, string | undefined] {
     return [false, `Header item is not an object of type {name: string; value: string}`];
   }
   const keys = Object.keys(obj);
-  if (keys.length < 2) {
-    return [false, `Each header must be an object of type {name: string; value: string}`];
-  }
   if (!(keys.includes("name") && typeof obj.name === "string")) {
     return [false, `name property of each header item must exist as a string`];
   }
@@ -26,43 +23,47 @@ function checkParamItem(obj: any) {
     ];
   }
   const keys = Object.keys(obj);
-  if (keys.length < 2) {
-    return [
-      false,
-      `Each param must be an object of type {name: string; value: scalar; encode?: boolean}`,
-    ];
-  }
   if (!(keys.includes("name") && typeof obj.name === "string")) {
     return [false, `name property of each param item must exist as a string`];
   }
+  // value is optional
   if (keys.includes("encode") && typeof obj.encode !== "boolean") {
     return [false, `encode property of each param item must be a boolean`];
   }
   return [true, undefined];
 }
 
+function isArrayOrDict(obj: any) {
+  return typeof obj == 'object' && ! (obj instanceof Date);
+}
+
 function checkHeadersParamsOptionsTestsCaptures(obj: any) {
   if (obj.hasOwnProperty("headers")) {
     const headers = obj.headers;
-    if (!Array.isArray(headers)) {
-      return [false, "Headers must be defined as an array"];
+    if (!isArrayOrDict(headers)) {
+      return [false, `Headers must be an array or a dictionary: found ${typeof headers}`];
     }
-    for (const header of headers) {
-      const [headerValid, headerError] = checkHeaderItem(header);
-      if (!headerValid) {
-        return [false, `Error in header item ${getStringIfNotScalar(header)}: ${headerError}`];
+    if (Array.isArray(headers)) {
+      for (const header of headers) {
+        const [headerValid, headerError] = checkHeaderItem(header);
+        if (!headerValid) {
+          return [false, `Error in header item ${getStringIfNotScalar(header)}: ${headerError}`];
+        }
       }
     }
+    // For a dictionary, anything is valid.
   }
   if (obj.hasOwnProperty("params")) {
     const params = obj.params;
-    if (!Array.isArray(params)) {
-      return [false, "Params must be defined as an array"];
+    if (!isArrayOrDict(params)) {
+      return [false, `Params must be an array or a dictionary: found ${typeof params}`];
     }
-    for (const param of params) {
-      const [paramValid, paramError] = checkParamItem(param);
-      if (!paramValid) {
-        return [false, `Error in param item ${getStringIfNotScalar(param)}: ${paramError}`];
+    if (Array.isArray(params)) {
+      for (const param of params) {
+        const [paramValid, paramError] = checkParamItem(param);
+        if (!paramValid) {
+          return [false, `Error in param item ${getStringIfNotScalar(param)}: ${paramError}`];
+        }
       }
     }
   }
@@ -210,7 +211,7 @@ const VALID_METHODS = [
   "trace",
 ] as const;
 
-export function checkRequestType(obj: any): [boolean, string | undefined] {
+export function validateRawRequest(obj: any): [boolean, string | undefined] {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [false, "Request must be of type object"];
   }

@@ -105,8 +105,10 @@ export function getParamsForUrl(paramsArray: Array<Param> | undefined): string {
 
   params.forEach((param) => {
     const key = param.name as string;
-    let value = param.value as string;
-    if (param.encode !== undefined && param.encode === false) {
+    let value = param.value;
+    if (value == undefined) {
+      paramArray.push(key);
+    } else if (param.encode === false) {
       paramArray.push(`${key}=${value}`);
     } else {
       paramArray.push(`${key}=${encodeURIComponent(value)}`);

@@ -1,7 +1,7 @@
 import { window } from "vscode";
 
 import { RequestSpec, ResponseData } from "./core/models";
-import { getRequestsData } from "./core/parseBundle";
+import { getAllRequestSpecs, getRequestSpec } from "./core/parseBundle";
 import { loadVarSet } from "./core/variables";
 
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
@@ -15,7 +15,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
   /*
   Also loads the bundle vars, along with getting the data
   */
-  const allData: RequestSpec = getRequestsData(text, getActiveVarSet(), name)[name];
+  const allData: RequestSpec = getRequestSpec(text, getActiveVarSet(), name);
 
   if (allData === undefined) {
     return;
@@ -51,7 +51,7 @@ export async function runAllRequests(text: string): Promise<void> {
   /*
   Also loads the bundle vars, along with getting the data
   */
-  const allRequests = getRequestsData(text, getActiveVarSet());
+  const allRequests = getAllRequestSpecs(text, getActiveVarSet());
 
   for (const name in allRequests) {
     const autoHeaders: { [key: string]: string } = {

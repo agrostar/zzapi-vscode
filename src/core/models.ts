@@ -13,15 +13,8 @@ export interface Header {
 
 export interface Param {
   name: string;
-  value: string;
+  value?: string;
   encode?: boolean;
-}
-
-export interface RequestOptions {
-  follow?: boolean;
-  verifySSL?: boolean;
-  formatJSON?: boolean;
-  showHeaders?: boolean;
 }
 
 export interface Options {
@@ -52,25 +45,33 @@ export interface Captures {
   headers?: { [key: string]: string };
 }
 
+export type RawHeaders = Array<Header> | {[name: string]: string} | undefined;
+export type RawParams = Array<Param> | {[name: string]: any} | undefined;
+export interface RawOptions {
+  follow?: boolean;
+  verifySSL?: boolean;
+  formatJSON?: boolean;
+  showHeaders?: boolean;
+}
+
 export interface Common {
   baseUrl?: string;
-
-  headers?: Array<Header>;
-  params?: Array<Param>;
-  options?: RequestOptions;
+  headers: RawHeaders;
+  params: RawParams;
+  options?: RawOptions;
   tests?: Tests;
   capture?: Captures;
 }
 
-export interface Request {
+// The raw request as seen in the bundle (with a "name" key added for convenience)
+export interface RawRequest {
   name: string;
-
   url: string;
   method: Method;
-  headers?: Array<Header>;
-  params?: Array<Param>;
+  headers: RawHeaders;
+  params: RawParams;
   body?: string;
-  options?: RequestOptions;
+  options?: RawOptions;
   tests?: Tests;
   capture?: Captures;
 }

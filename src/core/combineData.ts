@@ -1,30 +1,33 @@
 import {
   RequestSpec,
-  Request,
+  RawRequest,
   Common,
   Header,
   Param,
   Tests,
   Captures,
-  RequestOptions,
+  RawOptions,
   Options,
+  RawParams,
+  RawHeaders,
 } from "./models";
 
-export function getMergedData(common: Common | undefined, request: Request): RequestSpec {
+
+export function getMergedData(common: Common, request: RawRequest): RequestSpec {
   // making deep copies of the objects because we will be deleting some data
-  let commonData =
-    common === undefined ? undefined : (JSON.parse(JSON.stringify(common)) as Common);
-  let requestData = JSON.parse(JSON.stringify(request)) as Request;
+  // TODO: avoid deleting data and deep copies.
+  let commonData = (JSON.parse(JSON.stringify(common)) as Common);
+  let requestData = JSON.parse(JSON.stringify(request)) as RawRequest;
 
   return getAllMergedData(commonData, requestData);
 }
 
-function getAllMergedData(commonData: Common | undefined, requestData: Request): RequestSpec {
+function getAllMergedData(commonData: Common, requestData: RawRequest): RequestSpec {
   const name = requestData.name;
 
   const method = requestData.method;
-  const params = getMergedParams(commonData?.params, requestData.params);
-  const headers = getMergedHeaders(commonData, requestData);
+  const params = getMergedParams(commonData.params, requestData.params);
+  const headers = getMergedHeaders(commonData.headers, requestData.headers);
   const body = requestData.body;
   const options = getMergedOptions(commonData?.options, requestData.options);
 
@@ -49,30 +52,47 @@ function getAllMergedData(commonData: Common | undefined, requestData: Request):
   return mergedData;
 }
 
-function getMergedParams(
-  commonParams: Array<Param> | undefined,
-  requestParams: Array<Param> | undefined,
-): Array<Param> | undefined {
-  let mixedParams: Array<Param> | undefined;
+function paramObjectToArray(params: object): Param[] {
+  const paramArray: Param[] = [];
+  Object.entries(params).forEach(([name, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach(v => {
+        paramArray.push({ name, value: v });
+      })
+    } else {
+      paramArray.push({ name, value });
+    }
+  });
+  return paramArray;
+}
 
-  if (commonParams === undefined || !Array.isArray(commonParams)) {
-    mixedParams = requestParams;
-  } else if (requestParams === undefined || !Array.isArray(requestParams)) {
-    mixedParams = commonParams;
-  } else {
-    mixedParams = commonParams.concat(requestParams);
+function getMergedParams(commonParams: RawParams, requestParams: RawParams): Array<Param> {
+  let mixedParams: Param[] = [];
+
+  if (commonParams) {
+    if (Array.isArray(commonParams)) {
+      mixedParams = mixedParams.concat(commonParams);
+    } else {
+      mixedParams = mixedParams.concat(paramObjectToArray(commonParams));
+    }
   }
-
+  if (requestParams) {
+    if (Array.isArray(requestParams)) {
+      mixedParams = mixedParams.concat(requestParams);
+    } else {
+      mixedParams = mixedParams.concat(paramObjectToArray(requestParams));
+    }
+  }
   return mixedParams;
 }
 
-function getMergedHeaders(
-  commonData: Common | undefined,
-  requestData: Request,
-): { [name: string]: string } {
-  let commonHeaders = getArrayHeadersAsJSON(commonData?.headers);
-  let requestHeaders = getArrayHeadersAsJSON(requestData.headers);
-
+function getMergedHeaders(commonHeaders: RawHeaders, requestHeaders: RawHeaders): { [name: string]: string } {
+  if (Array.isArray(commonHeaders)) {
+    commonHeaders = getArrayHeadersAsObject(commonHeaders);
+  }
+  if (Array.isArray(requestHeaders)) {
+    requestHeaders = getArrayHeadersAsObject(requestHeaders);
+  }
   commonHeaders = setHeadersToLowerCase(commonHeaders);
   requestHeaders = setHeadersToLowerCase(requestHeaders);
 
@@ -80,8 +100,8 @@ function getMergedHeaders(
 }
 
 function getMergedOptions(
-  common: RequestOptions | undefined,
-  request: RequestOptions | undefined,
+  common: RawOptions | undefined,
+  request: RawOptions | undefined,
 ): Options {
   const defaultFollow = false;
   const defaultVerify = false;
@@ -153,6 +173,7 @@ function getMergedCaptures(
   type keyOfMergedData = keyof typeof mergedData;
   for (const key in mergedData) {
     if (mergedData[key as keyOfMergedData] === undefined) {
+      // TODO: avoid delete and therefore deep copies
       delete mergedData[key as keyOfMergedData];
     }
   }
@@ -178,6 +199,7 @@ function getMergedTests(common: Tests | undefined, request: Tests | undefined): 
   type keyOfMergedData = keyof typeof mergedData;
   for (const key in mergedData) {
     if (mergedData[key as keyOfMergedData] === undefined) {
+      // TODO: avoid delete and therefore deep copies
       delete mergedData[key as keyOfMergedData];
     }
   }
@@ -192,7 +214,7 @@ function getTest(commonTest: any, requestTest: any) {
   return commonTest;
 }
 
-function getArrayHeadersAsJSON(
+function getArrayHeadersAsObject(
   objectSet: Array<Header> | undefined,
 ): { [key: string]: string } | undefined {
   if (objectSet === undefined) {

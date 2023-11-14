@@ -85,6 +85,6 @@ export function setWorkingDir(dir: string): void {
 export function setCurrentVarSetName(statusBar: StatusBarItem, varSetName: string): void {
   ACTIVE_VARSET = varSetName;
   storeEnv();
-  statusBar.text = `zzAPI var set: ${ACTIVE_VARSET}`;
+  statusBar.text = `zzAPI var-set: ${ACTIVE_VARSET}`;
   statusBar.backgroundColor = undefined;
 }
