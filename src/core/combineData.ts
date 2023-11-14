@@ -10,6 +10,7 @@ import {
   Options,
   RawParams,
   RawHeaders,
+  RawTests,
 } from "./models";
 
 
@@ -29,7 +30,7 @@ function getAllMergedData(commonData: Common, requestData: RawRequest): RequestS
   const params = getMergedParams(commonData.params, requestData.params);
   const headers = getMergedHeaders(commonData.headers, requestData.headers);
   const body = requestData.body;
-  const options = getMergedOptions(commonData?.options, requestData.options);
+  const options = getMergedOptions(commonData.options, requestData.options);
 
   const tests = getMergedTests(commonData?.tests, requestData.tests);
   const captures = getMergedCaptures(commonData?.capture, requestData.capture);
@@ -45,8 +46,8 @@ function getAllMergedData(commonData: Common, requestData: RawRequest): RequestS
       body: body,
     },
     options: options,
-    tests: tests,
-    captures: captures,
+    tests: tests || {},
+    captures: captures || {},
   };
 
   return mergedData;
@@ -93,63 +94,33 @@ function getMergedHeaders(commonHeaders: RawHeaders, requestHeaders: RawHeaders)
   if (Array.isArray(requestHeaders)) {
     requestHeaders = getArrayHeadersAsObject(requestHeaders);
   }
-  commonHeaders = setHeadersToLowerCase(commonHeaders);
-  requestHeaders = setHeadersToLowerCase(requestHeaders);
+  commonHeaders = withLowerCaseKeys(commonHeaders);
+  requestHeaders = withLowerCaseKeys(requestHeaders);
 
   return Object.assign({}, commonHeaders, requestHeaders);
 }
 
-function getMergedOptions(
-  common: RawOptions | undefined,
-  request: RawOptions | undefined,
-): Options {
+// TODO: make all options default false. Change Format to NoFormat.
+// Needs a schema change.
+function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}): Options {
   const defaultFollow = false;
   const defaultVerify = false;
   const defaultFormat = true;
   const defaultHeaders = false;
 
-  let finalFollow: boolean;
-  if (request !== undefined && request.follow !== undefined) {
-    finalFollow = request.follow;
-  } else if (common !== undefined && common.follow !== undefined) {
-    finalFollow = common.follow;
-  } else {
-    finalFollow = defaultFollow;
-  }
+  const follow = rOptions.follow != undefined ? rOptions.follow :
+    cOptions.follow != undefined ? cOptions.follow: defaultFollow;
 
-  let finalVerify: boolean;
-  if (request !== undefined && request.verifySSL !== undefined) {
-    finalVerify = request.verifySSL;
-  } else if (common !== undefined && common.verifySSL !== undefined) {
-    finalVerify = common.verifySSL;
-  } else {
-    finalVerify = defaultVerify;
-  }
+  const verifySSL = rOptions.verifySSL != undefined ? rOptions.verifySSL :
+    cOptions.verifySSL != undefined ? cOptions.verifySSL: defaultVerify;
 
-  let finalFormat: boolean;
-  if (request !== undefined && request.formatJSON !== undefined) {
-    finalFormat = request.formatJSON;
-  } else if (common !== undefined && common.formatJSON !== undefined) {
-    finalFormat = common.formatJSON;
-  } else {
-    finalFormat = defaultFormat;
-  }
+  const formatJSON = rOptions.formatJSON != undefined ? rOptions.formatJSON :
+    cOptions.formatJSON != undefined ? cOptions.formatJSON : defaultFormat;
 
-  let finalShowHeaders: boolean;
-  if (request !== undefined && request.showHeaders !== undefined) {
-    finalShowHeaders = request.showHeaders;
-  } else if (common !== undefined && common.showHeaders !== undefined) {
-    finalShowHeaders = common.showHeaders;
-  } else {
-    finalShowHeaders = defaultHeaders;
-  }
+  const showHeaders = rOptions.showHeaders != undefined ? rOptions.showHeaders :
+    cOptions.showHeaders != undefined ? cOptions.showHeaders : defaultHeaders;
 
-  return {
-    follow: finalFollow,
-    verifySSL: finalVerify,
-    formatJSON: finalFormat,
-    showHeaders: finalShowHeaders,
-  };
+  return { follow, verifySSL, formatJSON, showHeaders };
 }
 
 function getMergedCaptures(
@@ -157,10 +128,10 @@ function getMergedCaptures(
   request: Captures | undefined,
 ): Captures | undefined {
   if (common !== undefined) {
-    common.headers = setHeadersToLowerCase(common.headers);
+    common.headers = withLowerCaseKeys(common.headers);
   }
   if (request !== undefined) {
-    request.headers = setHeadersToLowerCase(request.headers);
+    request.headers = withLowerCaseKeys(request.headers);
   }
 
   let mergedData: Captures = {
@@ -181,28 +152,17 @@ function getMergedCaptures(
   return mergedData;
 }
 
-function getMergedTests(common: Tests | undefined, request: Tests | undefined): Tests | undefined {
-  if (common !== undefined) {
-    common.headers = setHeadersToLowerCase(common.headers);
-  }
-  if (request !== undefined) {
-    request.headers = setHeadersToLowerCase(request.headers);
-  }
+function getMergedTests(commonTests: RawTests = {}, requestTests: RawTests = {}) : Tests {
+  commonTests.headers = withLowerCaseKeys(commonTests.headers);
+  requestTests.headers = withLowerCaseKeys(requestTests.headers);
 
+  // We override status and body but we merge (combine) headers and json
   let mergedData: Tests = {
-    status: getTest(common?.status, request?.status),
-    headers: getTest(common?.headers, request?.headers),
-    json: getTest(common?.json, request?.json),
-    body: getTest(common?.body, request?.body),
+    status: requestTests.status || commonTests.status,
+    body: requestTests.body || commonTests.body,
+    headers: Object.assign({}, commonTests.headers, requestTests.headers),
+    json: Object.assign({}, commonTests.json, requestTests.json),
   };
-
-  type keyOfMergedData = keyof typeof mergedData;
-  for (const key in mergedData) {
-    if (mergedData[key as keyOfMergedData] === undefined) {
-      // TODO: avoid delete and therefore deep copies
-      delete mergedData[key as keyOfMergedData];
-    }
-  }
 
   return mergedData;
 }
@@ -214,11 +174,9 @@ function getTest(commonTest: any, requestTest: any) {
   return commonTest;
 }
 
-function getArrayHeadersAsObject(
-  objectSet: Array<Header> | undefined,
-): { [key: string]: string } | undefined {
+function getArrayHeadersAsObject(objectSet: Array<Header> | undefined): { [key: string]: string } {
   if (objectSet === undefined) {
-    return undefined;
+    return {};
   }
 
   let finalObject: { [key: string]: string } = {};
@@ -233,16 +191,14 @@ function getArrayHeadersAsObject(
   return finalObject;
 }
 
-function setHeadersToLowerCase(
-  headers: { [key: string]: any } | undefined,
-): { [key: string]: any } | undefined {
-  if (headers === undefined) {
-    return undefined;
+function withLowerCaseKeys(obj: { [key: string]: any } | undefined): { [key: string]: any } {
+  if (obj === undefined) {
+    return {};
   }
 
   let newObj: { [key: string]: any } = {};
-  for (const key in headers) {
-    newObj[key.toLowerCase()] = headers[key];
+  for (const key in obj) {
+    newObj[key.toLowerCase()] = obj[key];
   }
 
   return newObj;

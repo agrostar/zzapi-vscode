@@ -32,12 +32,15 @@ export interface Options {
  *  test with a colon.
  */
 export interface Tests {
-  json?: { [key: string]: any }; // TODO: we should have string instead of any in tests.
-  body?: { [key: string]: any } | string; // TODO: body should be string
-  status?: { [key: string]: any } | number;
-  headers?: { [key: string]: any };
+  json: { [key: string]: any };
+  headers: { [key: string]: any };
+  body?: { [key: string]: string } | string;
+  status?: { [key: string]: number } | number;
 }
 
+// TODO: captures should probably be <variable>: path/status etc. That way we can assign
+// multiple variables to the same value. Alternatively, we need a way to have a variable
+// in the LHS to be able to assign a variable to another.
 export interface Captures {
   json?: { [key: string]: string };
   body?: string;
@@ -47,6 +50,7 @@ export interface Captures {
 
 export type RawHeaders = Array<Header> | {[name: string]: string} | undefined;
 export type RawParams = Array<Param> | {[name: string]: any} | undefined;
+
 export interface RawOptions {
   follow?: boolean;
   verifySSL?: boolean;
@@ -54,12 +58,19 @@ export interface RawOptions {
   showHeaders?: boolean;
 }
 
+export interface RawTests {
+  json?: { [key: string]: any };
+  headers?: { [key: string]: any };
+  body?: { [key: string]: string } | string;
+  status?: { [key: string]: number } | number;
+}
+
 export interface Common {
   baseUrl?: string;
   headers: RawHeaders;
   params: RawParams;
   options?: RawOptions;
-  tests?: Tests;
+  tests?: RawTests;
   capture?: Captures;
 }
 
@@ -83,13 +94,13 @@ export interface RequestSpec {
     baseUrl?: string;
     url: string;
     method: Method;
-    params?: Array<Param>;
-    headers?: { [key: string]: string };
+    params: Array<Param>;
+    headers: { [key: string]: string };
     body?: any;
   };
   options: Options;
-  tests?: Tests;
-  captures?: Captures;
+  tests: Tests;
+  captures: Captures;
 }
 
 export interface ResponseData {

@@ -38,6 +38,7 @@ export function runAllTests(
   NUM_FAILED = 0;
   NUM_TESTS = 0;
 
+  // TODO: remove iteration and just run each of the tests.
   for (const test in tests) {
     if (test === "json") {
       if (tests.json === undefined) {
@@ -86,18 +87,20 @@ export function runAllTests(
       let required = tests[test as keyof Tests];
       let received = responseData[test as keyof ResponseData];
 
-      if (typeof required !== "object") {
-        required = getStringIfNotScalar(required);
-        received = getStringIfNotScalar(received);
-        if (received === required) {
-          testOutput += `\t${PASS} ${GAP} ${test} : ${required}\n`;
+      if (required != undefined) {
+        if (typeof required !== "object") {
+          required = getStringIfNotScalar(required);
+          received = getStringIfNotScalar(received);
+          if (received === required) {
+            testOutput += `\t${PASS} ${GAP} ${test} : ${required}\n`;
+          } else {
+            testOutput += `\t${FAIL} ${GAP} ${test} : ${required} ${GAP} Received ${received}\n`;
+            NUM_FAILED++;
+          }
+          NUM_TESTS++;
         } else {
-          testOutput += `\t${FAIL} ${GAP} ${test} : ${required} ${GAP} Received ${received}\n`;
-          NUM_FAILED++;
+          testOutput += runObjectTests(required, received, test);
         }
-        NUM_TESTS++;
-      } else {
-        testOutput += runObjectTests(required, received, test);
       }
     }
   }
