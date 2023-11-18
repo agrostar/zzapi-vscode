@@ -14,13 +14,13 @@ export interface Header {
 export interface Param {
   name: string;
   value?: string;
-  encode?: boolean;
+  raw?: boolean;
 }
 
 export interface Options {
   follow: boolean;
   verifySSL: boolean;
-  formatJSON: boolean;
+  keepRawJSON: boolean;
   showHeaders: boolean;
 }
 
@@ -32,8 +32,8 @@ export interface Options {
  *  test with a colon.
  */
 export interface Tests {
-  json: { [key: string]: any };
-  headers: { [key: string]: any };
+  json: { [key: string]: any };  // empty object means no json tests
+  headers: { [key: string]: any };  // empty object means no header tests
   body?: { [key: string]: string } | string;
   status?: { [key: string]: number } | number;
 }
@@ -54,15 +54,16 @@ export type RawParams = Array<Param> | {[name: string]: any} | undefined;
 export interface RawOptions {
   follow?: boolean;
   verifySSL?: boolean;
-  formatJSON?: boolean;
+  keepRawJSON?: boolean;
   showHeaders?: boolean;
 }
 
 export interface RawTests {
-  json?: { [key: string]: any };
-  headers?: { [key: string]: any };
-  body?: { [key: string]: string } | string;
   status?: { [key: string]: number } | number;
+  body?: { [key: string]: string } | string;
+  json?: { [key: string]: any }; // deprecated. Should use the $. key directly under tests.
+  headers?: { [key: string]: any };  // deprecated. Should h.<header-name> directly under tests.
+  [key: string]: any;
 }
 
 export interface Common {

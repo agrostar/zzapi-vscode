@@ -22,6 +22,7 @@ function getStringIfNotScalar(data: any) {
   return data;
 }
 
+// TODO: we need only tests here, not the request spec
 export function runAllTests(
   requestData: RequestSpec,
   responseData: ResponseData,

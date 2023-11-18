@@ -100,27 +100,15 @@ function getMergedHeaders(commonHeaders: RawHeaders, requestHeaders: RawHeaders)
   return Object.assign({}, commonHeaders, requestHeaders);
 }
 
-// TODO: make all options default false. Change Format to NoFormat.
-// Needs a schema change.
 function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}): Options {
-  const defaultFollow = false;
-  const defaultVerify = false;
-  const defaultFormat = true;
-  const defaultHeaders = false;
+  const options = Object.assign(cOptions, rOptions);
 
-  const follow = rOptions.follow != undefined ? rOptions.follow :
-    cOptions.follow != undefined ? cOptions.follow: defaultFollow;
+  const follow = options.follow == true;
+  const verifySSL = options.verifySSL == true;
+  const keepRawJSON = options.keepRawJSON == true;
+  const showHeaders = options.showHeaders == true;
 
-  const verifySSL = rOptions.verifySSL != undefined ? rOptions.verifySSL :
-    cOptions.verifySSL != undefined ? cOptions.verifySSL: defaultVerify;
-
-  const formatJSON = rOptions.formatJSON != undefined ? rOptions.formatJSON :
-    cOptions.formatJSON != undefined ? cOptions.formatJSON : defaultFormat;
-
-  const showHeaders = rOptions.showHeaders != undefined ? rOptions.showHeaders :
-    cOptions.showHeaders != undefined ? cOptions.showHeaders : defaultHeaders;
-
-  return { follow, verifySSL, formatJSON, showHeaders };
+  return { follow, verifySSL, keepRawJSON, showHeaders };
 }
 
 function getMergedCaptures(
@@ -152,16 +140,38 @@ function getMergedCaptures(
   return mergedData;
 }
 
-function getMergedTests(commonTests: RawTests = {}, requestTests: RawTests = {}) : Tests {
-  commonTests.headers = withLowerCaseKeys(commonTests.headers);
-  requestTests.headers = withLowerCaseKeys(requestTests.headers);
+/*
+ * json and header tests can be specified at the root level of 'tests' using
+ * $. and $h. prefixes, as this is more convenient when specifying them.
+ * We merge these into tests.json and tests.headers respectively.
+ */
+function mergePrefixBasedTests(tests: RawTests) {
+  if (!tests.json) tests.json = {};
+  if (!tests.headers) tests.headers = {};
+  for (const key of Object.keys(tests)) {
+    if (key.startsWith('$.')) {
+      tests.json[key] = tests[key];
+    } else if (key.startsWith('$h.')) {
+      const headerName = key.replace(/^\$h\./, '');
+      tests.headers[headerName] = tests[key];
+    }
+  }
+}
 
-  // We override status and body but we merge (combine) headers and json
+function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}) : Tests {
+  // Convert $. and h. at root level into headers and json keys
+  mergePrefixBasedTests(cTests);
+  mergePrefixBasedTests(rTests);
+
+  cTests.headers = withLowerCaseKeys(cTests.headers);
+  rTests.headers = withLowerCaseKeys(rTests.headers);
+
+  // We override status and body but we merge (combine) headers and json tests
   let mergedData: Tests = {
-    status: requestTests.status || commonTests.status,
-    body: requestTests.body || commonTests.body,
-    headers: Object.assign({}, commonTests.headers, requestTests.headers),
-    json: Object.assign({}, commonTests.json, requestTests.json),
+    status: rTests.status || cTests.status,
+    body: rTests.body || cTests.body,
+    headers: Object.assign({}, cTests.headers, rTests.headers),
+    json: Object.assign({}, cTests.json, rTests.json),
   };
 
   return mergedData;

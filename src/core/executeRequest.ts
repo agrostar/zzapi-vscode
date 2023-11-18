@@ -108,7 +108,7 @@ export function getParamsForUrl(paramsArray: Array<Param> | undefined): string {
     let value = param.value;
     if (value == undefined) {
       paramArray.push(key);
-    } else if (param.encode === false) {
+    } else if (param.raw === true) {
       paramArray.push(`${key}=${value}`);
     } else {
       paramArray.push(`${key}=${encodeURIComponent(value)}`);

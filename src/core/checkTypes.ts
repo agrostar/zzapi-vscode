@@ -19,7 +19,7 @@ function checkParamItem(obj: any) {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [
       false,
-      `Param item is not an object of type {name: string; value: scalar; encode?: boolean}`,
+      `Param item is not an object of type {name: string; value: scalar; raw?: boolean}`,
     ];
   }
   const keys = Object.keys(obj);
@@ -27,8 +27,8 @@ function checkParamItem(obj: any) {
     return [false, `name property of each param item must exist as a string`];
   }
   // value is optional
-  if (keys.includes("encode") && typeof obj.encode !== "boolean") {
-    return [false, `encode property of each param item must be a boolean`];
+  if (keys.includes("raw") && typeof obj.raw !== "boolean") {
+    return [false, `raw property of each param item must be a boolean`];
   }
   return [true, undefined];
 }
@@ -51,7 +51,7 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any) {
         }
       }
     }
-    // For a dictionary, anything is valid.
+    // For a dictionary, anything is valid. TODO: value has to be a scalar
   }
   if (obj.hasOwnProperty("params")) {
     const params = obj.params;
@@ -150,12 +150,12 @@ function checkCaptures(obj: any) {
   return [true, undefined];
 }
 
-const VALID_OPTIONS = ["follow", "verifySSL", "formatJSON", "showHeaders"];
+const VALID_OPTIONS = ["follow", "verifySSL", "keepRawJSON", "showHeaders"];
 function checkOptions(obj: any) {
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [
       false,
-      "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean; showHeaders?: boolean}",
+      "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; keepRawJSON?: boolean; showHeaders?: boolean}",
     ];
   }
 
@@ -167,7 +167,7 @@ function checkOptions(obj: any) {
     } else {
       return [
         false,
-        "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; formatJSON?: boolean; showHeaders?: boolean}",
+        "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; keepRawJSON?: boolean; showHeaders?: boolean}",
       ];
     }
   }

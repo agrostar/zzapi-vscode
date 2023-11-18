@@ -10,16 +10,16 @@ const KEYS_IN_HEADERS = ["rawHeaders"];
 export async function openEditorForIndividualReq(
   responseData: ResponseData,
   name: string,
-  formatJSON: boolean,
+  keepRawJSON: boolean,
   showHeaders: boolean,
 ): Promise<void> {
-  let [contentData, headersData] = getDataOfIndReqAsString(responseData, name, formatJSON);
+  let [contentData, headersData] = getDataOfIndReqAsString(responseData, name, keepRawJSON);
   await showContent(contentData, headersData, showHeaders, name);
 }
 
 export async function openEditorForAllRequests(
   responses: Array<{ response: ResponseData; name: string }>,
-  formatJSON?: boolean,
+  keepRawJSON?: boolean,
 ): Promise<void> {
   let allResponses: { [key: string]: any } = {};
 
@@ -27,7 +27,7 @@ export async function openEditorForAllRequests(
     let contentData = getDataOfIndReqAsString(
       responseObj.response,
       responseObj.name,
-      formatJSON,
+      keepRawJSON,
     )[0];
 
     let canParse = true;
@@ -51,7 +51,7 @@ export async function openEditorForAllRequests(
 function getDataOfIndReqAsString(
   responseData: ResponseData,
   name: string,
-  formatJSON?: boolean,
+  keepRawJSON?: boolean,
 ): [contentData: string, headersData: string] {
   let currentEnvironment = getActiveVarSet();
   if (!currentEnvironment) {
@@ -71,8 +71,8 @@ function getDataOfIndReqAsString(
     }
   }
 
-  if (formatJSON === undefined || formatJSON) {
-    let canFormat: boolean = true;
+  if (keepRawJSON) {
+    let canFormat: boolean = false;
 
     let parsedData: any;
     try {

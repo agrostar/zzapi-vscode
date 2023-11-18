@@ -39,7 +39,7 @@ export async function runIndividualRequest(text: string, name: string): Promise<
     await openEditorForIndividualReq(
       responseData,
       allData.name,
-      allData.options.formatJSON,
+      allData.options.keepRawJSON,
       allData.options.showHeaders,
     );
   }
