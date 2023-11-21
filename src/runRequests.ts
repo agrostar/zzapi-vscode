@@ -1,5 +1,3 @@
-import { window } from "vscode";
-
 import { RequestSpec, ResponseData } from "./core/models";
 import { getAllRequestSpecs, getRequestSpec } from "./core/parseBundle";
 import { loadVarSet } from "./core/variables";
