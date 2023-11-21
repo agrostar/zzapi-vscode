@@ -71,21 +71,18 @@ function getDataOfIndReqAsString(
     }
   }
 
-  if (keepRawJSON) {
-    let canFormat: boolean = false;
-
+  if (!keepRawJSON) {
+    let canFormat: boolean = true;
     let parsedData: any;
     try {
       parsedData = JSON.parse(contentData);
     } catch {
       canFormat = false;
     }
-
     if (canFormat) {
       contentData = JSON.stringify(parsedData, undefined, 2);
     }
   }
-
   return [contentData, headersData];
 }
 
