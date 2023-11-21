@@ -18,14 +18,13 @@ const SAMPLE_GET =
   `${TAB}${TAB}${TAB}# By default, the response headers are not displayed\n` +
   `${TAB}${TAB}${TAB}showHeaders: true\n` +
   `${TAB}${TAB}tests:\n` +
-  `${TAB}${TAB}${TAB}json:\n` +
-  `${TAB}${TAB}${TAB}${TAB}# Performs the following assertsions if the response is JSON\n` +
-  `${TAB}${TAB}${TAB}${TAB}$.args.foo1: bar1\n` +
-  `${TAB}${TAB}${TAB}${TAB}$.args.foo2: bar2\n` +
+  `${TAB}${TAB}${TAB}status: 200\n` +
+  `${TAB}${TAB}${TAB}# Performs the following assertsions if the response is JSON\n` +
+  `${TAB}${TAB}${TAB}$.args.foo1: bar1\n` +
+  `${TAB}${TAB}${TAB}$.args.foo2: bar2\n` +
   `${TAB}${TAB}capture:\n` +
-  `${TAB}${TAB}${TAB}json:\n` +
-  `${TAB}${TAB}${TAB}${TAB}# Captures the value of the field args.foo1 into the variable called SAMPLE_VAR\n` +
-  `${TAB}${TAB}${TAB}${TAB}$.args.foo1: SAMPLE_VAR\n`;
+  `${TAB}${TAB}${TAB}# Captures the value of the field args.foo1 into the variable called SAMPLE_VAR\n` +
+  `${TAB}${TAB}${TAB}variableName: $.args.foo1\n`;
 
 export async function addSampleGet() {
   await appendContent(SAMPLE_GET);
@@ -45,14 +44,14 @@ const SAMPLE_POST =
   `${TAB}${TAB}${TAB}# By default, the response headers are not displayed.\n` +
   `${TAB}${TAB}${TAB}showHeaders: true\n` +
   `${TAB}${TAB}tests:\n` +
-  `${TAB}${TAB}${TAB}json:\n` +
-  `${TAB}${TAB}${TAB}${TAB}# Performs the following assertsions if the response is JSON.\n` +
-  `${TAB}${TAB}${TAB}${TAB}$.data.foo1: bar1\n` +
-  `${TAB}${TAB}${TAB}${TAB}$.data.foo2: { $type: number, $gt: 41, $lt: 43 }\n` +
+  `${TAB}${TAB}${TAB}status: 200\n` +
+  `${TAB}${TAB}${TAB}# Performs the following assertsions if the response is JSON.\n` +
+  `${TAB}${TAB}${TAB}$.data.foo1: bar1\n` +
+  `${TAB}${TAB}${TAB}$.data.foo2: { $type: number, $gt: 41, $lt: 43 }\n` +
   `${TAB}${TAB}capture:\n` +
-  `${TAB}${TAB}${TAB}json:\n` +
-  `${TAB}${TAB}${TAB}${TAB}# Captures the value of the field data.foo1 into the variable called SAMPLE_VAR\n` +
-  `${TAB}${TAB}${TAB}${TAB}$.data.foo1: SAMPLE_VAR\n`;
+  `${TAB}${TAB}${TAB}# Captures the value of the field data.foo1 into the variable called SAMPLE_VAR\n` +
+  `${TAB}${TAB}${TAB}variableName: $.args.foo1\n`;
+
 
 export async function addSamplePost() {
   await appendContent(SAMPLE_POST);
