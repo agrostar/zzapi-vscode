@@ -11,19 +11,12 @@ import {
   RawParams,
   RawHeaders,
   RawTests,
+  RawSetVars,
+  SetVar,
 } from "./models";
 
 
-export function getMergedData(common: Common, request: RawRequest): RequestSpec {
-  // making deep copies of the objects because we will be deleting some data
-  // TODO: avoid deleting data and deep copies.
-  let commonData = (JSON.parse(JSON.stringify(common)) as Common);
-  let requestData = JSON.parse(JSON.stringify(request)) as RawRequest;
-
-  return getAllMergedData(commonData, requestData);
-}
-
-function getAllMergedData(commonData: Common, requestData: RawRequest): RequestSpec {
+export function getMergedData(commonData: Common, requestData: RawRequest): RequestSpec {
   const name = requestData.name;
 
   const method = requestData.method;
@@ -32,22 +25,20 @@ function getAllMergedData(commonData: Common, requestData: RawRequest): RequestS
   const body = requestData.body;
   const options = getMergedOptions(commonData.options, requestData.options);
 
-  const tests = getMergedTests(commonData?.tests, requestData.tests);
-  const captures = getMergedCaptures(commonData?.capture, requestData.capture);
+  const [tests, hasJsonTests] = getMergedTests(commonData?.tests, requestData.tests);
+  const [setvars, hasJsonVars] = getMergedSetVars(requestData.setvars, requestData.capture);
 
   const mergedData: RequestSpec = {
-    name: name,
+    name,
     httpRequest: {
       baseUrl: commonData?.baseUrl,
       url: requestData.url,
-      method: method,
-      params: params,
-      headers: headers,
-      body: body,
+      method, params, headers, body,
     },
-    options: options,
-    tests: tests || {},
-    captures: captures || {},
+    options,
+    tests,
+    setvars,
+    expectJson: hasJsonTests || hasJsonVars,
   };
 
   return mergedData;
@@ -111,33 +102,56 @@ function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}):
   return { follow, verifySSL, keepRawJSON, showHeaders };
 }
 
-function getMergedCaptures(
-  common: Captures | undefined,
-  request: Captures | undefined,
-): Captures | undefined {
-  if (common !== undefined) {
-    common.headers = withLowerCaseKeys(common.headers);
-  }
-  if (request !== undefined) {
-    request.headers = withLowerCaseKeys(request.headers);
-  }
+function getMergedSetVars(setvars: RawSetVars = {}, captures: Captures = {}): [SetVar[], boolean] {
+  const mergedVars : SetVar[] = [];
+  let hasJsonVars = false;
 
-  let mergedData: Captures = {
-    status: getTest(common?.status, request?.status),
-    headers: getTest(common?.headers, request?.headers),
-    json: getTest(common?.json, request?.json),
-    body: getTest(common?.body, request?.body),
-  };
-
-  type keyOfMergedData = keyof typeof mergedData;
-  for (const key in mergedData) {
-    if (mergedData[key as keyOfMergedData] === undefined) {
-      // TODO: avoid delete and therefore deep copies
-      delete mergedData[key as keyOfMergedData];
+  // captures is the old way, deprecated, but we still support it
+  if (captures.body) {
+    mergedVars.push({ varName: captures.body, type: 'body', spec: '' });
+  }
+  if (captures.status) {
+    mergedVars.push({ varName: captures.status, type: 'status', spec: '' });
+  }
+  if (captures.headers) {
+    for (const header in captures.headers) {
+      mergedVars.push({ 
+        varName: captures.headers[header], 
+        type: 'header', 
+        spec: header,
+      });
+    }
+  }
+  if (captures.json) {
+    for (const path in captures.json) {
+      hasJsonVars = true;
+      mergedVars.push({ 
+        varName: captures.json[path], 
+        type: 'json',
+        spec: path,
+      });
     }
   }
 
-  return mergedData;
+  // Regular new way of defining variable captures: setvars
+  for (const varName in setvars) {
+    let spec = setvars[varName];
+    let type: "body"|"json"|"status"|"header";
+    if (spec.startsWith('$.')) {
+      type = 'json';
+      hasJsonVars = true;
+    } else if (spec.startsWith('$h.')) {
+      type = 'header';
+      spec = spec.replace(/^\$h\./, '');
+    } else if (spec == 'status' || spec == 'body') {
+      type = spec;
+    } else {
+      continue;
+    }
+    mergedVars.push({ varName, type, spec });
+  }
+
+  return [mergedVars, hasJsonVars];
 }
 
 /*
@@ -158,7 +172,7 @@ function mergePrefixBasedTests(tests: RawTests) {
   }
 }
 
-function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}) : Tests {
+function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}) : [Tests, boolean] {
   // Convert $. and h. at root level into headers and json keys
   mergePrefixBasedTests(cTests);
   mergePrefixBasedTests(rTests);
@@ -174,15 +188,9 @@ function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}) : Tests {
     json: Object.assign({}, cTests.json, rTests.json),
   };
 
-  return mergedData;
+  return [mergedData, Object.keys(mergedData.json).length > 0];
 }
 
-function getTest(commonTest: any, requestTest: any) {
-  if (requestTest !== undefined) {
-    return requestTest;
-  }
-  return commonTest;
-}
 
 function getArrayHeadersAsObject(objectSet: Array<Header> | undefined): { [key: string]: string } {
   if (objectSet === undefined) {

@@ -5,75 +5,25 @@ import { getAllRequestSpecs, getRequestSpec } from "./core/parseBundle";
 import { loadVarSet } from "./core/variables";
 
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
-import { allRequestsWithProgress, individualRequestWithProgress } from "./getResponse";
+import { allRequestsWithProgress } from "./getResponse";
 import { getCurrDirPath, getActiveVarSet } from "./EnvironmentSelection";
 import { getExtensionVersion } from "./extension"; // TODO: pass this in to avoid circular dependency
 
-export async function runIndividualRequest(text: string, name: string): Promise<void> {
-  loadVarSet(getCurrDirPath(), getActiveVarSet());
-
-  /*
-  Also loads the bundle vars, along with getting the data
-  */
-  const allData: RequestSpec = getRequestSpec(text, getActiveVarSet(), name);
-
-  if (allData === undefined) {
-    return;
-  }
-
-  const autoHeaders: { [key: string]: string } = {
-    "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string),
-  };
-
-  if (allData.httpRequest.body && typeof allData.httpRequest.body == "object") {
-    autoHeaders["content-type"] = "application/json";
-  }
-
-  allData.httpRequest.headers = Object.assign(
-    autoHeaders,
-    allData.httpRequest.headers === undefined ? {} : allData.httpRequest.headers,
-  );
-
-  const [cancelled, responseData] = await individualRequestWithProgress(allData);
-  if (!cancelled) {
-    await openEditorForIndividualReq(
-      responseData,
-      allData.name,
-      allData.options.keepRawJSON,
-      allData.options.showHeaders,
-    );
-  }
-}
-
-export async function runAllRequests(text: string): Promise<void> {
-  loadVarSet(getCurrDirPath(), getActiveVarSet());
-
-  /*
-  Also loads the bundle vars, along with getting the data
-  */
-  const allRequests = getAllRequestSpecs(text, getActiveVarSet());
-
-  for (const name in allRequests) {
+async function runRequests( requests: {[name: string]: RequestSpec} ): Promise<void> {
+  for (const name in requests) {
+    const request = requests[name]
     const autoHeaders: { [key: string]: string } = {
       "user-agent": "zzAPI-vscode/" + (getExtensionVersion() as string),
     };
 
-    if (
-      allRequests[name].httpRequest.body &&
-      typeof allRequests[name].httpRequest.body == "object"
-    ) {
+    if (request.httpRequest.body && typeof request.httpRequest.body == "object") {
       autoHeaders["content-type"] = "application/json";
     }
 
-    allRequests[name].httpRequest.headers = Object.assign(
-      autoHeaders,
-      allRequests[name].httpRequest.headers === undefined
-        ? {}
-        : allRequests[name].httpRequest.headers,
-    );
+    request.httpRequest.headers = Object.assign(autoHeaders, request.httpRequest.headers)
   }
 
-  const allResponses = await allRequestsWithProgress(allRequests);
+  const allResponses = await allRequestsWithProgress(requests);
 
   let atleastOneExecuted = false;
   let responses: Array<{ name: string; response: ResponseData }> = [];
@@ -90,8 +40,26 @@ export async function runAllRequests(text: string): Promise<void> {
   });
 
   if (atleastOneExecuted) {
-    await openEditorForAllRequests(responses);
-  } else {
-    window.showInformationMessage("ALL REQUESTS WERE CANCELLED");
+    if (Object.keys(requests).length > 1) {
+      await openEditorForAllRequests(responses);
+    } else {
+      const name = Object.keys(requests)[0];
+      const theRequest = requests[name];
+      const theResponse = allResponses[0].response;
+      await openEditorForIndividualReq(theResponse, name, theRequest.options.keepRawJSON, theRequest.options.showHeaders);
+    }
   }
+}
+
+export async function runOneRequest(text: string, name: string): Promise<void> {
+  loadVarSet(getCurrDirPath(), getActiveVarSet());
+  const request: RequestSpec = getRequestSpec(text, getActiveVarSet(), name);
+  const requests: {[name: string]: RequestSpec} = { [name]: request};
+  runRequests(requests);
+}
+
+export async function runAllRequests(text: string): Promise<void> {
+  loadVarSet(getCurrDirPath(), getActiveVarSet());
+  const allRequests = getAllRequestSpecs(text, getActiveVarSet());
+  runRequests(allRequests);
 }

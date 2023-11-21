@@ -31,7 +31,7 @@ RequestSpec: {
         method, URL, headers, params, body
     },
     options: {
-        follow, verifySSL, showHeaders, formatJSON
+        follow, verifySSL, showHeaders, keepRawJSON
     },
     tests: {
         status, body, json, headers

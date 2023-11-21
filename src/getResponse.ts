@@ -1,88 +1,27 @@
 import { window, ProgressLocation } from "vscode";
 
 import { getOutputChannel } from "./extension";
-import { ResponseData, RequestSpec, GotRequest } from "./core/models";
+import { ResponseData, RequestSpec, GotRequest, TestResult } from "./core/models";
 import { cancelGotRequest, constructGotRequest, executeGotRequest } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 import { replaceVariablesInRequest } from "./core/variables";
 
-export async function individualRequestWithProgress(
-  requestData: RequestSpec,
-): Promise<[boolean, ResponseData]> {
-  let seconds = 0;
-
-  const [cancelled, response] = await window.withProgress(
-    {
-      location: ProgressLocation.Window,
-      cancellable: true,
-      title: `Running ${requestData.name}, Click to Cancel`,
-    },
-    async (progress, token) => {
-      const interval = setInterval(() => {
-        progress.report({ message: `${++seconds} seconds` });
-      }, 1000);
-
-      let cancelled = false;
-      token.onCancellationRequested(() => {
-        window.showInformationMessage(`Request ${requestData.name} was cancelled`);
-        cancelGotRequest(httpRequest);
-        cancelled = true;
-
-        clearInterval(interval);
-      });
-
-      replaceVariablesInRequest(requestData);
-      const requestWithWarnings = constructGotRequest(requestData);
-      const httpRequest = requestWithWarnings.request;
-      const warnings = requestWithWarnings.warnings;
-
-      const [httpResponse, executionTime, size] = await executeGotRequest(httpRequest);
-
-      // displaying rawHeaders, testing against headers
-      const response = {
-        executionTime: executionTime + " ms",
-        status: httpResponse.statusCode,
-        body: httpResponse.body,
-        rawHeaders: getHeadersAsString(httpResponse.rawHeaders),
-        headers: httpResponse.headers,
-      };
-
-      if (!cancelled) {
-        const outputChannel = getOutputChannel();
-
-        if (warnings.length > 0) {
-          outputChannel.appendLine("--------------------------------------");
-          outputChannel.append(warnings);
-          outputChannel.appendLine("--------------------------------------");
-        }
-
-        const [testOutput, NUM_FAILED, NUM_TESTS] = runAllTests(requestData, response);
-        const NUM_PASSED = NUM_TESTS - NUM_FAILED;
-
-        if (NUM_FAILED == 0) {
-          outputChannel.append(`${new Date().toLocaleString()} [info]  `);
-        } else {
-          outputChannel.append(`${new Date().toLocaleString()} [error] `);
-        }
-        outputChannel.appendLine(
-          `'${requestData.httpRequest.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
-        );
-        if (NUM_FAILED != 0) {
-          outputChannel.append(testOutput);
-        }
-
-        captureVariables(requestData, response);
-        // outputChannel.append(captureOutput);
-
-        outputChannel.show();
-      }
-
-      return [cancelled, response];
-    },
-  );
-
-  return [cancelled, response];
+function formatTestResults(results: TestResult[]): string {
+  const resultLines: string[] = []
+  for (const r of results) {
+    let line: string;
+    if (r.pass) {
+      line = `\t[info] test ${r.spec}: expected ${r.op}: ${r.expected} OK`;
+    } else {
+      line = `\t[FAIL] test ${r.spec}: expected ${r.op}: ${r.expected} | got ${r.received}`;
+    }
+    if (r.message) {
+      line = `${line} [${r.message}]`;
+    }
+    resultLines.push(line);
+  }
+  return resultLines.join('\n');
 }
 
 export async function allRequestsWithProgress(allRequests: { [name: string]: RequestSpec }) {
@@ -90,7 +29,6 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
   let currRequestName: string = "";
 
   let responses: Array<{ cancelled: boolean; name: string; response: ResponseData }> = [];
-  let warnings = new Set<string>();
 
   let cancelled = false;
   let seconds = 0;
@@ -109,72 +47,102 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         window.showInformationMessage("Cancelled Run All Requests");
         cancelGotRequest(currHttpRequest);
         cancelled = true;
-
         clearInterval(interval);
       });
 
       for (const name in allRequests) {
-        if (cancelled) {
-          break;
-        }
-
         currRequestName = `(Running '${name}')`;
-
         let requestData = allRequests[name];
+        const method = requestData.httpRequest.method;
 
-        replaceVariablesInRequest(requestData);
-        const requestWithWarnings = constructGotRequest(requestData);
-        currHttpRequest = requestWithWarnings.request;
-        const warning = requestWithWarnings.warnings;
-        warnings.add(warning);
+        const undefs = replaceVariablesInRequest(requestData);
+        currHttpRequest = constructGotRequest(requestData);
 
-        const [httpResponse, executionTime, size] = await executeGotRequest(currHttpRequest);
+        const [httpResponse, executionTime, size, error] = await executeGotRequest(currHttpRequest);
 
-        const response = {
+        const response: ResponseData = {
           executionTime: executionTime + " ms",
           status: httpResponse.statusCode,
           body: httpResponse.body,
           rawHeaders: getHeadersAsString(httpResponse.rawHeaders),
           headers: httpResponse.headers,
+          json: null,
         };
 
-        if (!cancelled) {
-          const outputChannel = getOutputChannel();
-
-          const [testOutput, NUM_FAILED, NUM_TESTS] = runAllTests(requestData, response);
-          const NUM_PASSED = NUM_TESTS - NUM_FAILED;
-
-          if (NUM_FAILED == 0) {
-            outputChannel.append(`${new Date().toLocaleString()} [info]  `);
-          } else {
-            outputChannel.append(`${new Date().toLocaleString()} [error] `);
-          }
-          outputChannel.appendLine(
-            `'${requestData.httpRequest.method}' "${requestData.name}" status: ${response.status} size: ${size} B time: ${response.executionTime} tests: ${NUM_PASSED}/${NUM_TESTS} passed`,
-          );
-          if (NUM_FAILED != 0) {
-            outputChannel.append(testOutput);
-          }
-
-          captureVariables(requestData, response);
-          // outputChannel.append(captureOutput);
-
-          outputChannel.show();
+        if (cancelled) {
+          break;
         }
 
+        const out = getOutputChannel();
+        if (error) {
+          out.append(`${new Date().toLocaleString()} [error] `);
+          out.appendLine(
+            `'${method}' "${name}" Error executing request: ${error})`
+            );
+          if (undefs.length > 0) {
+            out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
+          }
+          out.show();
+          continue;
+        }
+
+        // If no error, we can assume response is there and can be shown
         responses.push({ cancelled: cancelled, name: name, response: response });
+
+        let parseError = '';
+        if (requestData.expectJson && response.status) {
+          if (!response.body) {
+            parseError = 'No response body';
+          } else {
+            try {
+              response.json = JSON.parse(response.body as string);
+            } catch (err) {
+              if (err instanceof Error) {
+                parseError = err.message;
+              } else {
+                parseError = 'Error parsing the response body: ${err}';
+              }
+            }
+          }
+        }
+
+        const status = response.status;
+        const et = response.executionTime;
+        if (parseError) {
+          out.append(`${new Date().toLocaleString()} [error] `);
+          out.appendLine(
+            `'${method}' "${name}" status: ${status} size: ${size} B time: ${et} parse error(${parseError})`
+            );
+          continue;
+        }
+
+        const results = runAllTests(requestData, response);
+        const passed = results.filter(r => r.pass).length
+        const all = results.length;
+
+        if (all == passed) {
+          out.append(`${new Date().toLocaleString()} [info]  `);
+        } else {
+          out.append(`${new Date().toLocaleString()} [error] `);
+        }
+        const testString = all == 0 ? '' : `tests: ${passed}/${all} passed`;
+        out.appendLine(
+          `'${method}' "${name}" status: ${status} size: ${size} B time: ${et} ${testString}`,
+        );
+        if (all != passed) {
+          out.appendLine(formatTestResults(results));
+        }
+        const captureErrors = captureVariables(requestData, response);
+        if (captureErrors) {
+          out.appendLine(captureErrors);
+        }
+        if (undefs.length > 0) {
+          out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
+        }
+        out.show();
       }
     },
   );
-
-  if (warnings.size > 0) {
-    const outputChannel = getOutputChannel();
-    outputChannel.appendLine("--------------------------------------");
-    warnings.forEach((warning) => {
-      outputChannel.append(warning);
-    });
-    outputChannel.appendLine("--------------------------------------");
-  }
 
   return responses;
 }

@@ -9,15 +9,7 @@ import got from "got";
 
 import { GotRequest, Param, RequestSpec } from "./models";
 
-let UNDEFINED_VARS = new Set<string>();
-export function appendUndefinedVars(warning: string) {
-  UNDEFINED_VARS.add(warning);
-}
-
-export function constructGotRequest(allData: RequestSpec): {
-  request: GotRequest;
-  warnings: string;
-} {
+export function constructGotRequest(allData: RequestSpec): GotRequest {
   const completeUrl = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
@@ -36,13 +28,7 @@ export function constructGotRequest(allData: RequestSpec): {
     },
   };
 
-  let warnings = "";
-  UNDEFINED_VARS.forEach((variable) => {
-    warnings += `WARNING: variable '${variable}' is not defined (Did you choose an env?)\n`;
-  });
-  UNDEFINED_VARS.clear(); //reset the warnings
-
-  return { request: got(completeUrl, options), warnings: warnings };
+  return got(completeUrl, options);
 }
 
 export function getBody(body: any): string | undefined {
@@ -57,10 +43,11 @@ export function getBody(body: any): string | undefined {
 
 export async function executeGotRequest(
   httpRequest: GotRequest,
-): Promise<[response: { [key: string]: any }, executionTime: number, byteLength: number]> {
+): Promise<[response: { [key: string]: any }, executionTime: number, byteLength: number, error: string]> {
   const startTime = new Date().getTime();
   let responseObject: { [key: string]: any };
   let size: number = 0;
+  let error = '';
 
   try {
     responseObject = await httpRequest;
@@ -75,20 +62,18 @@ export async function executeGotRequest(
         size = 0;
       }
     } else {
-      let message: string;
+      responseObject = {};
       if (e.code === "ERR_INVALID_URL") {
-        message = `Invalid URL: ${e.input}`;
+        error = `Invalid URL: ${e.input}`;
       } else if (e.name === "CancelError") {
-        message = "Cancelled";
+        error = "Cancelled";
       } else {
-        message = e.message;
+        error = e.message;
       }
-      responseObject = { body: message };
-      size = Buffer.byteLength(responseObject.body);
     }
   }
   const executionTime = new Date().getTime() - startTime;
-  return [responseObject, executionTime, size];
+  return [responseObject, executionTime, size, error];
 }
 
 export function cancelGotRequest(httpRequest: GotRequest): void {

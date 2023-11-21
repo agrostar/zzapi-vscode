@@ -61,8 +61,8 @@ function checkAndMergeRequest(commonData: Common, allRequests: { [name: string]:
  * @param document the yaml document to parse to form the requests
  * @returns An array of RequestPosition objects
  */
-export function getRequestPositions(document: string): Array<RequestPosition> {
-  let positions: Array<RequestPosition> = [];
+export function getRequestPositions(document: string): RequestPosition[] {
+  let positions: RequestPosition[] = [];
 
   const lineCounter = new YAML.LineCounter();
   let doc = YAML.parseDocument(document, { lineCounter });

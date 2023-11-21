@@ -3,7 +3,6 @@ import * as path from "path";
 import * as YAML from "yaml";
 
 import { RequestSpec } from "./models";
-import { appendUndefinedVars } from "./executeRequest";
 import { checkVariables } from "./checkTypes";
 
 /*
@@ -124,17 +123,17 @@ export function loadBundleVariables(document: string, env?: string) {
   }
 }
 
-export function replaceVariables(data: any): any {
+export function replaceVariables(data: any): [any, string[]] {
   if (typeof data === "object" && data != null) {
     return replaceVariablesInNonScalar(data);
   }
   if (typeof data === "string") {
     return replaceVariablesInString(data);
   }
-  return data;
+  return [data, []];
 }
 
-function replaceVariablesInNonScalar(data: { [key: string]: any } | Array<any>) {
+function replaceVariablesInNonScalar(data: { [key: string]: any } | Array<any>): [any, string[]] {
   if (Array.isArray(data)) {
     return replaceVariablesInArray(data);
   } else {
@@ -142,51 +141,71 @@ function replaceVariablesInNonScalar(data: { [key: string]: any } | Array<any>) 
   }
 }
 
-function replaceVariablesInArray(data: Array<any>): Array<any> {
+function replaceVariablesInArray(data: Array<any>): [Array<any>, string[]] {
   let newData: Array<any> = [];
+  const undefs: string[] = [];
 
   data.forEach((item) => {
+    let newItem: any;
+    let newUndefs: string[] = [];
     if (typeof item === "object") {
       if (Array.isArray(item)) {
-        newData.push(replaceVariablesInArray(item));
+        [newItem, newUndefs] = replaceVariablesInArray(item);
       } else {
-        newData.push(replaceVariablesInObject(item));
+        [newItem, newUndefs] = replaceVariablesInObject(item);
       }
     } else if (typeof item === "string") {
-      newData.push(replaceVariablesInString(item));
+      [newItem, newUndefs] = replaceVariablesInString(item);
     } else {
-      newData.push(item);
+      newItem = item;
     }
+    newData.push(newItem);
+    undefs.push(...newUndefs);
   });
 
-  return newData;
+  return [newData, undefs];
 }
 
-function replaceVariablesInObject(objectData: { [key: string]: any }): {
-  [key: string]: any;
-} {
-  for (const key in objectData) {
-    if (typeof objectData[key] === "object") {
-      if (Array.isArray(objectData[key])) {
-        objectData[key] = replaceVariablesInArray(objectData[key]);
+function replaceVariablesInObject(obj: { [key: string]: any }): [{ [key: string]: any }, string[]] {
+  const undefs: string[] = [];
+  for (const key in obj) {
+    let newUndefs: string[] = [];
+    if (typeof obj[key] === "object") {
+      if (Array.isArray(obj[key])) {
+        [obj[key], newUndefs] = replaceVariablesInArray(obj[key]);
       } else {
-        objectData[key] = replaceVariablesInObject(objectData[key]);
+        [obj[key], newUndefs] = replaceVariablesInObject(obj[key]);
       }
-    } else if (typeof objectData[key] === "string") {
-      objectData[key] = replaceVariablesInString(objectData[key]);
+    } else if (typeof obj[key] === "string") {
+      [obj[key], newUndefs] = replaceVariablesInString(obj[key]);
     }
+    undefs.push(...newUndefs);
   }
-  return objectData;
+  return [obj, undefs];
 }
 
-export function replaceVariablesInRequest(request: RequestSpec): void {
-  request.httpRequest.baseUrl = replaceVariables(request.httpRequest.baseUrl);
-  request.httpRequest.url = replaceVariables(request.httpRequest.url);
-  request.httpRequest.params = replaceVariables(request.httpRequest.params);
-  request.httpRequest.headers = replaceVariables(request.httpRequest.headers);
-  request.httpRequest.body = replaceVariables(request.httpRequest.body);
+export function replaceVariablesInRequest(request: RequestSpec): string[] {
+  const undefs: string[] = [];
+  let newUndefs;
+  [request.httpRequest.baseUrl, newUndefs] = replaceVariables(request.httpRequest.baseUrl);
+  undefs.push(...newUndefs);
 
-  request.tests = replaceVariables(request.tests);
+  [request.httpRequest.url, newUndefs] = replaceVariables(request.httpRequest.url);
+  undefs.push(...newUndefs);
+
+  [request.httpRequest.params, newUndefs] = replaceVariables(request.httpRequest.params);
+  undefs.push(...newUndefs);
+
+  [request.httpRequest.headers, newUndefs] = replaceVariables(request.httpRequest.headers);
+  undefs.push(...newUndefs);
+
+  [request.httpRequest.body, newUndefs] = replaceVariables(request.httpRequest.body);
+  undefs.push(...newUndefs);
+
+  [request.tests, newUndefs] = replaceVariables(request.tests);
+  undefs.push(...newUndefs);
+
+  return undefs;
 }
 
 /**
@@ -218,10 +237,12 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
  */
 const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
-function replaceVariablesInString(text: string): any {
+function replaceVariablesInString(text: string): [any, string[]] {
   let valueInNativeType: any;
   let variableIsFullText: boolean = false;
+  const undefs: string[] = [];
 
+  // TODO: make a complete match regex and return native type immediately.
   const outputText = text
     .replace(VAR_REGEX_WITH_BRACES, (match, variable) => {
       if (VARIABLES.hasOwnProperty(variable)) {
@@ -232,7 +253,7 @@ function replaceVariablesInString(text: string): any {
         }
         return getStrictStringValue(varVal);
       }
-      appendUndefinedVars(variable);
+      undefs.push(variable);
       return match;
     })
     .replace(VAR_REGEX_WITHOUT_BRACES, (match) => {
@@ -245,13 +266,13 @@ function replaceVariablesInString(text: string): any {
         }
         return getStrictStringValue(varVal);
       }
-      appendUndefinedVars(variable);
+      undefs.push(variable);
       return match;
     });
 
   if (variableIsFullText) {
-    return valueInNativeType;
+    return [valueInNativeType, undefs];
   } else {
-    return outputText;
+    return [outputText, undefs];
   }
 }

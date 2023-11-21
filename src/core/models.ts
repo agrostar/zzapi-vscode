@@ -24,23 +24,22 @@ export interface Options {
   showHeaders: boolean;
 }
 
-/**
- * For now, the value in json tests is assumed to be a scalar for direct comparison.
- * If the value is an object, it is assumed that we want to perform object tests ($eq: , $ne: )
- *  etc.
- * Thus, if you wish to compare a non-scalar, you must do it as {$eq: val}, and not as a direct
- *  test with a colon.
- */
+export type Assertion = number | boolean | string | null | { [op: string]: any };
+
 export interface Tests {
-  json: { [key: string]: any };  // empty object means no json tests
-  headers: { [key: string]: any };  // empty object means no header tests
-  body?: { [key: string]: string } | string;
-  status?: { [key: string]: number } | number;
+  json: { [key: string]: Assertion };
+  headers: { [key: string]: Assertion };
+  body?: Assertion;
+  status?: Assertion;
 }
 
-// TODO: captures should probably be <variable>: path/status etc. That way we can assign
-// multiple variables to the same value. Alternatively, we need a way to have a variable
-// in the LHS to be able to assign a variable to another.
+export interface SetVar {
+  varName: string;
+  type: "json" | "header" | "status" | "body";
+  spec: string; // $.jsonpath or header name, or just "" for body and status (ignored)
+}
+
+// Deprecated: soon to be removed in favour of SetVars
 export interface Captures {
   json?: { [key: string]: string };
   body?: string;
@@ -62,8 +61,15 @@ export interface RawTests {
   status?: { [key: string]: number } | number;
   body?: { [key: string]: string } | string;
   json?: { [key: string]: any }; // deprecated. Should use the $. key directly under tests.
-  headers?: { [key: string]: any };  // deprecated. Should h.<header-name> directly under tests.
+  headers?: { [key: string]: any };  // deprecated. Should use $h.<header-name> directly under tests.
   [key: string]: any;
+}
+
+// Having the LHS as the variable name lets us assign variables to constants too, which could
+// be useful to set things like "from now, use a different userId", and in future also math
+// like ++ on the variables, and maybe even object constants.
+export interface RawSetVars {
+  [key: string]: string
 }
 
 export interface Common {
@@ -72,7 +78,6 @@ export interface Common {
   params: RawParams;
   options?: RawOptions;
   tests?: RawTests;
-  capture?: Captures;
 }
 
 // The raw request as seen in the bundle (with a "name" key added for convenience)
@@ -84,11 +89,12 @@ export interface RawRequest {
   params: RawParams;
   body?: string;
   options?: RawOptions;
-  tests?: Tests;
+  tests?: RawTests;
   capture?: Captures;
+  setvars?: RawSetVars;
 }
 
-// the combined data that completely defines any request
+// The combined data that completely defines any request
 export interface RequestSpec {
   name: string;
   httpRequest: {
@@ -99,9 +105,10 @@ export interface RequestSpec {
     headers: { [key: string]: string };
     body?: any;
   };
+  expectJson: boolean;
   options: Options;
   tests: Tests;
-  captures: Captures;
+  setvars: SetVar[];
 }
 
 export interface ResponseData {
@@ -110,6 +117,7 @@ export interface ResponseData {
   body: string;
   rawHeaders: string;
   headers: { [key: string]: string };
+  json: any;
 }
 
 export interface RequestPosition {
@@ -119,3 +127,12 @@ export interface RequestPosition {
 }
 
 export type GotRequest = CancelableRequest<Response<string>>;
+
+export interface TestResult {
+  pass: boolean;
+  spec: string;
+  op: string;
+  expected: any;
+  received: any;
+  message?: string;
+}
