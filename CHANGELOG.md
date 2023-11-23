@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.0.1]
+ - Changed sample snippets to use new way of specifying params and headers
+ - Changed import postman to use new way of specifying params and headers
+
+## [1.0.0]
+ - Support direct name: value for params and headers
+ - Support json tests directly under tests. Sub-field `json` and `headers` deprecated
+ - New setvars object to specify `variable: spec`. Old captures deprecated
+
 ## [0.10.4]
 - Changed icon to transparent background
 - Bundled using webpack

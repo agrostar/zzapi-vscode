@@ -39,26 +39,30 @@ function addRequest(prefix: string, element: any, requests: any) {
     }
   }
 
-  if (r.header) {
-    request.headers = r.header.map((h: any) => {
-      return {
-        name: h.key,
-        value: reformatVariables(h.value),
-      };
-    });
-    const ct = request.headers.find((h: any) => h.name.toLowerCase() == "content-type");
-    if (ct) {
-      contentTypeAdded = true;
+  if (r.header && r.header.length > 0) {
+    request.headers = {};
+    for (const h of r.header) {
+      request.headers[h.key] = reformatVariables(h.value);
+      if (h.key.toLowerCase() == "content-type") {
+        contentTypeAdded = true;
+      }
     }
   }
 
-  if (r.url && r.url.query) {
-    request.params = r.url.query.map((q: any) => {
-      return {
-        name: q.key,
-        value: reformatVariables(q.value || ""),
-      };
-    });
+  if (r.url && r.url.query && r.url.query.length > 0) {
+    request.params = {};
+    for (const q of r.url.query) {
+      const { key, value } = q;
+      if (request.params[key]) {
+        // Already added. Convert to array and add additional values.
+        if (!Array.isArray(request.params[key])) {
+          request.params[key] = [request.params[key]];
+        }
+        request.params[key].push(value);
+      } else {
+        request.params[key] = value;
+      }
+    }
   }
 
   if (r.body && r.body.mode == "raw") {
@@ -71,8 +75,8 @@ function addRequest(prefix: string, element: any, requests: any) {
         request.body = reformatVariables(r.body.raw);
       }
       if (!contentTypeAdded) {
-        if (!request.headers) request.headers = [];
-        request.headers.push({ name: "Content-Type", value: "application/json" });
+        if (!request.headers) request.headers = {};
+        request.headers["Content-Type"] = "application/json";
       }
     } else {
       request.body = reformatVariables(r.body.raw);

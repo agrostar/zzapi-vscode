@@ -127,7 +127,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         }
         const testString = all == 0 ? '' : `tests: ${passed}/${all} passed`;
         out.appendLine(
-          `'${method}' "${name}" status: ${status} size: ${size} B time: ${et} ${testString}`,
+          `${method} ${name} status: ${status} size: ${size} B time: ${et} ${testString}`,
         );
         if (all != passed) {
           out.appendLine(formatTestResults(results));
