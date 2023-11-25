@@ -40,7 +40,7 @@ export async function showVariables() {
   }
 
   getOutputChannel().append(content);
-  getOutputChannel().show();
+  getOutputChannel().show(true);
 }
 
 export async function showRecentHeaders() {
@@ -56,5 +56,5 @@ export async function showRecentHeaders() {
   }
   outputChannel.append(headers);
   outputChannel.appendLine("----------");
-  outputChannel.show();
+  outputChannel.show(true);
 }

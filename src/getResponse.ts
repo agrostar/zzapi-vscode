@@ -12,7 +12,7 @@ function formatTestResults(results: TestResult[]): string {
   for (const r of results) {
     let line: string;
     if (r.pass) {
-      line = `\t[info] test ${r.spec}: expected ${r.op}: ${r.expected} OK`;
+      line = `\t[INFO] test ${r.spec}: expected ${r.op}: ${r.expected} OK`;
     } else {
       line = `\t[FAIL] test ${r.spec}: expected ${r.op}: ${r.expected} | got ${r.received}`;
     }
@@ -82,7 +82,6 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           if (undefs.length > 0) {
             out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
           }
-          out.show();
           continue;
         }
 
@@ -121,7 +120,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         const all = results.length;
 
         if (all == passed) {
-          out.append(`${new Date().toLocaleString()} [info]  `);
+          out.append(`${new Date().toLocaleString()} [INFO]  `);
         } else {
           out.append(`${new Date().toLocaleString()} [error] `);
         }
@@ -139,7 +138,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (undefs.length > 0) {
           out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
         }
-        out.show();
+        out.show(true); // true preserves the focus wherever it currently is. Otherwise, cursor moves to the output channel
       }
     },
   );

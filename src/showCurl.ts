@@ -17,5 +17,5 @@ export function showCurl(text: string, name: string) {
   outputChannel.appendLine(`${new Date().toLocaleString()} cURL OF "${name}":`);
   outputChannel.appendLine(curlCommand);
   outputChannel.appendLine("----------");
-  outputChannel.show();
+  outputChannel.show(true);
 }

@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.2]
+ - Bug fix: Focus does not shift to output window when running a request
+
 ## [1.0.1]
  - Changed sample snippets to use new way of specifying params and headers
  - Changed import postman to use new way of specifying params and headers
