@@ -100,13 +100,13 @@
         "fileMatch": [
           "*.zzb"
         ],
-        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-bundle.schema.json"
+        "url": "https://agrostar.in/schemas/zzapi-bundle.schema.json"
       },
       {
         "fileMatch": [
           "*.zzv"
         ],
-        "url": "https://raw.githubusercontent.com/agrostar/zzapi/main/zzapi-varset.schema.json"
+        "url": "https://agrostar.in/schemas/zzapi-varset.schema.json"
       }
     ],
     "languages": [

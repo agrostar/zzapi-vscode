@@ -1,6 +1,9 @@
 # Change Log
 
 ## [1.0.2]
+ - Moving schemas to https://agrostar.in due to problems with raw.githubusercontent.com
+
+## [1.0.2]
  - Bug fix: Focus does not shift to output window when running a request
 
 ## [1.0.1]
