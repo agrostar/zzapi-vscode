@@ -22,7 +22,7 @@ const SAMPLE_GET =
   `${TAB}${TAB}${TAB}# Performs the following assertsions if the response is JSON\n` +
   `${TAB}${TAB}${TAB}$.args.foo1: bar1\n` +
   `${TAB}${TAB}${TAB}$.args.foo2: bar2\n` +
-  `${TAB}${TAB}capture:\n` +
+  `${TAB}${TAB}setvars:\n` +
   `${TAB}${TAB}${TAB}# Captures the value of the field args.foo1 into the variable called sampleVar\n` +
   `${TAB}${TAB}${TAB}sampleVar: $.args.foo1\n`;
 
@@ -45,7 +45,7 @@ const SAMPLE_POST =
   `${TAB}${TAB}${TAB}# Performs the following assertsions if the response is JSON.\n` +
   `${TAB}${TAB}${TAB}$.data.foo1: bar1\n` +
   `${TAB}${TAB}${TAB}$.data.foo2: { $type: number, $gt: 41, $lt: 43 }\n` +
-  `${TAB}${TAB}capture:\n` +
+  `${TAB}${TAB}setvars:\n` +
   `${TAB}${TAB}${TAB}# Captures the value of the field data.foo1 into the variable called sampleVar\n` +
   `${TAB}${TAB}${TAB}sampleVar: $.args.foo1\n`;
 

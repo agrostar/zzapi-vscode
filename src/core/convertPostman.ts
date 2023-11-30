@@ -24,7 +24,6 @@ function addRequest(prefix: string, element: any, requests: any) {
   const name = `${prefix}${element.name}`;
   requests[name] = request;
   const r = element.request;
-  let contentTypeAdded = false;
 
   request.method = r.method;
 
@@ -39,12 +38,13 @@ function addRequest(prefix: string, element: any, requests: any) {
     }
   }
 
+  let contentType = "";
   if (r.header && r.header.length > 0) {
     request.headers = {};
     for (const h of r.header) {
       request.headers[h.key] = reformatVariables(h.value);
       if (h.key.toLowerCase() == "content-type") {
-        contentTypeAdded = true;
+        contentType = h.value;
       }
     }
   }
@@ -66,17 +66,13 @@ function addRequest(prefix: string, element: any, requests: any) {
   }
 
   if (r.body && r.body.mode == "raw") {
-    if (r.body?.options?.raw?.language == "json") {
+    if (r.body?.options?.raw?.language == "json" || contentType == "application/json") {
       try {
         request.body = JSON.parse(r.body.raw);
         reformatVariablesInObject(request.body);
       } catch (e) {
         // due to variables, the JSON may not be parseable. Use raw in that case.
         request.body = reformatVariables(r.body.raw);
-      }
-      if (!contentTypeAdded) {
-        if (!request.headers) request.headers = {};
-        request.headers["Content-Type"] = "application/json";
       }
     } else {
       request.body = reformatVariables(r.body.raw);

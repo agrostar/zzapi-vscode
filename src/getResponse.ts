@@ -75,9 +75,9 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
 
         const out = getOutputChannel();
         if (error) {
-          out.append(`${new Date().toLocaleString()} [error] `);
+          out.append(`${new Date().toLocaleString()} [ERROR] `);
           out.appendLine(
-            `'${method}' "${name}" Error executing request: ${error})`
+            `${method} ${name} Error executing request: ${error})`
             );
           if (undefs.length > 0) {
             out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
@@ -108,9 +108,9 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         const status = response.status;
         const et = response.executionTime;
         if (parseError) {
-          out.append(`${new Date().toLocaleString()} [error] `);
+          out.append(`${new Date().toLocaleString()} [ERROR] `);
           out.appendLine(
-            `'${method}' "${name}" status: ${status} size: ${size} B time: ${et} parse error(${parseError})`
+            `${method} ${name} status: ${status} size: ${size} B time: ${et} parse error(${parseError})`
             );
           continue;
         }
@@ -122,7 +122,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (all == passed) {
           out.append(`${new Date().toLocaleString()} [INFO]  `);
         } else {
-          out.append(`${new Date().toLocaleString()} [error] `);
+          out.append(`${new Date().toLocaleString()} [ERROR] `);
         }
         const testString = all == 0 ? '' : `tests: ${passed}/${all} passed`;
         out.appendLine(
@@ -136,7 +136,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           out.appendLine(captureErrors);
         }
         if (undefs.length > 0) {
-          out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
+          out.appendLine(`\t[WARN]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
         }
         out.show(true); // true preserves the focus wherever it currently is. Otherwise, cursor moves to the output channel
       }
