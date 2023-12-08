@@ -1,8 +1,10 @@
-import { getActiveVarSet, getCurrDirPath } from "./EnvironmentSelection";
 import { getCurlRequest } from "./core/constructCurl";
 import { getRequestSpec } from "./core/parseBundle";
 import { loadVarSet, replaceVariablesInRequest } from "./core/variables";
-import { getOutputChannel } from "./extension";
+
+import { getOutputChannel } from "./utils/outputChannel";
+
+import { getActiveVarSet, getCurrDirPath } from "./EnvironmentSelection";
 
 export function showCurl(text: string, name: string) {
   loadVarSet(getCurrDirPath(), getActiveVarSet());

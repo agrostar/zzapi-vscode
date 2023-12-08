@@ -1,7 +1,8 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor, Uri } from "vscode";
 
 import { getVarSetNames, loadBundleVariables } from "./core/variables";
-import { documentIsBundle, storeEnv } from "./extension";
+
+import { documentIsBundle } from "./utils/checkDoc";
 
 const NO_VARSET = "-- None --";
 export function getDefaultEnv(): string {
@@ -87,4 +88,21 @@ export function setCurrentVarSetName(statusBar: StatusBarItem, varSetName: strin
   storeEnv();
   statusBar.text = `zzAPI var-set: ${ACTIVE_VARSET}`;
   statusBar.backgroundColor = undefined;
+}
+
+let SELECTED_ENVS: { [bundlePath: string]: string } = {};
+
+export function getSelectedEnvs(): { [bundlePath: string]: string } {
+  return SELECTED_ENVS;
+}
+
+// if store default is true, then we forcefully store the default var-set, else the active one
+export function storeEnv(storeDefault?: boolean): void {
+  const activeEditor = window.activeTextEditor;
+  if (!(activeEditor && documentIsBundle(activeEditor.document))) {
+    return;
+  }
+
+  const envPath = activeEditor.document.uri.path;
+  SELECTED_ENVS[envPath] = storeDefault ? getDefaultEnv() : getActiveVarSet();
 }

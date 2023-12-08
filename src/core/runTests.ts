@@ -22,13 +22,13 @@ export function runAllTests(requestData: RequestSpec, responseData: ResponseData
   for (const spec in tests.json) {
     const expected = tests.json[spec];
     const received = getValueForJSONTests(responseData.json, spec);
-    const jsonResults = runTest(spec, expected, received)
+    const jsonResults = runTest(spec, expected, received);
     results.push(...jsonResults);
   }
-  
+
   for (const spec in tests.headers) {
     const expected = tests.headers[spec];
-    const received = responseData.headers ? responseData.headers[spec] : '';
+    const received = responseData.headers ? responseData.headers[spec] : "";
     const headerResults = runTest(spec, expected, received);
     results.push(...headerResults);
   }
@@ -36,14 +36,14 @@ export function runAllTests(requestData: RequestSpec, responseData: ResponseData
   if (tests.body) {
     const expected = tests.body;
     const received = responseData.body;
-    const bodyResults = runTest('body', expected, received);
+    const bodyResults = runTest("body", expected, received);
     results.push(...bodyResults);
   }
 
   if (tests.status) {
     const expected = tests.status;
     const received = responseData.status;
-    const statusResults = runTest('status', expected, received);
+    const statusResults = runTest("status", expected, received);
     results.push(...statusResults);
   }
 
@@ -57,7 +57,7 @@ function runTest(spec: string, expected: Assertion, received: any): TestResult[]
     expected = getStringIfNotScalar(expected);
     received = getStringIfNotScalar(received);
     const pass = expected === received;
-    results.push({ pass, expected, received, spec, op: ':' });
+    results.push({ pass, expected, received, spec, op: ":" });
   } else {
     results = runObjectTests(expected, received, spec);
   }
@@ -75,14 +75,18 @@ function getValueForJSONTests(responseContent: object, key: string): any {
   }
 }
 
-function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spec: string): TestResult[] {
+function runObjectTests(
+  opVals: { [key: string]: any },
+  receivedObject: any,
+  spec: string,
+): TestResult[] {
   let results: TestResult[] = [];
 
   for (const op in opVals) {
     let expected = getStringIfNotScalar(opVals[op]);
     let received = getStringIfNotScalar(receivedObject);
     let pass = false;
-    let message = '';
+    let message = "";
     if (op === "$eq") {
       pass = received === expected;
     } else if (op == "$ne") {
@@ -122,10 +126,17 @@ function runObjectTests(opVals: { [key: string]: any }, receivedObject: any, spe
       // Do nothing. $regex will address it.
       continue;
     } else {
-      results.push({ pass: false, expected: "one of $eq, $ne etc.", received: op, op: '', spec, message: "To compare objects, use $eq"});
+      results.push({
+        pass: false,
+        expected: "one of $eq, $ne etc.",
+        received: op,
+        op: "",
+        spec,
+        message: "To compare objects, use $eq",
+      });
       continue;
     }
-    results.push({ pass, expected, received, spec, op, message })
+    results.push({ pass, expected, received, spec, op, message });
   }
 
   return results;

@@ -1,4 +1,4 @@
-import { getStringIfNotScalar } from "./captureVars";
+import { getStringIfNotScalar } from "./utils/castData";
 
 function checkHeaderItem(obj: any): [boolean, string | undefined] {
   if (typeof obj !== "object" || Array.isArray(obj)) {
@@ -34,7 +34,7 @@ function checkParamItem(obj: any) {
 }
 
 function isArrayOrDict(obj: any) {
-  return typeof obj == 'object' && ! (obj instanceof Date);
+  return typeof obj == "object" && !(obj instanceof Date);
 }
 
 function checkHeadersParamsOptionsTestsCaptures(obj: any) {

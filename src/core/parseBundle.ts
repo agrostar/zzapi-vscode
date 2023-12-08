@@ -13,7 +13,7 @@ import { loadBundleVariables } from "./variables";
 
 const VALID_KEYS = ["requests", "common", "variables"];
 
-function getRawRequests(doc: string, env: string): [{[name: string]: RawRequest }, Common] {
+function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest }, Common] {
   let parsedData = YAML.parse(doc);
   if (typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null) {
     throw new Error("Bundle must be an object with key value pairs");
@@ -43,7 +43,11 @@ function getRawRequests(doc: string, env: string): [{[name: string]: RawRequest 
   return [allRequests, commonData];
 }
 
-function checkAndMergeRequest(commonData: Common, allRequests: { [name: string]: RawRequest }, name: string): RequestSpec {
+function checkAndMergeRequest(
+  commonData: Common,
+  allRequests: { [name: string]: RawRequest },
+  name: string,
+): RequestSpec {
   let request = allRequests[name];
   if (request === undefined) {
     throw new Error("Request must be defined");
@@ -132,4 +136,3 @@ export function getRequestSpec(document: string, env: string, name: string): Req
   const [allRequests, commonData] = getRawRequests(document, env);
   return checkAndMergeRequest(commonData, allRequests, name);
 }
-

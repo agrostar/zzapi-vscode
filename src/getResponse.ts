@@ -1,14 +1,15 @@
 import { window, ProgressLocation } from "vscode";
 
-import { getOutputChannel } from "./extension";
 import { ResponseData, RequestSpec, GotRequest, TestResult } from "./core/models";
 import { cancelGotRequest, constructGotRequest, executeGotRequest } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 import { replaceVariablesInRequest } from "./core/variables";
 
+import { getOutputChannel } from "./utils/outputChannel";
+
 function formatTestResults(results: TestResult[]): string {
-  const resultLines: string[] = []
+  const resultLines: string[] = [];
   for (const r of results) {
     let line: string;
     if (r.pass) {
@@ -21,7 +22,7 @@ function formatTestResults(results: TestResult[]): string {
     }
     resultLines.push(line);
   }
-  return resultLines.join('\n');
+  return resultLines.join("\n");
 }
 
 export async function allRequestsWithProgress(allRequests: { [name: string]: RequestSpec }) {
@@ -76,11 +77,11 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         const out = getOutputChannel();
         if (error) {
           out.append(`${new Date().toLocaleString()} [ERROR] `);
-          out.appendLine(
-            `${method} ${name} Error executing request: ${error})`
-            );
+          out.appendLine(`${method} ${name} Error executing request: ${error})`);
           if (undefs.length > 0) {
-            out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
+            out.appendLine(
+              `\t[warn]  Undefined variable(s): ${undefs.join(",")}. Did you choose an env?`,
+            );
           }
           continue;
         }
@@ -88,10 +89,10 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         // If no error, we can assume response is there and can be shown
         responses.push({ cancelled: cancelled, name: name, response: response });
 
-        let parseError = '';
+        let parseError = "";
         if (requestData.expectJson && response.status) {
           if (!response.body) {
-            parseError = 'No response body';
+            parseError = "No response body";
           } else {
             try {
               response.json = JSON.parse(response.body as string);
@@ -99,7 +100,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
               if (err instanceof Error) {
                 parseError = err.message;
               } else {
-                parseError = 'Error parsing the response body: ${err}';
+                parseError = "Error parsing the response body: ${err}";
               }
             }
           }
@@ -110,13 +111,13 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (parseError) {
           out.append(`${new Date().toLocaleString()} [ERROR] `);
           out.appendLine(
-            `${method} ${name} status: ${status} size: ${size} B time: ${et} parse error(${parseError})`
-            );
+            `${method} ${name} status: ${status} size: ${size} B time: ${et} parse error(${parseError})`,
+          );
           continue;
         }
 
         const results = runAllTests(requestData, response);
-        const passed = results.filter(r => r.pass).length
+        const passed = results.filter((r) => r.pass).length;
         const all = results.length;
 
         if (all == passed) {
@@ -124,7 +125,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         } else {
           out.append(`${new Date().toLocaleString()} [ERROR] `);
         }
-        const testString = all == 0 ? '' : `tests: ${passed}/${all} passed`;
+        const testString = all == 0 ? "" : `tests: ${passed}/${all} passed`;
         out.appendLine(
           `${method} ${name} status: ${status} size: ${size} B time: ${et} ${testString}`,
         );
@@ -136,7 +137,9 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           out.appendLine(captureErrors);
         }
         if (undefs.length > 0) {
-          out.appendLine(`\t[WARN]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
+          out.appendLine(
+            `\t[WARN]  Undefined variable(s): ${undefs.join(",")}. Did you choose an env?`,
+          );
         }
         out.show(true); // true preserves the focus wherever it currently is. Otherwise, cursor moves to the output channel
       }

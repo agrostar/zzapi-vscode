@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 
 import { getRequestPositions } from "./core/parseBundle";
-import { documentIsBundle } from "./extension";
+
+import { documentIsBundle } from "./utils/checkDoc";
 
 export class CodeLensProvider implements vscode.CodeLensProvider {
   private codeLenses: vscode.CodeLens[] = [];

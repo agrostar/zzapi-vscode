@@ -43,11 +43,13 @@ export function getBody(body: any): string | undefined {
 
 export async function executeGotRequest(
   httpRequest: GotRequest,
-): Promise<[response: { [key: string]: any }, executionTime: number, byteLength: number, error: string]> {
+): Promise<
+  [response: { [key: string]: any }, executionTime: number, byteLength: number, error: string]
+> {
   const startTime = new Date().getTime();
   let responseObject: { [key: string]: any };
   let size: number = 0;
-  let error = '';
+  let error = "";
 
   try {
     responseObject = await httpRequest;

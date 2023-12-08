@@ -15,7 +15,6 @@ import {
   SetVar,
 } from "./models";
 
-
 export function getMergedData(commonData: Common, requestData: RawRequest): RequestSpec {
   const name = requestData.name;
 
@@ -33,7 +32,10 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
     httpRequest: {
       baseUrl: commonData?.baseUrl,
       url: requestData.url,
-      method, params, headers, body,
+      method,
+      params,
+      headers,
+      body,
     },
     options,
     tests,
@@ -48,9 +50,9 @@ function paramObjectToArray(params: object): Param[] {
   const paramArray: Param[] = [];
   Object.entries(params).forEach(([name, value]) => {
     if (Array.isArray(value)) {
-      value.forEach(v => {
+      value.forEach((v) => {
         paramArray.push({ name, value: v });
-      })
+      });
     } else {
       paramArray.push({ name, value });
     }
@@ -78,7 +80,10 @@ function getMergedParams(commonParams: RawParams, requestParams: RawParams): Arr
   return mixedParams;
 }
 
-function getMergedHeaders(commonHeaders: RawHeaders, requestHeaders: RawHeaders): { [name: string]: string } {
+function getMergedHeaders(
+  commonHeaders: RawHeaders,
+  requestHeaders: RawHeaders,
+): { [name: string]: string } {
   if (Array.isArray(commonHeaders)) {
     commonHeaders = getArrayHeadersAsObject(commonHeaders);
   }
@@ -103,21 +108,21 @@ function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}):
 }
 
 function getMergedSetVars(setvars: RawSetVars = {}, captures: Captures = {}): [SetVar[], boolean] {
-  const mergedVars : SetVar[] = [];
+  const mergedVars: SetVar[] = [];
   let hasJsonVars = false;
 
   // captures is the old way, deprecated, but we still support it
   if (captures.body) {
-    mergedVars.push({ varName: captures.body, type: 'body', spec: '' });
+    mergedVars.push({ varName: captures.body, type: "body", spec: "" });
   }
   if (captures.status) {
-    mergedVars.push({ varName: captures.status, type: 'status', spec: '' });
+    mergedVars.push({ varName: captures.status, type: "status", spec: "" });
   }
   if (captures.headers) {
     for (const header in captures.headers) {
-      mergedVars.push({ 
-        varName: captures.headers[header], 
-        type: 'header', 
+      mergedVars.push({
+        varName: captures.headers[header],
+        type: "header",
         spec: header,
       });
     }
@@ -125,9 +130,9 @@ function getMergedSetVars(setvars: RawSetVars = {}, captures: Captures = {}): [S
   if (captures.json) {
     for (const path in captures.json) {
       hasJsonVars = true;
-      mergedVars.push({ 
-        varName: captures.json[path], 
-        type: 'json',
+      mergedVars.push({
+        varName: captures.json[path],
+        type: "json",
         spec: path,
       });
     }
@@ -136,14 +141,14 @@ function getMergedSetVars(setvars: RawSetVars = {}, captures: Captures = {}): [S
   // Regular new way of defining variable captures: setvars
   for (const varName in setvars) {
     let spec = setvars[varName];
-    let type: "body"|"json"|"status"|"header";
-    if (spec.startsWith('$.')) {
-      type = 'json';
+    let type: "body" | "json" | "status" | "header";
+    if (spec.startsWith("$.")) {
+      type = "json";
       hasJsonVars = true;
-    } else if (spec.startsWith('$h.')) {
-      type = 'header';
-      spec = spec.replace(/^\$h\./, '');
-    } else if (spec == 'status' || spec == 'body') {
+    } else if (spec.startsWith("$h.")) {
+      type = "header";
+      spec = spec.replace(/^\$h\./, "");
+    } else if (spec == "status" || spec == "body") {
       type = spec;
     } else {
       continue;
@@ -163,16 +168,16 @@ function mergePrefixBasedTests(tests: RawTests) {
   if (!tests.json) tests.json = {};
   if (!tests.headers) tests.headers = {};
   for (const key of Object.keys(tests)) {
-    if (key.startsWith('$.')) {
+    if (key.startsWith("$.")) {
       tests.json[key] = tests[key];
-    } else if (key.startsWith('$h.')) {
-      const headerName = key.replace(/^\$h\./, '');
+    } else if (key.startsWith("$h.")) {
+      const headerName = key.replace(/^\$h\./, "");
       tests.headers[headerName] = tests[key];
     }
   }
 }
 
-function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}) : [Tests, boolean] {
+function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}): [Tests, boolean] {
   // Convert $. and h. at root level into headers and json keys
   mergePrefixBasedTests(cTests);
   mergePrefixBasedTests(rTests);
@@ -190,7 +195,6 @@ function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}) : [Tests, 
 
   return [mergedData, Object.keys(mergedData.json).length > 0];
 }
-
 
 function getArrayHeadersAsObject(objectSet: Array<Header> | undefined): { [key: string]: string } {
   if (objectSet === undefined) {

@@ -1,8 +1,10 @@
 import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, languages } from "vscode";
 
-import { getActiveVarSet } from "./EnvironmentSelection";
 import { ResponseData } from "./core/models";
-import { getOutputChannel } from "./extension";
+
+import { getOutputChannel } from "./utils/outputChannel";
+
+import { getActiveVarSet } from "./EnvironmentSelection";
 
 const KEYS_IN_BODY = ["body"];
 const KEYS_IN_HEADERS = ["rawHeaders"];

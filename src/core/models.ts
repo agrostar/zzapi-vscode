@@ -47,8 +47,8 @@ export interface Captures {
   headers?: { [key: string]: string };
 }
 
-export type RawHeaders = Array<Header> | {[name: string]: string} | undefined;
-export type RawParams = Array<Param> | {[name: string]: any} | undefined;
+export type RawHeaders = Array<Header> | { [name: string]: string } | undefined;
+export type RawParams = Array<Param> | { [name: string]: any } | undefined;
 
 export interface RawOptions {
   follow?: boolean;
@@ -61,7 +61,7 @@ export interface RawTests {
   status?: { [key: string]: number } | number;
   body?: { [key: string]: string } | string;
   json?: { [key: string]: any }; // deprecated. Should use the $. key directly under tests.
-  headers?: { [key: string]: any };  // deprecated. Should use $h.<header-name> directly under tests.
+  headers?: { [key: string]: any }; // deprecated. Should use $h.<header-name> directly under tests.
   [key: string]: any;
 }
 
@@ -69,7 +69,7 @@ export interface RawTests {
 // be useful to set things like "from now, use a different userId", and in future also math
 // like ++ on the variables, and maybe even object constants.
 export interface RawSetVars {
-  [key: string]: string
+  [key: string]: string;
 }
 
 export interface Common {
