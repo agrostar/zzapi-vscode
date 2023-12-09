@@ -33,10 +33,14 @@ function checkParamItem(obj: any) {
   return [true, undefined];
 }
 
+// TODO: Add all such, including getStringOrJson etc in "typeutils.ts"
 function isArrayOrDict(obj: any) {
   return typeof obj == "object" && !(obj instanceof Date);
 }
 
+// TODO: add a return type to this and all other functions, wherever the type is very clear.
+// Also consider returning just a string. If the string is not returned, there is no error.
+// Same pattern can be used for other checkXXX also.
 function checkHeadersParamsOptionsTestsCaptures(obj: any) {
   if (obj.hasOwnProperty("headers")) {
     const headers = obj.headers;
@@ -90,6 +94,8 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any) {
 }
 
 function checkTests(obj: any) {
+  // TODO: commomn pattern of checking whether it is an object (specifically, a dict or map).
+  // Can create another function in typutils and this will become clearer to read here.
   if (typeof obj !== "object" || Array.isArray(obj)) {
     return [false, "Tests item must be an object"];
   }
@@ -192,6 +198,8 @@ export function checkCommonType(obj: any): [boolean, string | undefined] {
   return [true, undefined];
 }
 
+// TODO: make this an object. In general, prefer lookups to be in maps instead
+// of arrays. Very minor performance impact, but it is a good habit to develop.
 const VALID_METHODS = [
   "options",
   "GET",

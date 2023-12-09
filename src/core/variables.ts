@@ -5,6 +5,12 @@ import * as YAML from "yaml";
 import { RequestSpec } from "./models";
 import { checkVariables } from "./checkTypes";
 
+// TODO: let us rething how variables can be handled. Globals need to be avoided.
+// One way around is to pass the "variables" object around wherever it is needed.
+// parseBundle returns the variables, the higher layer (vscode extension) passes
+// it through to any function that needs it. runRequests, captureVariables.
+// We can use the closure strategy here also.
+
 /*
 Creating a master function so it is easy to adjust order if reqd
 If we want to append to vars instead of refresh, then make 

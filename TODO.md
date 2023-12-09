@@ -1,33 +1,30 @@
-# Before first release
-
-* Review READMEs, LICENCE and schemas one last time (Vasan) - split zzv and zzb READMEs
-
 # Improvements
 
-* Bundle using webpack (Vasan)
+* Support .zzb.yml in addition to .zzb. This will allow people to use yml as the extension to let VS Code dectect it as yaml even without the extension, so that it can be formatted nicely. Also, it will get formatted on github, bitbucket in the browser also.
+
+* CLI Tool:
+  * Separate out core into a new repo and create a core library npm
+  * zzapi-runner: command-line runner which can use the core library
+
+* Rename varset as environment
+
+* Apparently we can make a section of the document a "snippet" and associate a different language to it. Explore using "markdown" as the language for doc-* nodes.
 
 * Fix circular dependencies (Varun)
 
-* More tools:
-  * Separate out core into a new repo and create a core library npm
-  * zzapi-runner: command-line runner which can use the core library
-  * zzapi-doc: documentation generator, which can use the core library
+* Read body from file when file:// is detected
 
-* Support `{ foo: bar }` kind of headers and params in addition to arrays. Use case: when need to override, unique keys, they can use the shorter simpler form of `foo: bar`. In more complex cases of repeating parameter names or needing the doc: attribute, they can use the long form. 
+* Move encoding/raw for params into options. That way we don't have to support name:xxx, value: xxx way of input
+
+* Add Run Request and Run All Requests to command palette.
+
+* Multipart formdata is painful. We need some way of supporting this.
 
 * Scaffolding: using Cmd+Shift+P activate the extension and also create a directory and basic files like zz-envs.yaml and test/staging/production/local environments.
 
-* A way to temporarily disable parameters/headers, especially in documentation: need to keep the variable/header as an example, mainly for documentation, but not use it by default while executing the request.
-
-* Path params: eg, /employees/345: URL should be /employees/:id and params can have :id set to a value
-
-* Commands should be visbile in the command pallette (or somewhere else). Cannot rely on CodeLens alone.
-
-* A Tree View in the explorer sidebar for selecting and executing requests (replacement for OUTLINE, which does not allow commands on the tree elements).
-
-* Show output as "http" language and get it automatically formatted. (see https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+* A Tree View in the explorer sidebar for selecting and executing requests (replacement for OUTLINE, which does not allow commands on the tree elements). Right now using fold All etc, but it is not that convenient.
 
 * Cookie-jar to capture cookies automatically and add them to following requests with in the same run (or even persist?)
 
-* Show/export as curl: Not prioritized as MVP because the collections are meant to be shared via the code repository anyway. No need for exporting as curl to share (which is the main use case). But it is still very useful, especially if the other team member does not use zzAPI. curl is useful if executing from some remote machine. Otherwise, copy-paste the request YAML and let the other person use zzAPI to execute it.
+* Path params: eg, /employees/345: URL should be /employees/:id and params can have :id set to a value
 

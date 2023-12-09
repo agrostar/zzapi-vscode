@@ -71,14 +71,14 @@ export function activate(context: ExtensionContext): void {
   });
   context.subscriptions.push(bundleChangeHandler);
 
-  const EXTENSION_VERSION: string = context.extension.packageJSON.version;
+  const zzApiVersion: string = context.extension.packageJSON.version;
 
   languages.registerCodeLensProvider("*", new CodeLensProvider());
   commands.registerCommand("extension.runRequest", async (name) => {
-    await runRequestCommand(name, EXTENSION_VERSION);
+    await runRequestCommand(name, zzApiVersion);
   });
   commands.registerCommand("extension.runAllRequests", async () => {
-    await runAllRequestsCommand(EXTENSION_VERSION);
+    await runAllRequestsCommand(zzApiVersion);
   });
   commands.registerCommand("extension.importPostman", async () => {
     await importPostmanCommand();

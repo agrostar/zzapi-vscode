@@ -15,6 +15,8 @@ import {
   SetVar,
 } from "./models";
 
+// TODO: let us use consistent naming. File is combine, function is merge. Pick one
+// and use for both.
 export function getMergedData(commonData: Common, requestData: RawRequest): RequestSpec {
   const name = requestData.name;
 
@@ -46,6 +48,9 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
   return mergedData;
 }
 
+// TODO: a general convention to follow is to define a function before it is used. Only in
+// case of recursive calls it is hard to do so. Otherwise, let us follow that. If we are consistent,
+// it creates a good conceptual model for someone new reading the code.
 function paramObjectToArray(params: object): Param[] {
   const paramArray: Param[] = [];
   Object.entries(params).forEach(([name, value]) => {
@@ -60,6 +65,10 @@ function paramObjectToArray(params: object): Param[] {
   return paramArray;
 }
 
+// TODO: Two ways of declaring arrays: Param[] or Array<Param>. Let us use the Param[]
+// convention throughout. It's shorter and easier to read. Array<> form can be used if we
+// are defining the interface in place, eg, Array<{name: string, age: int}> because the []
+// can be easily missed if it is at the end in this case.
 function getMergedParams(commonParams: RawParams, requestParams: RawParams): Array<Param> {
   let mixedParams: Param[] = [];
 

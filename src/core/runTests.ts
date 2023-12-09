@@ -7,6 +7,7 @@ import jp from "jsonpath";
 
 import { RequestSpec, ResponseData, TestResult, Assertion } from "./models";
 
+// TODO: move to typeutils.ts
 function getStringIfNotScalar(data: any) {
   if (typeof data === "object") {
     return JSON.stringify(data);

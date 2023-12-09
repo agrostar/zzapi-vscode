@@ -13,6 +13,10 @@ import { loadBundleVariables } from "./variables";
 
 const VALID_KEYS = ["requests", "common", "variables"];
 
+// TODO: At first I thought returning multiple values as an array is convenient because
+// the names of the values can be flexible to the caller. But now I realize typechecking fails
+// because TS allows any array to be returned / received (does not check for each element being
+// the right type.) We learn as we code! So let us convert these multiple returns to object returns.
 function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest }, Common] {
   let parsedData = YAML.parse(doc);
   if (typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null) {

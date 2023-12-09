@@ -78,6 +78,7 @@ export async function executeGotRequest(
   return [responseObject, executionTime, size, error];
 }
 
+// TODO: do we need this? The caller can directly call httpRequest.cancel
 export function cancelGotRequest(httpRequest: GotRequest): void {
   httpRequest.cancel();
 }
