@@ -5,11 +5,18 @@ import * as YAML from "yaml";
 import { RequestSpec } from "./models";
 import { checkVariables } from "./checkTypes";
 
-// TODO: let us rething how variables can be handled. Globals need to be avoided.
+// TODO: let us rethink how variables can be handled. Globals need to be avoided.
 // One way around is to pass the "variables" object around wherever it is needed.
 // parseBundle returns the variables, the higher layer (vscode extension) passes
 // it through to any function that needs it. runRequests, captureVariables.
 // We can use the closure strategy here also.
+
+// Another option is to supply a callback to runRequests etc, which they can use
+// to pull the variables object. This way the interface is cleaner, since we are
+// passing in a "static" thing to the lower level functions rather than a "dynamic"
+// variable which can change, which is not such a big deal in JS because closure
+// variables are passed by reference. But in other languages it can cause issues,
+// so as a habit let us try to use the callback pattern.
 
 /*
 Creating a master function so it is easy to adjust order if reqd
