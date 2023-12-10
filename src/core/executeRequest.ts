@@ -1,10 +1,3 @@
-/**
- * FUNCTIONS PROVIDED TO CALLER
- * @function constructGotRequest
- * @function cancelGotRequest
- * @function executeGotRequest
- */
-
 import got from "got";
 
 import { GotRequest, Param, RequestSpec } from "./models";

@@ -28,11 +28,6 @@ import { resetCapturedVariables } from "./core/variables";
 
 let DISPOSABLES: Disposable[] = [];
 
-/**
- * Possible file extensions representing a bundle. Any bundle name must end with this.
- *
- * ANY CHANGES HERE MUST REFLECT IN yamlValidation IN package.json
- */
 let CURR_BUNDLE_PATH: string = "";
 
 export function activate(context: ExtensionContext): void {

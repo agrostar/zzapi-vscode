@@ -1,9 +1,3 @@
-/**
- * MODELS PROVIDED TO CALLER
- * @interface RequestSpec
- * @type GotRequest
- */
-
 import { CancelableRequest, Response, Method } from "got";
 
 export interface Header {

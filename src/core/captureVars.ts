@@ -1,8 +1,3 @@
-/**
- * FUNCTIONS PROVIDED TO CALLER
- * @function captureVariables
- */
-
 import jp from "jsonpath";
 
 import { captureVariable } from "./variables";

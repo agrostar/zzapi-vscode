@@ -1,9 +1,3 @@
-/**
- * FUNCTIONS PROVIDED TO CALLER
- * @function getRequestPositions
- * @function getRequestsData
- */
-
 import * as YAML from "yaml";
 
 import { RawRequest, RequestSpec, RequestPosition, Common } from "./models";

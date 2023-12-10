@@ -1,8 +1,3 @@
-/**
- * FUNCTIONS PROVIDED TO CALLER
- * @function runAllTests
- */
-
 import jp from "jsonpath";
 
 import { RequestSpec, ResponseData, TestResult, Assertion } from "./models";
