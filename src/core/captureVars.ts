@@ -1,13 +1,16 @@
 import jp from "jsonpath";
 
-import { captureVariable } from "./variables";
 import { ResponseData, RequestSpec } from "./models";
 
-export function captureVariables(requestData: RequestSpec, responseData: ResponseData): string {
+export function captureVariables(
+  requestData: RequestSpec,
+  responseData: ResponseData,
+): [{ [key: string]: any }, string] {
   const setvars = requestData.setvars;
   const headers = responseData.headers;
 
   let captureOutput = "";
+  let capturedVariables: { [key: string]: any } = {};
 
   for (const { varName, type, spec } of setvars) {
     let value = undefined;
@@ -31,8 +34,8 @@ export function captureVariables(requestData: RequestSpec, responseData: Respons
     } else if (type === "body") {
       value = requestData.expectJson ? responseData.json : responseData.body;
     }
-    captureVariable(varName, value);
+    capturedVariables[varName] = value;
   }
 
-  return captureOutput;
+  return [capturedVariables, captureOutput];
 }

@@ -24,7 +24,7 @@ import {
 } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
 import { addSampleGet, addSamplePost } from "./addSamples";
-import { resetCapturedVariables } from "./core/variables";
+import { resetCapturedVariables } from "./variables";
 
 let DISPOSABLES: Disposable[] = [];
 

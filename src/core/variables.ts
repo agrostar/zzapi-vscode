@@ -1,9 +1,4 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as YAML from "yaml";
-
 import { RequestSpec } from "./models";
-import { checkVariables } from "./checkTypes";
 
 // TODO: let us rethink how variables can be handled. Globals need to be avoided.
 // One way around is to pass the "variables" object around wherever it is needed.
@@ -23,29 +18,6 @@ Creating a master function so it is easy to adjust order if reqd
 If we want to append to vars instead of refresh, then make 
   VARIABLES the source (useful when it becomes non-global)
 */
-function reloadVariables() {
-  VARIABLES = Object.assign({}, ENV_VARIABLES, BUNDLE_VARIABLES, CAPTURED_VARIABLES);
-}
-
-const VARFILE_EXTENSION = ".zzv";
-
-let VARIABLES: { [key: string]: any } = {};
-export function getVariables() {
-  return VARIABLES;
-}
-
-let CAPTURED_VARIABLES: { [key: string]: any } = {};
-export function getCapturedVariables() {
-  return CAPTURED_VARIABLES;
-}
-export function resetCapturedVariables() {
-  CAPTURED_VARIABLES = {};
-}
-
-let ENV_VARIABLES: { [key: string]: any } = {};
-
-let BUNDLE_VAR_DATA: { [key: string]: { [key: string]: any } } = {};
-let BUNDLE_VARIABLES: { [key: string]: any } = {};
 
 function getStrictStringValue(value: any): string {
   if (value === null) {
@@ -59,102 +31,31 @@ function getStrictStringValue(value: any): string {
   }
 }
 
-function getVarFilePaths(dirPath: string): string[] {
-  if (!dirPath) return [];
-  const dirContents = fs.readdirSync(dirPath, { recursive: false }) as string[];
-  const varFiles = dirContents.filter((file) => path.extname(file) == VARFILE_EXTENSION);
-  return varFiles.map((file) => path.join(dirPath, file));
-}
-
-export function getVarSetNames(dirPath: string): string[] {
-  if (!dirPath) return [];
-  let allVarSets = {};
-  getVarFilePaths(dirPath).forEach((varFilePath) => {
-    const fileData = fs.readFileSync(varFilePath, "utf-8");
-    const varSets = YAML.parse(fileData);
-    allVarSets = Object.assign(allVarSets, varSets);
-  });
-
-  const uniqueNames = new Set([...Object.keys(allVarSets), ...Object.keys(BUNDLE_VAR_DATA)]);
-  return [...uniqueNames];
-}
-
-// TODO: not happy with global here. Need to create an instance or object
-// and pass it through to requests.
-export function loadVarSet(dirPath: string, setName: string) {
-  if (!dirPath) return {};
-  ENV_VARIABLES = {};
-  getVarFilePaths(dirPath).forEach((varFilePath) => {
-    const fileData = fs.readFileSync(varFilePath, "utf-8");
-    const varSets = YAML.parse(fileData);
-    if (varSets[setName]) {
-      Object.assign(ENV_VARIABLES, varSets[setName]);
-    }
-  });
-
-  reloadVariables();
-}
-
-export function captureVariable(key: any, value: any): void {
-  CAPTURED_VARIABLES[key] = value;
-  reloadVariables();
-}
-
-/**
- *
- * @param document the bundle containing the variables
- * @param env Optional param: if set, then sets BUNDLE_VARIABLES according to env set.
- *  If not set, then do not set BUNDLE_VARIABLES, just store the entire variables object
- *  from the bundle to memory. Use case of the latter: retrieving environment names, without
- *  running a request yet.
- * @returns
- */
-export function loadBundleVariables(document: string, env?: string) {
-  BUNDLE_VAR_DATA = {};
-  const parsedData = YAML.parse(document);
-  if (parsedData === undefined) {
-    return;
-  }
-
-  const variables = parsedData.variables;
-  if (variables !== undefined) {
-    const [valid, error] = checkVariables(variables);
-    if (!valid) {
-      throw new Error(`Error in variables: ${error}`);
-    }
-    BUNDLE_VAR_DATA = variables;
-  }
-
-  if (env !== undefined) {
-    if (BUNDLE_VAR_DATA.hasOwnProperty(env)) {
-      BUNDLE_VARIABLES = BUNDLE_VAR_DATA[env];
-    } else {
-      BUNDLE_VARIABLES = {};
-    }
-
-    reloadVariables();
-  }
-}
-
-export function replaceVariables(data: any): [any, string[]] {
+function replaceVariables(data: any, variables: { [key: string]: any }): [any, string[]] {
   if (typeof data === "object" && data != null) {
-    return replaceVariablesInNonScalar(data);
+    return replaceVariablesInNonScalar(data, variables);
   }
   if (typeof data === "string") {
-    return replaceVariablesInString(data);
+    return replaceVariablesInString(data, variables);
   }
   return [data, []];
 }
 
-function replaceVariablesInNonScalar(data: { [key: string]: any } | Array<any>): [any, string[]] {
+function replaceVariablesInNonScalar(
+  data: { [key: string]: any } | Array<any>,
+  variables: { [key: string]: any },
+): [any, string[]] {
   if (Array.isArray(data)) {
-    return replaceVariablesInArray(data);
+    return replaceVariablesInArray(data, variables);
   } else {
-    return replaceVariablesInObject(data);
+    return replaceVariablesInObject(data, variables);
   }
 }
 
-function replaceVariablesInArray(data: Array<any>): [Array<any>, string[]] {
+function replaceVariablesInArray(
+  data: Array<any>,
+  variables: { [key: string]: any },
+): [Array<any>, string[]] {
   let newData: Array<any> = [];
   const undefs: string[] = [];
 
@@ -163,12 +64,12 @@ function replaceVariablesInArray(data: Array<any>): [Array<any>, string[]] {
     let newUndefs: string[] = [];
     if (typeof item === "object") {
       if (Array.isArray(item)) {
-        [newItem, newUndefs] = replaceVariablesInArray(item);
+        [newItem, newUndefs] = replaceVariablesInArray(item, variables);
       } else {
-        [newItem, newUndefs] = replaceVariablesInObject(item);
+        [newItem, newUndefs] = replaceVariablesInObject(item, variables);
       }
     } else if (typeof item === "string") {
-      [newItem, newUndefs] = replaceVariablesInString(item);
+      [newItem, newUndefs] = replaceVariablesInString(item, variables);
     } else {
       newItem = item;
     }
@@ -179,43 +80,55 @@ function replaceVariablesInArray(data: Array<any>): [Array<any>, string[]] {
   return [newData, undefs];
 }
 
-function replaceVariablesInObject(obj: { [key: string]: any }): [{ [key: string]: any }, string[]] {
+function replaceVariablesInObject(
+  obj: { [key: string]: any },
+  variables: { [key: string]: any },
+): [{ [key: string]: any }, string[]] {
   const undefs: string[] = [];
   for (const key in obj) {
     let newUndefs: string[] = [];
     if (typeof obj[key] === "object") {
       if (Array.isArray(obj[key])) {
-        [obj[key], newUndefs] = replaceVariablesInArray(obj[key]);
+        [obj[key], newUndefs] = replaceVariablesInArray(obj[key], variables);
       } else {
-        [obj[key], newUndefs] = replaceVariablesInObject(obj[key]);
+        [obj[key], newUndefs] = replaceVariablesInObject(obj[key], variables);
       }
     } else if (typeof obj[key] === "string") {
-      [obj[key], newUndefs] = replaceVariablesInString(obj[key]);
+      [obj[key], newUndefs] = replaceVariablesInString(obj[key], variables);
     }
     undefs.push(...newUndefs);
   }
   return [obj, undefs];
 }
 
-export function replaceVariablesInRequest(request: RequestSpec): string[] {
+export function replaceVariablesInRequest(
+  request: RequestSpec,
+  variables: { [key: string]: any },
+): string[] {
   const undefs: string[] = [];
   let newUndefs;
-  [request.httpRequest.baseUrl, newUndefs] = replaceVariables(request.httpRequest.baseUrl);
+  [request.httpRequest.baseUrl, newUndefs] = replaceVariables(
+    request.httpRequest.baseUrl,
+    variables,
+  );
   undefs.push(...newUndefs);
 
-  [request.httpRequest.url, newUndefs] = replaceVariables(request.httpRequest.url);
+  [request.httpRequest.url, newUndefs] = replaceVariables(request.httpRequest.url, variables);
   undefs.push(...newUndefs);
 
-  [request.httpRequest.params, newUndefs] = replaceVariables(request.httpRequest.params);
+  [request.httpRequest.params, newUndefs] = replaceVariables(request.httpRequest.params, variables);
   undefs.push(...newUndefs);
 
-  [request.httpRequest.headers, newUndefs] = replaceVariables(request.httpRequest.headers);
+  [request.httpRequest.headers, newUndefs] = replaceVariables(
+    request.httpRequest.headers,
+    variables,
+  );
   undefs.push(...newUndefs);
 
-  [request.httpRequest.body, newUndefs] = replaceVariables(request.httpRequest.body);
+  [request.httpRequest.body, newUndefs] = replaceVariables(request.httpRequest.body, variables);
   undefs.push(...newUndefs);
 
-  [request.tests, newUndefs] = replaceVariables(request.tests);
+  [request.tests, newUndefs] = replaceVariables(request.tests, variables);
   undefs.push(...newUndefs);
 
   return undefs;
@@ -250,29 +163,32 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
  */
 const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
-function replaceVariablesInString(text: string): [any, string[]] {
+function replaceVariablesInString(
+  text: string,
+  variables: { [key: string]: any },
+): [any, string[]] {
   let valueInNativeType: any;
   let variableIsFullText: boolean = false;
   const undefs: string[] = [];
 
   // TODO: make a complete match regex and return native type immediately.
   const outputText = text
-    .replace(VAR_REGEX_WITH_BRACES, (match, variable) => {
-      if (VARIABLES.hasOwnProperty(variable)) {
-        const varVal = VARIABLES[variable];
+    .replace(VAR_REGEX_WITH_BRACES, (match, varName) => {
+      if (variables.hasOwnProperty(varName)) {
+        const varVal = variables[varName];
         if (text === match) {
           variableIsFullText = true;
           valueInNativeType = varVal;
         }
         return getStrictStringValue(varVal);
       }
-      undefs.push(variable);
+      undefs.push(varName);
       return match;
     })
     .replace(VAR_REGEX_WITHOUT_BRACES, (match) => {
       const variable = match.slice(1);
-      if (typeof variable === "string" && VARIABLES.hasOwnProperty(variable)) {
-        const varVal = VARIABLES[variable];
+      if (typeof variable === "string" && variables.hasOwnProperty(variable)) {
+        const varVal = variables[variable];
         if (text === match) {
           variableIsFullText = true;
           valueInNativeType = varVal;

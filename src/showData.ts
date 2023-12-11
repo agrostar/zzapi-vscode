@@ -1,10 +1,9 @@
 import * as YAML from "yaml";
 
-import { getCapturedVariables, getVariables } from "./core/variables";
-
 import { getOutputChannel } from "./utils/outputChannel";
 
 import { getRecentHeadersData } from "./showInEditor";
+import { getCapturedVariables, getVariables } from "./variables";
 
 export async function showVariables() {
   const variables = getVariables();

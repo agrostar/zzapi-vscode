@@ -1,17 +1,19 @@
 import { getCurlRequest } from "./core/constructCurl";
-import { getRequestSpec } from "./core/parseBundle";
-import { loadVarSet, replaceVariablesInRequest } from "./core/variables";
+import { getBundleVariables, getRequestSpec } from "./core/parseBundle";
+import { replaceVariablesInRequest } from "./core/variables";
 
 import { getOutputChannel } from "./utils/outputChannel";
 
 import { getActiveVarSet, getCurrDirPath } from "./EnvironmentSelection";
+import { getVariables, loadBundleVariables, loadVarSet } from "./variables";
 
 export function showCurl(text: string, name: string) {
   loadVarSet(getCurrDirPath(), getActiveVarSet());
+  loadBundleVariables(getBundleVariables(text), getActiveVarSet());
 
   let request = getRequestSpec(text, getActiveVarSet(), name);
-
-  replaceVariablesInRequest(request);
+  replaceVariablesInRequest(request, getVariables());
+  
   const curlCommand = getCurlRequest(request);
 
   const outputChannel = getOutputChannel();

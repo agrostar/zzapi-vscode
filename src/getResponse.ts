@@ -8,6 +8,8 @@ import { replaceVariablesInRequest } from "./core/variables";
 
 import { getOutputChannel } from "./utils/outputChannel";
 
+import { getVariables, storeCapturedVariables } from "./variables";
+
 function formatTestResults(results: TestResult[]): string {
   const resultLines: string[] = [];
   for (const r of results) {
@@ -56,7 +58,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         let requestData = allRequests[name];
         const method = requestData.httpRequest.method;
 
-        const undefs = replaceVariablesInRequest(requestData);
+        const undefs = replaceVariablesInRequest(requestData, getVariables());
         currHttpRequest = constructGotRequest(requestData);
 
         const [httpResponse, executionTime, size, error] = await executeGotRequest(currHttpRequest);
@@ -73,7 +75,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (cancelled) {
           break;
         }
-
+        
         const out = getOutputChannel();
         if (error) {
           out.append(`${new Date().toLocaleString()} [ERROR] `);
@@ -83,6 +85,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
               `\t[warn]  Undefined variable(s): ${undefs.join(",")}. Did you choose an env?`,
             );
           }
+          out.show(true);
           continue;
         }
 
@@ -132,7 +135,8 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (all != passed) {
           out.appendLine(formatTestResults(results));
         }
-        const captureErrors = captureVariables(requestData, response);
+        const [capturedVariables, captureErrors] = captureVariables(requestData, response);
+        storeCapturedVariables(capturedVariables);
         if (captureErrors) {
           out.appendLine(captureErrors);
         }

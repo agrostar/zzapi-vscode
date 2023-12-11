@@ -1,15 +1,19 @@
 import { RequestSpec, ResponseData } from "./core/models";
-import { getAllRequestSpecs, getRequestSpec } from "./core/parseBundle";
-import { loadVarSet } from "./core/variables";
+import { getAllRequestSpecs, getBundleVariables, getRequestSpec } from "./core/parseBundle";
 
+import { loadVarSet, loadBundleVariables } from "./variables";
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import { allRequestsWithProgress } from "./getResponse";
 import { getCurrDirPath, getActiveVarSet } from "./EnvironmentSelection";
 
 async function runRequests(
   requests: { [name: string]: RequestSpec },
+  bundleVariables: {[key: string]: any},
   extensionVersion: string,
 ): Promise<void> {
+  loadVarSet(getCurrDirPath(), getActiveVarSet());
+  loadBundleVariables(bundleVariables, getActiveVarSet());
+
   for (const name in requests) {
     const request = requests[name];
     const autoHeaders: { [key: string]: string } = {
@@ -61,14 +65,14 @@ export async function runOneRequest(
   name: string,
   extensionVersion: string,
 ): Promise<void> {
-  loadVarSet(getCurrDirPath(), getActiveVarSet());
   const request: RequestSpec = getRequestSpec(text, getActiveVarSet(), name);
   const requests: { [name: string]: RequestSpec } = { [name]: request };
-  runRequests(requests, extensionVersion);
+  const bundleVariables = getBundleVariables(text);
+  await runRequests(requests, bundleVariables, extensionVersion);
 }
 
 export async function runAllRequests(text: string, extensionVersion: string): Promise<void> {
-  loadVarSet(getCurrDirPath(), getActiveVarSet());
   const allRequests = getAllRequestSpecs(text, getActiveVarSet());
-  runRequests(allRequests, extensionVersion);
+  const bundleVariables = getBundleVariables(text);
+  await runRequests(allRequests, bundleVariables, extensionVersion);
 }
