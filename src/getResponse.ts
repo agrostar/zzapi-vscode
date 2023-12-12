@@ -82,6 +82,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           if (undefs.length > 0) {
             out.appendLine(`\t[warn]  Undefined variable(s): ${undefs.join(',')}. Did you choose an env?`);
           }
+          out.show(true);
           continue;
         }
 
@@ -112,6 +113,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           out.appendLine(
             `${method} ${name} status: ${status} size: ${size} B time: ${et} parse error(${parseError})`
             );
+          out.show(true);
           continue;
         }
 

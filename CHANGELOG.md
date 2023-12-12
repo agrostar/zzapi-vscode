@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.5]
+- Bug: show output channel on errors
+
 ## [1.0.4]
 - Consistent output messages
 - Import postman will parse json if content-type header is found and is application/json
