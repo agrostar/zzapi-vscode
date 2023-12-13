@@ -45,19 +45,21 @@ export function setEnvironment(statusBar: StatusBarItem, env: string): void {
   }
 }
 
+export function getContentIfBundle(): string {
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor && documentIsBundle(activeEditor.document)) {
+    return activeEditor.document.getText();
+  } else {
+    return "";
+  }
+}
+
 export function createEnvironmentSelector(
   context: ExtensionContext,
   statusBar: StatusBarItem,
 ): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
-    let bundleContents: string;
-    const activeEditor = window.activeTextEditor;
-    if (activeEditor && documentIsBundle(activeEditor.document)) {
-      bundleContents = activeEditor.document.getText();
-    } else {
-      bundleContents = "";
-    }
-
+    const bundleContents = getContentIfBundle();
     const varSetNames = getEnvNames(WORKING_DIR, bundleContents);
     varSetNames.push(NO_VARSET);
     window

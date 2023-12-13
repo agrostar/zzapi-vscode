@@ -3,10 +3,17 @@ import * as YAML from "yaml";
 import { getOutputChannel } from "./utils/outputChannel";
 
 import { getRecentHeadersData } from "./showInEditor";
-import { getVarStore } from "./variables";
+import { getVarFileContents, getVarStore } from "./variables";
+import { loadVariables } from "./core/variableParser";
+import { getActiveVarSet, getContentIfBundle, getCurrDirPath } from "./EnvironmentSelection";
 
 export async function showVariables() {
-  const loadedVariables = getVarStore().getLoadedVariables();
+  const loadedVariables = loadVariables(
+    getActiveVarSet(),
+    getContentIfBundle(),
+    getVarFileContents(getCurrDirPath()),
+  );
+  getVarStore().setLoadedVariables(loadedVariables);
   const capturedVars = getVarStore().getCapturedVariables();
 
   const varSize = Object.keys(loadedVariables).length;
@@ -17,14 +24,15 @@ export async function showVariables() {
   if (varSize <= 0 && capSize <= 0) {
     content += "----------\n";
     content +=
-      "No variables stored.\nRunning a request may store the associated variables, if any are defined\n";
+      "No variables stored.\n";
     content += "----------\n";
   } else {
     content = "";
 
     content += "----------\n";
     if (varSize > 0) {
-      content += "# Current Loaded Variables: variables from .zzv files and the associated bundle\n";
+      content +=
+        "# Current Loaded Variables: variables from .zzv files and the associated bundle\n";
       content += YAML.stringify({ "Current Loaded Variables": loadedVariables });
     } else {
       content += YAML.stringify({ "Current Loaded Variables": "NONE" });
