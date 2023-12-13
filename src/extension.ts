@@ -24,7 +24,7 @@ import {
 } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
 import { addSampleGet, addSamplePost } from "./addSamples";
-import { resetCapturedVariables } from "./variables";
+import { getVarStore } from "./variables";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -54,7 +54,7 @@ export function activate(context: ExtensionContext): void {
         }
         setEnvironment(statusBar, getSelectedEnvs()[editorPath]);
 
-        resetCapturedVariables();
+        getVarStore().resetCapturedVariables();
       }
 
       //if we are referring to a new dir

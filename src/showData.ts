@@ -3,13 +3,13 @@ import * as YAML from "yaml";
 import { getOutputChannel } from "./utils/outputChannel";
 
 import { getRecentHeadersData } from "./showInEditor";
-import { getCapturedVariables, getVariables } from "./variables";
+import { getVarStore } from "./variables";
 
 export async function showVariables() {
-  const variables = getVariables();
-  const capturedVars = getCapturedVariables();
+  const loadedVariables = getVarStore().getLoadedVariables();
+  const capturedVars = getVarStore().getCapturedVariables();
 
-  const varSize = Object.keys(variables).length;
+  const varSize = Object.keys(loadedVariables).length;
   const capSize = Object.keys(capturedVars).length;
 
   let content: string = "";
@@ -24,8 +24,8 @@ export async function showVariables() {
 
     content += "----------\n";
     if (varSize > 0) {
-      content += "# Current Loaded Variables: variables currently considered by the bundle\n";
-      content += YAML.stringify({ "Current Loaded Variables": variables });
+      content += "# Current Loaded Variables: variables from .zzv files and the associated bundle\n";
+      content += YAML.stringify({ "Current Loaded Variables": loadedVariables });
     } else {
       content += YAML.stringify({ "Current Loaded Variables": "NONE" });
     }

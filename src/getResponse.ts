@@ -4,11 +4,10 @@ import { ResponseData, RequestSpec, GotRequest, TestResult } from "./core/models
 import { cancelGotRequest, constructGotRequest, executeGotRequest } from "./core/executeRequest";
 import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
-import { replaceVariablesInRequest } from "./core/variables";
+import { replaceVariablesInRequest } from "./core/replaceVars";
 
 import { getOutputChannel } from "./utils/outputChannel";
-
-import { getVariables, storeCapturedVariables } from "./variables";
+import { getVarStore } from "./variables";
 
 function formatTestResults(results: TestResult[]): string {
   const resultLines: string[] = [];
@@ -58,7 +57,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         let requestData = allRequests[name];
         const method = requestData.httpRequest.method;
 
-        const undefs = replaceVariablesInRequest(requestData, getVariables());
+        const undefs = replaceVariablesInRequest(requestData, getVarStore().getAllVariables());
         currHttpRequest = constructGotRequest(requestData);
 
         const [httpResponse, executionTime, size, error] = await executeGotRequest(currHttpRequest);
@@ -136,7 +135,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           out.appendLine(formatTestResults(results));
         }
         const [capturedVariables, captureErrors] = captureVariables(requestData, response);
-        storeCapturedVariables(capturedVariables);
+        getVarStore().mergeCapturedVariables(capturedVariables);
         if (captureErrors) {
           out.appendLine(captureErrors);
         }

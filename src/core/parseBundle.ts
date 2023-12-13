@@ -2,27 +2,9 @@ import * as YAML from "yaml";
 
 import { RawRequest, RequestSpec, RequestPosition, Common } from "./models";
 import { getMergedData } from "./combineData";
-import { checkCommonType, validateRawRequest, checkVariables } from "./checkTypes";
+import { checkCommonType, validateRawRequest } from "./checkTypes";
 
 const VALID_KEYS = ["requests", "common", "variables"];
-
-export function getBundleVariables(doc: string): { [key: string]: any } {
-  let parsedData = YAML.parse(doc);
-  if (typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null) {
-    throw new Error("Bundle must be an object with key value pairs");
-  }
-
-  const variables = parsedData.variables;
-  if (variables !== undefined) {
-    const [valid, error] = checkVariables(variables);
-    if (!valid) {
-      throw new Error(`Error in variables: ${error}`);
-    }
-    return variables;
-  } else {
-    return {};
-  }
-}
 
 // TODO: At first I thought returning multiple values as an array is convenient because
 // the names of the values can be flexible to the caller. But now I realize typechecking fails

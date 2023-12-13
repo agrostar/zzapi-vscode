@@ -1,16 +1,17 @@
 import jp from "jsonpath";
 
 import { ResponseData, RequestSpec } from "./models";
+import { Variables } from "./variables";
 
 export function captureVariables(
   requestData: RequestSpec,
   responseData: ResponseData,
-): [{ [key: string]: any }, string] {
+): [Variables, string] {
   const setvars = requestData.setvars;
   const headers = responseData.headers;
 
   let captureOutput = "";
-  let capturedVariables: { [key: string]: any } = {};
+  let capturedVariables: Variables = {};
 
   for (const { varName, type, spec } of setvars) {
     let value = undefined;

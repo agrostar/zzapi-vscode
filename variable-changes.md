@@ -86,3 +86,7 @@ function replaceVariables(req: RequestSpec) {
     * call captureVariables
     * merge the returned variables into the VarStore
   * In the vscode runner, we save the VarStore in a global var
+  
+# Changes to the above
+- added getters and setters for loaded and captured to the above.
+	- Proposal for adding a setter instead of just merge: without it, the runner has to first reset and then merge. This is possible but adding a setter seems simple. Problem: the class now feels a little cluttered.  
