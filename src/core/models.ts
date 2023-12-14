@@ -41,8 +41,8 @@ export interface Captures {
   headers?: { [key: string]: string };
 }
 
-export type RawHeaders = Array<Header> | { [name: string]: string } | undefined;
-export type RawParams = Array<Param> | { [name: string]: any } | undefined;
+export type RawHeaders = Header[] | { [name: string]: string } | undefined;
+export type RawParams = Param[] | { [name: string]: any } | undefined;
 
 export interface RawOptions {
   follow?: boolean;
@@ -95,7 +95,7 @@ export interface RequestSpec {
     baseUrl?: string;
     url: string;
     method: Method;
-    params: Array<Param>;
+    params: Param[];
     headers: { [key: string]: string };
     body?: any;
   };

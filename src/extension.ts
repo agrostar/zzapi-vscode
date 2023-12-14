@@ -88,7 +88,7 @@ export function activate(context: ExtensionContext): void {
     await showRecentHeaders();
   });
   commands.registerCommand("extension.showCurl", (name) => {
-    showCurlCommand(name);
+    showCurlCommand(name, zzApiVersion);
   });
   commands.registerCommand("extension.showSampleGET", async () => {
     await addSampleGet();

@@ -24,7 +24,7 @@ function replaceVariables(data: any, variables: Variables): [any, string[]] {
 }
 
 function replaceVariablesInNonScalar(
-  data: { [key: string]: any } | Array<any>,
+  data: { [key: string]: any } | any[],
   variables: Variables,
 ): [any, string[]] {
   if (Array.isArray(data)) {
@@ -34,8 +34,8 @@ function replaceVariablesInNonScalar(
   }
 }
 
-function replaceVariablesInArray(data: Array<any>, variables: Variables): [Array<any>, string[]] {
-  let newData: Array<any> = [];
+function replaceVariablesInArray(data: any[], variables: Variables): [any[], string[]] {
+  let newData: any[] = [];
   const undefs: string[] = [];
 
   data.forEach((item) => {

@@ -15,42 +15,6 @@ import {
   SetVar,
 } from "./models";
 
-// TODO: let us use consistent naming. File is combine, function is merge. Pick one
-// and use for both.
-export function getMergedData(commonData: Common, requestData: RawRequest): RequestSpec {
-  const name = requestData.name;
-
-  const method = requestData.method;
-  const params = getMergedParams(commonData.params, requestData.params);
-  const headers = getMergedHeaders(commonData.headers, requestData.headers);
-  const body = requestData.body;
-  const options = getMergedOptions(commonData.options, requestData.options);
-
-  const [tests, hasJsonTests] = getMergedTests(commonData?.tests, requestData.tests);
-  const [setvars, hasJsonVars] = getMergedSetVars(requestData.setvars, requestData.capture);
-
-  const mergedData: RequestSpec = {
-    name,
-    httpRequest: {
-      baseUrl: commonData?.baseUrl,
-      url: requestData.url,
-      method,
-      params,
-      headers,
-      body,
-    },
-    options,
-    tests,
-    setvars,
-    expectJson: hasJsonTests || hasJsonVars,
-  };
-
-  return mergedData;
-}
-
-// TODO: a general convention to follow is to define a function before it is used. Only in
-// case of recursive calls it is hard to do so. Otherwise, let us follow that. If we are consistent,
-// it creates a good conceptual model for someone new reading the code.
 function paramObjectToArray(params: object): Param[] {
   const paramArray: Param[] = [];
   Object.entries(params).forEach(([name, value]) => {
@@ -65,11 +29,7 @@ function paramObjectToArray(params: object): Param[] {
   return paramArray;
 }
 
-// TODO: Two ways of declaring arrays: Param[] or Array<Param>. Let us use the Param[]
-// convention throughout. It's shorter and easier to read. Array<> form can be used if we
-// are defining the interface in place, eg, Array<{name: string, age: int}> because the []
-// can be easily missed if it is at the end in this case.
-function getMergedParams(commonParams: RawParams, requestParams: RawParams): Array<Param> {
+function getMergedParams(commonParams: RawParams, requestParams: RawParams): Param[] {
   let mixedParams: Param[] = [];
 
   if (commonParams) {
@@ -205,7 +165,7 @@ function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}): [Tests, b
   return [mergedData, Object.keys(mergedData.json).length > 0];
 }
 
-function getArrayHeadersAsObject(objectSet: Array<Header> | undefined): { [key: string]: string } {
+function getArrayHeadersAsObject(objectSet: Header[] | undefined): { [key: string]: string } {
   if (objectSet === undefined) {
     return {};
   }
@@ -233,4 +193,35 @@ function withLowerCaseKeys(obj: { [key: string]: any } | undefined): { [key: str
   }
 
   return newObj;
+}
+
+export function getMergedData(commonData: Common, requestData: RawRequest): RequestSpec {
+  const name = requestData.name;
+
+  const method = requestData.method;
+  const params = getMergedParams(commonData.params, requestData.params);
+  const headers = getMergedHeaders(commonData.headers, requestData.headers);
+  const body = requestData.body;
+  const options = getMergedOptions(commonData.options, requestData.options);
+
+  const [tests, hasJsonTests] = getMergedTests(commonData?.tests, requestData.tests);
+  const [setvars, hasJsonVars] = getMergedSetVars(requestData.setvars, requestData.capture);
+
+  const mergedData: RequestSpec = {
+    name,
+    httpRequest: {
+      baseUrl: commonData?.baseUrl,
+      url: requestData.url,
+      method,
+      params,
+      headers,
+      body,
+    },
+    options,
+    tests,
+    setvars,
+    expectJson: hasJsonTests || hasJsonVars,
+  };
+
+  return mergedData;
 }

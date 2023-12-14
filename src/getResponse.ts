@@ -74,7 +74,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
         if (cancelled) {
           break;
         }
-        
+
         const out = getOutputChannel();
         if (error) {
           out.append(`${new Date().toLocaleString()} [ERROR] `);
@@ -162,7 +162,7 @@ function getStrictStringValue(value: any): string {
   }
 }
 
-function getHeadersAsString(rawHeaders: Array<string>): string {
+function getHeadersAsString(rawHeaders: string[]): string {
   let formattedString = "\n";
   if (rawHeaders === undefined) {
     return formattedString;

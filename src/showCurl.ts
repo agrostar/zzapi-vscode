@@ -8,7 +8,7 @@ import { loadVariables } from "./core/variableParser";
 import { getVarFileContents, getVarStore } from "./variables";
 import { replaceVariablesInRequest } from "./core/replaceVars";
 
-export function showCurl(text: string, name: string) {
+export function showCurl(text: string, name: string, extensionVersion: string) {
   const loadedVariables = loadVariables(
     getActiveVarSet(),
     text,
@@ -16,7 +16,14 @@ export function showCurl(text: string, name: string) {
   );
   getVarStore().setLoadedVariables(loadedVariables);
 
-  let request = getRequestSpec(text, getActiveVarSet(), name);
+  const request = getRequestSpec(text, getActiveVarSet(), name);
+  const autoHeaders: { [key: string]: string } = {
+    "user-agent": "zzAPI-vscode/" + extensionVersion,
+  };
+  if (request.httpRequest.body && typeof request.httpRequest.body == "object") {
+    autoHeaders["content-type"] = "application/json";
+  }
+  request.httpRequest.headers = Object.assign(autoHeaders, request.httpRequest.headers);
   replaceVariablesInRequest(request, getVarStore().getAllVariables());
 
   const curlCommand = getCurlRequest(request);

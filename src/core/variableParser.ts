@@ -1,20 +1,23 @@
 import * as YAML from "yaml";
 
+import { isDict } from "./utils/typeUtils";
+
 import { checkVariables } from "./checkTypes";
 import { Variables } from "./variables";
 
 export function getBundleVariables(doc: string): { [key: string]: any } {
   let parsedData = YAML.parse(doc);
-  if (typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null) {
-    throw new Error("Bundle must be an object with key value pairs");
+  // an empty string is parsed to null. If we are not in a bundle then doc is empty string.
+  if (parsedData === null) parsedData = {};
+  if (!isDict(parsedData)) {
+    throw new Error("Bundle could not be parsed");
   }
 
   const variables = parsedData.variables;
   if (variables !== undefined) {
-    const [valid, error] = checkVariables(variables);
-    if (!valid) {
-      throw new Error(`Error in variables: ${error}`);
-    }
+    const error = checkVariables(variables);
+    if (error !== undefined) throw new Error(`Error in variables: ${error}`);
+
     return variables;
   } else {
     return {};
@@ -45,7 +48,7 @@ export function loadVariables(
   let envVars = {};
   varFileContents.forEach((fileContents) => {
     const parsedData = YAML.parse(fileContents);
-    if(parsedData && parsedData.hasOwnProperty(envName)) {
+    if (parsedData && parsedData.hasOwnProperty(envName)) {
       Object.assign(envVars, parsedData[envName]);
     }
   });

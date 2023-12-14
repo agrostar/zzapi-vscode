@@ -1,7 +1,9 @@
 import * as YAML from "yaml";
 
+import { isDict } from "./utils/typeUtils";
+
 import { RawRequest, RequestSpec, RequestPosition, Common } from "./models";
-import { getMergedData } from "./combineData";
+import { getMergedData } from "./mergeData";
 import { checkCommonType, validateRawRequest } from "./checkTypes";
 
 const VALID_KEYS = ["requests", "common", "variables"];
@@ -12,8 +14,8 @@ const VALID_KEYS = ["requests", "common", "variables"];
 // the right type.) We learn as we code! So let us convert these multiple returns to object returns.
 function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest }, Common] {
   let parsedData = YAML.parse(doc);
-  if (typeof parsedData !== "object" || Array.isArray(parsedData) || parsedData === null) {
-    throw new Error("Bundle must be an object with key value pairs");
+  if (!isDict(parsedData) || parsedData === null) {
+    throw new Error("Bundle could not be parsed");
   }
 
   for (const key in parsedData) {
@@ -22,14 +24,10 @@ function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest
     }
   }
 
-  // loadBundleVariables(doc, env); // TODO: return variables from here (least side effects principle)
-
   let commonData = parsedData.common;
   if (commonData !== undefined) {
-    const [valid, error] = checkCommonType(commonData);
-    if (!valid) {
-      throw new Error(`Error in common: ${error}`);
-    }
+    const error = checkCommonType(commonData);
+    if (error !== undefined) throw new Error(`Error in common: ${error}`);
   } else {
     commonData = {};
   }
@@ -51,10 +49,9 @@ function checkAndMergeRequest(
   }
 
   request.name = name;
-  const [valid, error] = validateRawRequest(request);
-  if (!valid) {
-    throw new Error(`Error in request '${name}': ${error}`);
-  }
+  const error = validateRawRequest(request);
+  if (error !== undefined) throw new Error(`Error in request '${name}': ${error}`);
+
   return getMergedData(commonData, request);
 }
 

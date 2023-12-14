@@ -19,10 +19,10 @@ export async function runAllRequestsCommand(extensionVersion: string): Promise<v
   }
 }
 
-export function showCurlCommand(name: string) {
+export function showCurlCommand(name: string, extensionVersion: string) {
   const activeEditor = window.activeTextEditor;
   if (activeEditor) {
     const text = activeEditor.document.getText();
-    showCurl(text, name);
+    showCurl(text, name, extensionVersion);
   }
 }

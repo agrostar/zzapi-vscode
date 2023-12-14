@@ -76,13 +76,13 @@ export function cancelGotRequest(httpRequest: GotRequest): void {
   httpRequest.cancel();
 }
 
-export function getParamsForUrl(paramsArray: Array<Param> | undefined): string {
+export function getParamsForUrl(paramsArray: Param[] | undefined): string {
   if (paramsArray === undefined) {
     return "";
   }
 
-  let params: Array<Param> = paramsArray;
-  let paramArray: Array<string> = [];
+  let params: Param[] = paramsArray;
+  let paramArray: string[] = [];
 
   params.forEach((param) => {
     const key = param.name as string;

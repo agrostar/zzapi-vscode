@@ -1,201 +1,172 @@
-import { getStringIfNotScalar } from "./utils/castData";
+import { getStringIfNotScalar, isArrayOrDict, isDict, getObjType } from "./utils/typeUtils";
 
-function checkHeaderItem(obj: any): [boolean, string | undefined] {
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [false, `Header item is not an object of type {name: string; value: string}`];
+function checkKey(
+  obj: any,
+  item: string,
+  key: string,
+  expectedType: string,
+  optional: boolean,
+): string | undefined {
+  if (!optional && !obj.hasOwnProperty(key)) {
+    return `${key} key must be present in each ${item} item`;
+  } else if (obj.hasOwnProperty(key) && typeof obj[key] !== expectedType) {
+    return `${key} key must have ${expectedType} value, found ${typeof obj[key]}`;
   }
-  const keys = Object.keys(obj);
-  if (!(keys.includes("name") && typeof obj.name === "string")) {
-    return [false, `name property of each header item must exist as a string`];
-  }
-  if (!(keys.includes("value") && typeof obj.value === "string")) {
-    return [false, `value property of each header item must exist as a string`];
-  }
-
-  return [true, undefined];
+  return undefined;
 }
 
-function checkParamItem(obj: any) {
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [
-      false,
-      `Param item is not an object of type {name: string; value: scalar; raw?: boolean}`,
-    ];
+function checkObjIsDict(obj: any, item: string): string | undefined {
+  if (!isDict(obj)) {
+    return `${item} item must be a dict: found ${getObjType(obj)}`;
+  } else {
+    return undefined;
   }
-  const keys = Object.keys(obj);
-  if (!(keys.includes("name") && typeof obj.name === "string")) {
-    return [false, `name property of each param item must exist as a string`];
-  }
-  // value is optional
-  if (keys.includes("raw") && typeof obj.raw !== "boolean") {
-    return [false, `raw property of each param item must be a boolean`];
-  }
-  return [true, undefined];
 }
 
-// TODO: Add all such, including getStringOrJson etc in "typeutils.ts"
-function isArrayOrDict(obj: any) {
-  return typeof obj == "object" && !(obj instanceof Date);
+function checkHeaderItem(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "header");
+  if (ret !== undefined) return ret;
+
+  ret = checkKey(obj, "header", "name", "string", false);
+  if (ret !== undefined) return ret;
+  ret = checkKey(obj, "header", "value", "string", false);
+  if (ret !== undefined) return ret;
+
+  return undefined;
 }
 
-// TODO: add a return type to this and all other functions, wherever the type is very clear.
-// Also consider returning just a string. If the string is not returned, there is no error.
-// Same pattern can be used for other checkXXX also.
-function checkHeadersParamsOptionsTestsCaptures(obj: any) {
+function checkParamItem(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "param");
+  if (ret !== undefined) return ret;
+
+  ret = checkKey(obj, "param", "name", "string", false);
+  if (ret !== undefined) return ret;
+  ret = checkKey(obj, "param", "raw", "boolean", true);
+  if (ret !== undefined) return ret;
+
+  return undefined;
+}
+
+function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
   if (obj.hasOwnProperty("headers")) {
     const headers = obj.headers;
     if (!isArrayOrDict(headers)) {
-      return [false, `Headers must be an array or a dictionary: found ${typeof headers}`];
+      return `Headers must be an array or a dictionary: found ${typeof headers}`;
     }
     if (Array.isArray(headers)) {
       for (const header of headers) {
-        const [headerValid, headerError] = checkHeaderItem(header);
-        if (!headerValid) {
-          return [false, `Error in header item ${getStringIfNotScalar(header)}: ${headerError}`];
+        const headerError = checkHeaderItem(header);
+        if (headerError !== undefined) {
+          return `Error in header item ${getStringIfNotScalar(header)}: ${headerError}`;
         }
       }
+    } else {
+      // dictionary
     }
     // For a dictionary, anything is valid. TODO: value has to be a scalar
   }
   if (obj.hasOwnProperty("params")) {
     const params = obj.params;
     if (!isArrayOrDict(params)) {
-      return [false, `Params must be an array or a dictionary: found ${typeof params}`];
+      return `Params must be an array or a dictionary: found ${typeof params}`;
     }
     if (Array.isArray(params)) {
       for (const param of params) {
-        const [paramValid, paramError] = checkParamItem(param);
-        if (!paramValid) {
-          return [false, `Error in param item ${getStringIfNotScalar(param)}: ${paramError}`];
+        const paramError = checkParamItem(param);
+        if (paramError !== undefined) {
+          return `Error in param item ${getStringIfNotScalar(param)}: ${paramError}`;
         }
       }
     }
   }
   if (obj.hasOwnProperty("options")) {
-    const [optionsValid, optionsError] = checkOptions(obj.options);
-    if (!optionsValid) {
-      return [false, `Error in options: ${optionsError}`];
-    }
+    const optionsError = checkOptions(obj.options);
+    if (optionsError !== undefined) return `Error in options: ${optionsError}`;
   }
   if (obj.hasOwnProperty("tests")) {
-    const [testsValid, testsError] = checkTests(obj.tests);
-    if (!testsValid) {
-      return [false, `Error in tests: ${testsError}`];
-    }
+    const testsError = checkTests(obj.tests);
+    if (testsError !== undefined) return `Error in tests: ${testsError}`;
   }
   if (obj.hasOwnProperty("capture")) {
-    const [capturesValid, capturesError] = checkCaptures(obj.capture);
-    if (!capturesValid) {
-      return [false, `Eror in captures: ${capturesError}`];
-    }
+    const capturesError = checkCaptures(obj.capture);
+    if (capturesError !== undefined) return `Error in captures: ${capturesError}`;
   }
 
-  return [true, undefined];
+  return undefined;
 }
 
-function checkTests(obj: any) {
-  // TODO: commomn pattern of checking whether it is an object (specifically, a dict or map).
-  // Can create another function in typutils and this will become clearer to read here.
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [false, "Tests item must be an object"];
+function checkTests(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "tests");
+  if (ret !== undefined) return ret;
+
+  if (obj.hasOwnProperty("json")) {
+    ret = checkObjIsDict(obj.json, "JSON tests");
+    if (ret !== undefined) return ret;
+  }
+  if (obj.hasOwnProperty("body") && !(isDict(obj.body) || typeof obj.body === "string")) {
+    return `body tests item must be a dict or string: found ${getObjType(obj.body)}`;
+  }
+  if (obj.hasOwnProperty("status") && !(isDict(obj.status) || typeof obj.status === "number")) {
+    return `status tests item must be a dict or number: found ${getObjType(obj.status)}`;
+  }
+  if (obj.hasOwnProperty("headers")) {
+    ret = checkObjIsDict(obj.headers, "header tests");
+    if (ret !== undefined) return ret;
   }
 
-  if (obj.hasOwnProperty("json") && (typeof obj.json !== "object" || Array.isArray(obj.json))) {
-    return [false, "JSON tests must be defined as an object"];
-  }
-  if (
-    obj.hasOwnProperty("body") &&
-    !((typeof obj.body === "object" && !Array.isArray(obj.body)) || typeof obj.body === "string")
-  ) {
-    return [false, "Body assertion must be defined as object tests, or a direct string assertion"];
-  }
-  if (
-    obj.hasOwnProperty("status") &&
-    !(
-      (typeof obj.status === "object" && !Array.isArray(obj.status)) ||
-      typeof obj.status === "number"
-    )
-  ) {
-    return [
-      false,
-      "Status assertion must be defined as object tests, or a direct number assertion",
-    ];
-  }
-  if (
-    obj.hasOwnProperty("headers") &&
-    typeof obj.headers !== "object" &&
-    !Array.isArray(obj.headers)
-  ) {
-    return [false, "Headers tests must be defined as an object"];
-  }
-
-  return [true, undefined];
+  return undefined;
 }
 
-function checkCaptures(obj: any) {
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [false, "Capture item must be an object"];
+function checkCaptures(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "captures");
+  if (ret !== undefined) return ret;
+
+  if (obj.hasOwnProperty("json")) {
+    ret = checkObjIsDict(obj.json, "JSON captures");
+    return ret;
   }
 
-  if (obj.hasOwnProperty("json") && (typeof obj.json !== "object" || Array.isArray(obj.json))) {
-    return [false, "JSON captures must be defined as an object"];
-  }
-  if (obj.hasOwnProperty("body") && !(typeof obj.body === "string")) {
-    return [false, "Value of body key must be a string representing variable name"];
-  }
-  if (obj.hasOwnProperty("status") && typeof obj.status !== "string") {
-    return [false, "Value of status key must be a string representing variable name"];
-  }
-  if (
-    obj.hasOwnProperty("headers") &&
-    (typeof obj.headers !== "object" || Array.isArray(obj.headers))
-  ) {
-    return [false, "Headers captures must be defined as an object"];
+  ret = checkKey(obj, "captures", "body", "string", true);
+  if (ret !== undefined) return ret;
+  ret = checkKey(obj, "captures", "status", "string", true);
+  if (ret !== undefined) return ret;
+
+  if (obj.hasOwnProperty("headers")) {
+    ret = checkObjIsDict(obj.headers, "header captures");
+    if (ret !== undefined) return ret;
   }
 
-  return [true, undefined];
+  return undefined;
 }
 
 const VALID_OPTIONS = ["follow", "verifySSL", "keepRawJSON", "showHeaders"];
-function checkOptions(obj: any) {
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [
-      false,
-      "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; keepRawJSON?: boolean; showHeaders?: boolean}",
-    ];
-  }
+function checkOptions(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "options");
+  if (ret !== undefined) return ret;
 
   for (const key in obj) {
     if (VALID_OPTIONS.includes(key)) {
-      if (typeof obj[key] !== "boolean") {
-        return [false, `${key} must be of type boolean if it exists`];
-      }
+      ret = checkKey(obj, "options", "key", "boolean", true);
+      if (ret !== undefined) return ret;
     } else {
-      return [
-        false,
-        "options must be defined as an object of type {follow?: boolean; verifySSL?: boolean; keepRawJSON?: boolean; showHeaders?: boolean}",
-      ];
+      return `options must be among ${VALID_OPTIONS}: found ${key}`;
     }
   }
 
-  return [true, undefined];
+  return undefined;
 }
 
-export function checkCommonType(obj: any): [boolean, string | undefined] {
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [false, "Common must be of type object"];
-  }
+export function checkCommonType(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "common");
+  if (ret !== undefined) return ret;
 
-  if (obj.hasOwnProperty("baseUrl") && typeof obj.baseUrl !== "string") {
-    return [false, "baseUrl must be of type string"];
-  }
+  ret = checkKey(obj, "common", "baseUrl", "string", true);
+  if (ret !== undefined) return ret;
 
-  const [valid, error] = checkHeadersParamsOptionsTestsCaptures(obj);
-  if (!valid) {
-    return [false, `${error}`];
-  }
+  ret = checkHeadersParamsOptionsTestsCaptures(obj);
+  if (ret !== undefined) return ret;
 
-  return [true, undefined];
+  return undefined;
 }
 
 // TODO: make this an object. In general, prefer lookups to be in maps instead
@@ -218,53 +189,43 @@ const VALID_METHODS = [
   "delete",
   "trace",
 ] as const;
+export function validateRawRequest(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "request");
+  if (ret !== undefined) return ret;
 
-export function validateRawRequest(obj: any): [boolean, string | undefined] {
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [false, "Request must be of type object"];
+  ret = checkHeadersParamsOptionsTestsCaptures(obj);
+  if (ret !== undefined) return ret;
+
+  ret = checkKey(obj, "request", "url", "string", false);
+  if (ret !== undefined) return ret;
+
+  if (!obj.hasOwnProperty("method")) {
+    return `method key must be present in each request item`;
+  } else if (!VALID_METHODS.includes(obj.method)) {
+    return `method key must have value among ${VALID_METHODS}: found ${obj.method}`;
   }
 
-  let [valid, error] = checkHeadersParamsOptionsTestsCaptures(obj);
-  if (!valid) {
-    return [false, `${error}`];
-  }
-  if (!(obj.hasOwnProperty("url") && typeof obj.url === "string")) {
-    return [false, `url must exist in request with type string`];
-  }
-  if (!(obj.hasOwnProperty("method") && VALID_METHODS.includes(obj.method))) {
-    return [false, `method must exist and be one of ${getStringIfNotScalar(VALID_METHODS)}`];
-  }
-
-  return [true, undefined];
+  return undefined;
 }
 
-export function checkVariables(obj: any) {
-  if (typeof obj !== "object" || Array.isArray(obj)) {
-    return [
-      false,
-      "Variables must be defined as an object with keys as environment names, and values as variable sets",
-    ];
-  }
+export function checkVariables(obj: any): string | undefined {
+  let ret = checkObjIsDict(obj, "variables");
+  if (ret !== undefined) return ret;
 
   for (const key in obj) {
-    if (typeof key !== "string") {
-      return [false, `Environment names must be a string: ${key} is not a string`];
-    }
+    if (typeof key !== "string")
+      return `Environment names must be a string: ${key} is not a string`;
 
     const variables = obj[key];
-    if (typeof variables !== "object" || Array.isArray(variables)) {
-      return [
-        false,
-        `Variable set corresponding to env ${key} is not an object with key: value pairs`,
-      ];
-    }
+    ret = checkObjIsDict(obj, `variables environment ${key}`);
+    if (ret !== undefined) return ret;
 
     for (const varName in variables) {
       if (typeof varName !== "string") {
-        return [false, `variable names must be a string: ${varName} is not a string`];
+        return `variable name ${varName} in env ${key} is not a string`;
       }
     }
   }
 
-  return [true, undefined];
+  return undefined;
 }
