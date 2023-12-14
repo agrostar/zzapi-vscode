@@ -64,6 +64,7 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
       // dictionary
     }
     // For a dictionary, anything is valid. TODO: value has to be a scalar
+    // question: how scalar? shouldn't it be strings only for headers? 
   }
   if (obj.hasOwnProperty("params")) {
     const params = obj.params;

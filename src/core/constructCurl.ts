@@ -1,10 +1,6 @@
 import { getBody, getParamsForUrl, getURL } from "./executeRequest";
 import { RequestSpec } from "./models";
 
-
-// TODO: there are inconsistencies between what we generate as curl and what actually
-// goes out as the request due to some automatic headers (user agent, content type).
-// Call this function *after* adding those auto-headers.
 export function getCurlRequest(request: RequestSpec): string {
   const methodFlag = ` -X ${request.httpRequest.method.toUpperCase()}`;
   let headersFlag = "";

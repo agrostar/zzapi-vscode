@@ -1,19 +1,12 @@
 import jp from "jsonpath";
 
-import { RequestSpec, ResponseData, TestResult, Assertion } from "./models";
+import { getStringIfNotScalar } from "./utils/typeUtils";
 
-// TODO: move to typeutils.ts
-function getStringIfNotScalar(data: any) {
-  if (typeof data === "object") {
-    return JSON.stringify(data);
-  }
-  return data;
-}
+import { Tests, ResponseData, TestResult, Assertion } from "./models";
 
-// TODO: we need only tests here, not the request spec
-export function runAllTests(requestData: RequestSpec, responseData: ResponseData): TestResult[] {
-  const tests = requestData.tests;
+export function runAllTests(tests: Tests, responseData: ResponseData): TestResult[] {
   const results: TestResult[] = [];
+  if (!tests) return results;
 
   for (const spec in tests.json) {
     const expected = tests.json[spec];

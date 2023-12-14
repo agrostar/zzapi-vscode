@@ -1,12 +1,12 @@
 import { getCurlRequest } from "./core/constructCurl";
 import { getRequestSpec } from "./core/parseBundle";
+import { replaceVariablesInRequest } from "./core/replaceVars";
+import { loadVariables } from "./core/variableParser";
 
 import { getOutputChannel } from "./utils/outputChannel";
 
 import { getActiveVarSet, getCurrDirPath } from "./EnvironmentSelection";
-import { loadVariables } from "./core/variableParser";
 import { getVarFileContents, getVarStore } from "./variables";
-import { replaceVariablesInRequest } from "./core/replaceVars";
 
 export function showCurl(text: string, name: string, extensionVersion: string) {
   const loadedVariables = loadVariables(

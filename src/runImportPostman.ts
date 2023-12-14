@@ -1,6 +1,7 @@
 import { Uri, window, workspace } from "vscode";
 
-import convertPostman, { convertEnvironment } from "./core/convertPostman";
+import convertCollection, { convertEnvironment } from "./core/convertPostman";
+
 import { openDocument } from "./showInEditor";
 
 export async function importPostmanCommand(): Promise<void> {
@@ -20,7 +21,7 @@ export async function importPostmanCommand(): Promise<void> {
   const pathStr = pathUri.fsPath;
 
   try {
-    const content = convertPostman(pathStr);
+    const content = convertCollection(pathStr);
     const doc = await workspace.openTextDocument({ content, language: "yaml" });
     window.showTextDocument(doc);
   } catch (e: any) {

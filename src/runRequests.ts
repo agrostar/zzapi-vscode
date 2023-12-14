@@ -1,10 +1,10 @@
 import { RequestSpec, ResponseData } from "./core/models";
 import { getAllRequestSpecs, getRequestSpec } from "./core/parseBundle";
+import { loadVariables } from "./core/variableParser";
 
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import { allRequestsWithProgress } from "./getResponse";
 import { getCurrDirPath, getActiveVarSet } from "./EnvironmentSelection";
-import { loadVariables } from "./core/variableParser";
 import { getVarFileContents, getVarStore } from "./variables";
 
 async function runRequests(

@@ -1,10 +1,11 @@
 import * as YAML from "yaml";
 
+import { loadVariables } from "./core/variableParser";
+
 import { getOutputChannel } from "./utils/outputChannel";
 
 import { getRecentHeadersData } from "./showInEditor";
 import { getVarFileContents, getVarStore } from "./variables";
-import { loadVariables } from "./core/variableParser";
 import { getActiveVarSet, getContentIfBundle, getCurrDirPath } from "./EnvironmentSelection";
 
 export async function showVariables() {

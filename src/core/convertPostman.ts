@@ -93,10 +93,7 @@ function addRequestsFromFolder(prefix: string, item: any, requests: any) {
   });
 }
 
-
-// TODO: rename this to convertCollection - consistent with convertEnvironment.
-// Both are in the file convertPostman, and that makes sense.
-export default function convertPostman(filePath: string): string {
+export default function convertCollection(filePath: string): string {
   const contents = fs.readFileSync(filePath, "utf-8");
   const collection = JSON.parse(contents);
   if (

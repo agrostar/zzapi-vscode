@@ -7,6 +7,7 @@ import { captureVariables } from "./core/captureVars";
 import { replaceVariablesInRequest } from "./core/replaceVars";
 
 import { getOutputChannel } from "./utils/outputChannel";
+
 import { getVarStore } from "./variables";
 
 function formatTestResults(results: TestResult[]): string {
@@ -118,7 +119,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
           continue;
         }
 
-        const results = runAllTests(requestData, response);
+        const results = runAllTests(requestData.tests, response);
         const passed = results.filter((r) => r.pass).length;
         const all = results.length;
 
