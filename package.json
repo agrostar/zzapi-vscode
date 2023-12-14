@@ -85,12 +85,10 @@
           "command": "extension.showRecentHeaders"
         },
         {
-          "command": "extension.showSampleGET",
-          "when": "resourceExtname == .zzb"
+          "command": "extension.showSampleGET"
         },
         {
-          "command": "extension.showSamplePOST",
-          "when": "resourceExtname == .zzb"
+          "command": "extension.showSamplePOST"
         }
       ]
     },
@@ -98,7 +96,7 @@
     "yamlValidation": [
       {
         "fileMatch": [
-          "*.zzb"
+          "*.zzb", "*.zzb.yml", "*.zzb.yaml"
         ],
         "url": "https://agrostar.in/schemas/zzapi-bundle.schema.json"
       },

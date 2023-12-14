@@ -6,7 +6,7 @@ export function getStringIfNotScalar(data: any) {
 }
 
 export function isArrayOrDict(obj: any) {
-  return typeof obj == "object" && !(obj instanceof Date);
+  return typeof obj == "object" && !(obj instanceof Date) && obj !== null;
 }
 
 export function isDict(obj: any) {

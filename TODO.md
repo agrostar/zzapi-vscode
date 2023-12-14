@@ -1,6 +1,6 @@
 # Improvements
 
-* Support .zzb.yml in addition to .zzb. This will allow people to use yml as the extension to let VS Code dectect it as yaml even without the extension, so that it can be formatted nicely. Also, it will get formatted on github, bitbucket in the browser also.
+* Support .zzb.yml in addition to .zzb. This will allow people to use yml as the extension to let VS Code dectect it as yaml even without the extension, so that it can be formatted nicely. Also, it will get formatted on github, bitbucket in the browser also. (done)
 
 * CLI Tool:
   * Separate out core into a new repo and create a core library npm
