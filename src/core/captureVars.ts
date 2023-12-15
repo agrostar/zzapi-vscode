@@ -6,7 +6,7 @@ import { Variables } from "./variables";
 export function captureVariables(
   requestData: RequestSpec,
   responseData: ResponseData,
-): [Variables, string] {
+): { capturedVars: Variables; captureErrors: string } {
   const setvars = requestData.setvars;
   const headers = responseData.headers;
 
@@ -38,5 +38,5 @@ export function captureVariables(
     capturedVariables[varName] = value;
   }
 
-  return [capturedVariables, captureOutput];
+  return { capturedVars: capturedVariables, captureErrors: captureOutput };
 }

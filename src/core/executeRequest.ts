@@ -1,4 +1,4 @@
-import got from "got";
+import got, { Method } from "got";
 
 import { GotRequest, Param, RequestSpec } from "./models";
 
@@ -10,7 +10,7 @@ export function constructGotRequest(allData: RequestSpec): GotRequest {
   );
 
   const options = {
-    method: allData.httpRequest.method,
+    method: allData.httpRequest.method.toLowerCase() as Method,
     body: getBody(allData.httpRequest.body),
     headers: allData.httpRequest.headers,
     followRedirect: allData.options?.follow,
@@ -34,11 +34,12 @@ export function getBody(body: any): string | undefined {
   }
 }
 
-export async function executeGotRequest(
-  httpRequest: GotRequest,
-): Promise<
-  [response: { [key: string]: any }, executionTime: number, byteLength: number, error: string]
-> {
+export async function executeGotRequest(httpRequest: GotRequest): Promise<{
+  response: { [key: string]: any };
+  executionTime: number;
+  byteLength: number;
+  error: string;
+}> {
   const startTime = new Date().getTime();
   let responseObject: { [key: string]: any };
   let size: number = 0;
@@ -68,12 +69,7 @@ export async function executeGotRequest(
     }
   }
   const executionTime = new Date().getTime() - startTime;
-  return [responseObject, executionTime, size, error];
-}
-
-// TODO: do we need this? The caller can directly call httpRequest.cancel
-export function cancelGotRequest(httpRequest: GotRequest): void {
-  httpRequest.cancel();
+  return { response: responseObject, executionTime: executionTime, byteLength: size, error: error };
 }
 
 export function getParamsForUrl(paramsArray: Param[] | undefined): string {

@@ -1,32 +1,21 @@
-import { RequestSpec } from "./models";
 import { Variables } from "./variables";
+import { RequestSpec } from "./models";
+import { getStrictStringValue } from "./utils/typeUtils";
 
-function getStrictStringValue(value: any): string {
-  if (value === null) {
-    return "null";
-  } else if (value === undefined) {
-    return "undefined";
-  } else if (typeof value === "object") {
-    return JSON.stringify(value);
-  } else {
-    return value.toString();
-  }
-}
-
-function replaceVariables(data: any, variables: Variables): [any, string[]] {
-  if (typeof data === "object" && data != null) {
+function replaceVariables(data: any, variables: Variables): { data: any; undefinedVars: string[] } {
+  if (typeof data === "object" && data !== null) {
     return replaceVariablesInNonScalar(data, variables);
   }
   if (typeof data === "string") {
     return replaceVariablesInString(data, variables);
   }
-  return [data, []];
+  return { data: data, undefinedVars: [] };
 }
 
 function replaceVariablesInNonScalar(
   data: { [key: string]: any } | any[],
   variables: Variables,
-): [any, string[]] {
+): { data: any; undefinedVars: string[] } {
   if (Array.isArray(data)) {
     return replaceVariablesInArray(data, variables);
   } else {
@@ -34,50 +23,65 @@ function replaceVariablesInNonScalar(
   }
 }
 
-function replaceVariablesInArray(data: any[], variables: Variables): [any[], string[]] {
+function replaceVariablesInArray(
+  data: any[],
+  variables: Variables,
+): { data: any[]; undefinedVars: string[] } {
   let newData: any[] = [];
   const undefs: string[] = [];
 
   data.forEach((item) => {
-    let newItem: any;
+    let newItem: any | any[];
     let newUndefs: string[] = [];
     if (typeof item === "object") {
       if (Array.isArray(item)) {
-        [newItem, newUndefs] = replaceVariablesInArray(item, variables);
+        const replacedData = replaceVariablesInArray(item, variables);
+        newItem = replacedData.data;
+        newUndefs = replacedData.undefinedVars;
       } else {
-        [newItem, newUndefs] = replaceVariablesInObject(item, variables);
+        const replacedData = replaceVariablesInObject(item, variables);
+        newItem = replacedData.data;
+        newUndefs = replacedData.undefinedVars;
       }
     } else if (typeof item === "string") {
-      [newItem, newUndefs] = replaceVariablesInString(item, variables);
+      const replacedData = replaceVariablesInString(item, variables);
+      newItem = replacedData.data;
+      newUndefs = replacedData.undefinedVars;
     } else {
       newItem = item;
     }
+
     newData.push(newItem);
     undefs.push(...newUndefs);
   });
 
-  return [newData, undefs];
+  return { data: newData, undefinedVars: undefs };
 }
 
 function replaceVariablesInObject(
   obj: { [key: string]: any },
   variables: Variables,
-): [{ [key: string]: any }, string[]] {
+): { data: { [key: string]: any }; undefinedVars: string[] } {
   const undefs: string[] = [];
   for (const key in obj) {
-    let newUndefs: string[] = [];
+    let replacedData = undefined;
     if (typeof obj[key] === "object") {
       if (Array.isArray(obj[key])) {
-        [obj[key], newUndefs] = replaceVariablesInArray(obj[key], variables);
+        replacedData = replaceVariablesInArray(obj[key], variables);
       } else {
-        [obj[key], newUndefs] = replaceVariablesInObject(obj[key], variables);
+        replacedData = replaceVariablesInObject(obj[key], variables);
       }
     } else if (typeof obj[key] === "string") {
-      [obj[key], newUndefs] = replaceVariablesInString(obj[key], variables);
+      replacedData = replaceVariablesInString(obj[key], variables);
     }
-    undefs.push(...newUndefs);
+
+    if (replacedData !== undefined) {
+      obj[key] = replacedData.data;
+      const newUndefs = replacedData.undefinedVars;
+      undefs.push(...newUndefs);
+    }
   }
-  return [obj, undefs];
+  return { data: obj, undefinedVars: undefs };
 }
 
 /**
@@ -109,12 +113,15 @@ const VAR_REGEX_WITH_BRACES = /(?<!\\)\$\(([_a-zA-Z]\w*)\)/g;
  */
 const VAR_REGEX_WITHOUT_BRACES = /(?<!\\)\$([_a-zA-Z]\w*)(?=\W|$)/g;
 
-function replaceVariablesInString(text: string, variables: Variables): [any, string[]] {
+function replaceVariablesInString(
+  text: string,
+  variables: Variables,
+): { data: any; undefinedVars: string[] } {
   let valueInNativeType: any;
   let variableIsFullText: boolean = false;
   const undefs: string[] = [];
 
-  // TODO: make a complete match regex and return native type immediately.
+  // todo: make a complete match regex and return native type immediately.
   const outputText = text
     .replace(VAR_REGEX_WITH_BRACES, (match, varName) => {
       if (variables.hasOwnProperty(varName)) {
@@ -143,38 +150,26 @@ function replaceVariablesInString(text: string, variables: Variables): [any, str
     });
 
   if (variableIsFullText) {
-    return [valueInNativeType, undefs];
+    return { data: valueInNativeType, undefinedVars: undefs };
   } else {
-    return [outputText, undefs];
+    return { data: outputText, undefinedVars: undefs };
   }
 }
 
 export function replaceVariablesInRequest(request: RequestSpec, variables: Variables): string[] {
   const undefs: string[] = [];
-  let newUndefs;
-  [request.httpRequest.baseUrl, newUndefs] = replaceVariables(
-    request.httpRequest.baseUrl,
-    variables,
-  );
-  undefs.push(...newUndefs);
 
-  [request.httpRequest.url, newUndefs] = replaceVariables(request.httpRequest.url, variables);
-  undefs.push(...newUndefs);
+  type keyOfHttp = Exclude<keyof typeof request.httpRequest, "method">;
+  const httpPropertiesToReplace: string[] = ["baseUrl", "url", "params", "headers", "body"];
+  for (const key of httpPropertiesToReplace) {
+    const replacedData = replaceVariables(request.httpRequest[key as keyOfHttp], variables);
+    request.httpRequest[key as keyOfHttp] = replacedData.data;
+    undefs.push(...replacedData.undefinedVars);
+  }
 
-  [request.httpRequest.params, newUndefs] = replaceVariables(request.httpRequest.params, variables);
-  undefs.push(...newUndefs);
-
-  [request.httpRequest.headers, newUndefs] = replaceVariables(
-    request.httpRequest.headers,
-    variables,
-  );
-  undefs.push(...newUndefs);
-
-  [request.httpRequest.body, newUndefs] = replaceVariables(request.httpRequest.body, variables);
-  undefs.push(...newUndefs);
-
-  [request.tests, newUndefs] = replaceVariables(request.tests, variables);
-  undefs.push(...newUndefs);
+  const replacedData = replaceVariables(request.tests, variables);
+  request.tests = replacedData.data;
+  undefs.push(...replacedData.undefinedVars);
 
   return undefs;
 }

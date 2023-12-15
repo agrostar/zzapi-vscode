@@ -6,21 +6,25 @@ import { RawRequest, RequestSpec, RequestPosition, Common } from "./models";
 import { getMergedData } from "./mergeData";
 import { checkCommonType, validateRawRequest } from "./checkTypes";
 
-const VALID_KEYS = ["requests", "common", "variables"];
+const VALID_KEYS: { [key: string]: boolean } = {
+  requests: true,
+  common: true,
+  variables: true,
+};
 
-// TODO: At first I thought returning multiple values as an array is convenient because
-// the names of the values can be flexible to the caller. But now I realize typechecking fails
-// because TS allows any array to be returned / received (does not check for each element being
-// the right type.) We learn as we code! So let us convert these multiple returns to object returns.
-function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest }, Common] {
+// returning as an array does not enforce typechecking, so we return as an object
+function getRawRequests(doc: string): {
+  rawRequests: { [name: string]: RawRequest };
+  commonData: Common;
+} {
   let parsedData = YAML.parse(doc);
   if (!isDict(parsedData)) {
     throw new Error("Bundle could not be parsed. Is your bundle a valid YAML document?");
   }
 
   for (const key in parsedData) {
-    if (!VALID_KEYS.includes(key)) {
-      throw new Error(`Invalid key: ${key} in bundle. Only ${VALID_KEYS} are allowed.`);
+    if (!VALID_KEYS[key]) {
+      throw new Error(`Invalid key: ${key} in bundle. Only ${Object.keys(VALID_KEYS)} are allowed.`);
     }
   }
 
@@ -35,7 +39,7 @@ function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest
   if (!isDict(allRequests)) {
     throw new Error("requests must be a dictionary in the bundle.");
   }
-  return [allRequests, commonData];
+  return { rawRequests: allRequests, commonData: commonData };
 }
 
 function checkAndMergeRequest(
@@ -111,9 +115,10 @@ export function getRequestPositions(document: string): RequestPosition[] {
  * @returns An object of type { [name: string]: RequestSpec } where each value is the data
  *  of a request of the name key
  */
-export function getAllRequestSpecs(document: string, env: string): { [name: string]: RequestSpec } {
+export function getAllRequestSpecs(document: string): { [name: string]: RequestSpec } {
+  const { rawRequests: allRequests, commonData: commonData } = getRawRequests(document);
+
   const requests: { [name: string]: RequestSpec } = {};
-  const [allRequests, commonData] = getRawRequests(document, env);
   for (const name in allRequests) {
     requests[name] = checkAndMergeRequest(commonData, allRequests, name);
   }
@@ -124,7 +129,8 @@ export function getAllRequestSpecs(document: string, env: string): { [name: stri
  * @param document the yaml document to parse to form the requests
  * @returns An object of type RequestSpec
  */
-export function getRequestSpec(document: string, env: string, name: string): RequestSpec {
-  const [allRequests, commonData] = getRawRequests(document, env);
+export function getRequestSpec(document: string, name: string): RequestSpec {
+  const { rawRequests: allRequests, commonData: commonData } = getRawRequests(document);
+
   return checkAndMergeRequest(commonData, allRequests, name);
 }

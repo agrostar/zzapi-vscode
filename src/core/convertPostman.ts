@@ -8,7 +8,7 @@ function reformatVariables(text: string): string {
 }
 
 // Recursive function to replace variables in an object in-situ
-function reformatVariablesInObject(object: any) {
+function reformatVariablesInObject(object: any): void {
   for (const key in object) {
     if (typeof object[key] == "string") {
       object[key] = reformatVariables(object[key]);
@@ -19,7 +19,7 @@ function reformatVariablesInObject(object: any) {
   }
 }
 
-function addRequest(prefix: string, element: any, requests: any) {
+function addRequest(prefix: string, element: any, requests: any): void {
   const request: any = {};
   const name = `${prefix}${element.name}`;
   requests[name] = request;
@@ -82,7 +82,7 @@ function addRequest(prefix: string, element: any, requests: any) {
   }
 }
 
-function addRequestsFromFolder(prefix: string, item: any, requests: any) {
+function addRequestsFromFolder(prefix: string, item: any, requests: any): void {
   item.forEach((element: any) => {
     if (element.item) {
       const subPrefix = prefix ? `${prefix}${element.name}/` : `${element.name}/`;

@@ -8,7 +8,7 @@ import { getRecentHeadersData } from "./showInEditor";
 import { getVarFileContents, getVarStore } from "./variables";
 import { getActiveEnv, getContentIfBundle, getCurrDirPath } from "./EnvironmentSelection";
 
-export async function showVariables() {
+export async function showVariables(): Promise<void> {
   const loadedVariables = loadVariables(
     getActiveEnv(),
     getContentIfBundle(),
@@ -24,16 +24,14 @@ export async function showVariables() {
 
   if (varSize <= 0 && capSize <= 0) {
     content += "----------\n";
-    content +=
-      "No variables stored.\n";
+    content += "No variables stored.\n";
     content += "----------\n";
   } else {
     content = "";
 
     content += "----------\n";
     if (varSize > 0) {
-      content +=
-        "# Current Loaded Variables: variables from .zzv files and the associated bundle\n";
+      content += "# Current Loaded Variables: variables from .zzv files and the associated bundle\n";
       content += YAML.stringify({ "Current Loaded Variables": loadedVariables });
     } else {
       content += YAML.stringify({ "Current Loaded Variables": "NONE" });
@@ -53,8 +51,8 @@ export async function showVariables() {
   getOutputChannel().show(true);
 }
 
-export async function showRecentHeaders() {
-  let [headers, reqName] = getRecentHeadersData();
+export async function showRecentHeaders(): Promise<void> {
+  let { recentHeaders: headers, recentRequestName: reqName } = getRecentHeadersData();
   if (headers === undefined) {
     headers = "No headers stored, run a request and try again\n";
   }

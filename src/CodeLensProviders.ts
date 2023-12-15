@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 import { getRequestPositions } from "./core/parseBundle";
+import { RequestPosition } from "./core/models";
 
 import { documentIsBundle } from "./utils/checkDoc";
 
@@ -25,7 +26,7 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
 
     this.codeLenses = [];
     const text = document.getText();
-    const allRequestPositions = getRequestPositions(text);
+    const allRequestPositions: RequestPosition[] = getRequestPositions(text);
 
     allRequestPositions.forEach((requestPosition) => {
       const name = requestPosition.name;

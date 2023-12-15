@@ -26,7 +26,7 @@ const SAMPLE_GET =
   `${TAB}${TAB}${TAB}# Captures the value of the field args.foo1 into the variable called sampleVar\n` +
   `${TAB}${TAB}${TAB}sampleVar: $.args.foo1\n`;
 
-export async function addSampleGet() {
+export async function addSampleGet(): Promise<void> {
   await appendContent(SAMPLE_GET);
 }
 
@@ -49,11 +49,11 @@ const SAMPLE_POST =
   `${TAB}${TAB}${TAB}# Captures the value of the field data.foo1 into the variable called sampleVar\n` +
   `${TAB}${TAB}${TAB}sampleVar: $.args.foo1\n`;
 
-export async function addSamplePost() {
+export async function addSamplePost(): Promise<void> {
   await appendContent(SAMPLE_POST);
 }
 
-async function appendContent(content: string) {
+async function appendContent(content: string): Promise<void> {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && documentIsBundle(activeEditor.document)) {
     const document = activeEditor.document;

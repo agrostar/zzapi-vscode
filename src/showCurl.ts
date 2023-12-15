@@ -8,7 +8,7 @@ import { getOutputChannel } from "./utils/outputChannel";
 import { getActiveEnv, getCurrDirPath } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
-export function showCurl(text: string, name: string, extensionVersion: string) {
+export function showCurl(text: string, name: string, extensionVersion: string): void {
   const loadedVariables = loadVariables(
     getActiveEnv(),
     text,
@@ -16,7 +16,7 @@ export function showCurl(text: string, name: string, extensionVersion: string) {
   );
   getVarStore().setLoadedVariables(loadedVariables);
 
-  const request = getRequestSpec(text, getActiveEnv(), name);
+  const request = getRequestSpec(text, name);
   const autoHeaders: { [key: string]: string } = {
     "user-agent": "zzAPI-vscode/" + extensionVersion,
   };

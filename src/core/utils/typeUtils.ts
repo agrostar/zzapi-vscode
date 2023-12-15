@@ -22,3 +22,17 @@ export function getObjType(obj: any): string {
     return typeof obj;
   }
 }
+
+export function getStrictStringValue(value: any): string {
+  if (value === null) {
+    return "null";
+  } else if (value === undefined) {
+    return "undefined";
+  } else if (value instanceof Date) {
+    return value.toLocaleString();
+  } else if (isDict(value)) {
+    return JSON.stringify(value);
+  } else {
+    return value.toString(); // should handle arrays and all scalars
+  }
+}

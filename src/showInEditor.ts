@@ -15,7 +15,7 @@ export async function openEditorForIndividualReq(
   keepRawJSON: boolean,
   showHeaders: boolean,
 ): Promise<void> {
-  let [contentData, headersData] = getDataOfIndReqAsString(responseData, name, keepRawJSON);
+  const { contentData, headersData } = getDataOfIndReqAsString(responseData, name, keepRawJSON);
   await showContent(contentData, headersData, showHeaders, name);
 }
 
@@ -30,7 +30,7 @@ export async function openEditorForAllRequests(
       responseObj.response,
       responseObj.name,
       keepRawJSON,
-    )[0];
+    ).contentData;
 
     let canParse = true;
     let parsedData = contentData;
@@ -54,7 +54,7 @@ function getDataOfIndReqAsString(
   responseData: ResponseData,
   name: string,
   keepRawJSON?: boolean,
-): [contentData: string, headersData: string] {
+): { contentData: string; headersData: string } {
   let currentEnvironment = getActiveEnv();
   if (!currentEnvironment) {
     currentEnvironment = "None Selected";
@@ -85,7 +85,7 @@ function getDataOfIndReqAsString(
       contentData = JSON.stringify(parsedData, undefined, 2);
     }
   }
-  return [contentData, headersData];
+  return { contentData, headersData };
 }
 
 let OPEN_DOCS: {
@@ -93,16 +93,18 @@ let OPEN_DOCS: {
 } = { body: undefined };
 
 export async function openDocument(content: string, language?: string): Promise<void> {
-  await workspace
-    .openTextDocument({ content: content, language: language })
-    .then(async (document) => {
-      await window.showTextDocument(document, {
-        preserveFocus: false,
-      });
+  await workspace.openTextDocument({ content: content, language: language }).then(async (document) => {
+    await window.showTextDocument(document, {
+      preserveFocus: false,
     });
+  });
 }
 
-export async function replaceContent(document: TextDocument, content: string, language?: string) {
+export async function replaceContent(
+  document: TextDocument,
+  content: string,
+  language?: string,
+): Promise<void> {
   if (language !== undefined) {
     languages.setTextDocumentLanguage(document, language);
   }
@@ -122,8 +124,11 @@ export function isOpenAndUntitled(document: TextDocument): boolean {
 
 let MOST_RECENT_HEADERS: string | undefined = undefined;
 let MOST_RECENT_REQUEST_NAME: string | undefined = undefined;
-export function getRecentHeadersData() {
-  return [MOST_RECENT_HEADERS, MOST_RECENT_REQUEST_NAME];
+export function getRecentHeadersData(): {
+  recentHeaders: string | undefined;
+  recentRequestName: string | undefined;
+} {
+  return { recentHeaders: MOST_RECENT_HEADERS, recentRequestName: MOST_RECENT_REQUEST_NAME };
 }
 
 /**

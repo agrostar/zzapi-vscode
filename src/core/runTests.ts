@@ -131,7 +131,7 @@ function runObjectTests(
   return results;
 }
 
-function getType(data: any) {
+function getType(data: any): string {
   if (data === null) {
     return "null";
   } else if (Array.isArray(data)) {

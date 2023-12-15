@@ -70,12 +70,12 @@ export async function runOneRequest(
   name: string,
   extensionVersion: string,
 ): Promise<void> {
-  const request: RequestSpec = getRequestSpec(text, getActiveEnv(), name);
+  const request: RequestSpec = getRequestSpec(text, name);
   const requests: { [name: string]: RequestSpec } = { [name]: request };
   await runRequests(requests, text, extensionVersion);
 }
 
 export async function runAllRequests(text: string, extensionVersion: string): Promise<void> {
-  const allRequests = getAllRequestSpecs(text, getActiveEnv());
+  const allRequests = getAllRequestSpecs(text);
   await runRequests(allRequests, text, extensionVersion);
 }

@@ -4,13 +4,17 @@ function checkKey(
   obj: any,
   item: string,
   key: string,
-  expectedType: string,
+  expectedTypes: string[],
   optional: boolean,
 ): string | undefined {
   if (!optional && !obj.hasOwnProperty(key)) {
     return `${key} key must be present in each ${item} item`;
-  } else if (obj.hasOwnProperty(key) && typeof obj[key] !== expectedType) {
-    return `${key} key must have ${expectedType} value, found ${typeof obj[key]}`;
+  } else if (obj.hasOwnProperty(key)) {
+    if (
+      !expectedTypes.some((type) => (type === "null" && obj[key] === type) || typeof obj[key] === type)
+    ) {
+      return `${key} of ${item} must have one of ${expectedTypes} value, found ${typeof obj[key]}`;
+    }
   }
   return undefined;
 }
@@ -27,9 +31,9 @@ function checkHeaderItem(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "header");
   if (ret !== undefined) return ret;
 
-  ret = checkKey(obj, "header", "name", "string", false);
+  ret = checkKey(obj, "header", "name", ["string"], false);
   if (ret !== undefined) return ret;
-  ret = checkKey(obj, "header", "value", "string", false);
+  ret = checkKey(obj, "header", "value", ["string", "number", "boolean", "null"], false);
   if (ret !== undefined) return ret;
 
   return undefined;
@@ -39,9 +43,9 @@ function checkParamItem(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "param");
   if (ret !== undefined) return ret;
 
-  ret = checkKey(obj, "param", "name", "string", false);
+  ret = checkKey(obj, "param", "name", ["string"], false);
   if (ret !== undefined) return ret;
-  ret = checkKey(obj, "param", "raw", "boolean", true);
+  ret = checkKey(obj, "param", "raw", ["boolean"], true);
   if (ret !== undefined) return ret;
 
   return undefined;
@@ -61,10 +65,14 @@ function checkHeadersParamsOptionsTestsCaptures(obj: any): string | undefined {
         }
       }
     } else {
-      // dictionary
+      // headers are a dictionary
+      for (const header in headers) {
+        const headerError = checkHeaderItem({ name: header, value: headers[header] });
+        if (headerError !== undefined) {
+          return `Error in header item ${getStringIfNotScalar(header)}: ${headerError}`;
+        }
+      }
     }
-    // For a dictionary, anything is valid. TODO: value has to be a scalar
-    // question: how scalar? shouldn't it be strings only for headers? 
   }
   if (obj.hasOwnProperty("params")) {
     const params = obj.params;
@@ -127,9 +135,9 @@ function checkCaptures(obj: any): string | undefined {
     return ret;
   }
 
-  ret = checkKey(obj, "captures", "body", "string", true);
+  ret = checkKey(obj, "captures", "body", ["string"], true);
   if (ret !== undefined) return ret;
-  ret = checkKey(obj, "captures", "status", "string", true);
+  ret = checkKey(obj, "captures", "status", ["string"], true);
   if (ret !== undefined) return ret;
 
   if (obj.hasOwnProperty("headers")) {
@@ -140,17 +148,22 @@ function checkCaptures(obj: any): string | undefined {
   return undefined;
 }
 
-const VALID_OPTIONS = ["follow", "verifySSL", "keepRawJSON", "showHeaders"];
+const VALID_OPTIONS: { [type: string]: boolean } = {
+  follow: true,
+  verifySSL: true,
+  keepRawJSON: true,
+  showHeaders: true,
+};
 function checkOptions(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "options");
   if (ret !== undefined) return ret;
 
   for (const key in obj) {
-    if (VALID_OPTIONS.includes(key)) {
-      ret = checkKey(obj, "options", "key", "boolean", true);
+    if (VALID_OPTIONS[key]) {
+      ret = checkKey(obj, "options", "key", ["boolean"], true);
       if (ret !== undefined) return ret;
     } else {
-      return `options must be among ${VALID_OPTIONS}: found ${key}`;
+      return `options must be among ${Object.keys(VALID_OPTIONS)}: found ${key}`;
     }
   }
 
@@ -161,7 +174,7 @@ export function checkCommonType(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "common");
   if (ret !== undefined) return ret;
 
-  ret = checkKey(obj, "common", "baseUrl", "string", true);
+  ret = checkKey(obj, "common", "baseUrl", ["string"], true);
   if (ret !== undefined) return ret;
 
   ret = checkHeadersParamsOptionsTestsCaptures(obj);
@@ -170,26 +183,17 @@ export function checkCommonType(obj: any): string | undefined {
   return undefined;
 }
 
-// TODO: make this an object. In general, prefer lookups to be in maps instead
-// of arrays. Very minor performance impact, but it is a good habit to develop.
-const VALID_METHODS = [
-  "options",
-  "GET",
-  "POST",
-  "PUT",
-  "PATCH",
-  "HEAD",
-  "DELETE",
-  "OPTIONS",
-  "TRACE",
-  "get",
-  "post",
-  "put",
-  "patch",
-  "head",
-  "delete",
-  "trace",
-] as const;
+// creating it as an object for faster access
+const VALID_METHODS: { [type: string]: boolean } = {
+  options: true,
+  get: true,
+  post: true,
+  put: true,
+  patch: true,
+  head: true,
+  delete: true,
+  trace: true,
+};
 export function validateRawRequest(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "request");
   if (ret !== undefined) return ret;
@@ -197,13 +201,14 @@ export function validateRawRequest(obj: any): string | undefined {
   ret = checkHeadersParamsOptionsTestsCaptures(obj);
   if (ret !== undefined) return ret;
 
-  ret = checkKey(obj, "request", "url", "string", false);
+  ret = checkKey(obj, "request", "url", ["string"], false);
   if (ret !== undefined) return ret;
 
+  const methodToPass = (obj.method as string).toLowerCase();
   if (!obj.hasOwnProperty("method")) {
     return `method key must be present in each request item`;
-  } else if (!VALID_METHODS.includes(obj.method)) {
-    return `method key must have value among ${VALID_METHODS}: found ${obj.method}`;
+  } else if (!VALID_METHODS[methodToPass]) {
+    return `method key must have value among ${Object.keys(VALID_METHODS)}: found ${methodToPass}`;
   }
 
   return undefined;
@@ -214,8 +219,7 @@ export function checkVariables(obj: any): string | undefined {
   if (ret !== undefined) return ret;
 
   for (const key in obj) {
-    if (typeof key !== "string")
-      return `Environment names must be a string: ${key} is not a string`;
+    if (typeof key !== "string") return `Environment names must be a string: ${key} is not a string`;
 
     const variables = obj[key];
     ret = checkObjIsDict(obj, `variables environment ${key}`);

@@ -76,7 +76,10 @@ function getMergedOptions(cOptions: RawOptions = {}, rOptions: RawOptions = {}):
   return { follow, verifySSL, keepRawJSON, showHeaders };
 }
 
-function getMergedSetVars(setvars: RawSetVars = {}, captures: Captures = {}): [SetVar[], boolean] {
+function getMergedSetVars(
+  setvars: RawSetVars = {},
+  captures: Captures = {},
+): { mergedVars: SetVar[]; hasJsonVars: boolean } {
   const mergedVars: SetVar[] = [];
   let hasJsonVars = false;
 
@@ -125,7 +128,7 @@ function getMergedSetVars(setvars: RawSetVars = {}, captures: Captures = {}): [S
     mergedVars.push({ varName, type, spec });
   }
 
-  return [mergedVars, hasJsonVars];
+  return { mergedVars: mergedVars, hasJsonVars: hasJsonVars };
 }
 
 /*
@@ -146,7 +149,10 @@ function mergePrefixBasedTests(tests: RawTests) {
   }
 }
 
-function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}): [Tests, boolean] {
+function getMergedTests(
+  cTests: RawTests = {},
+  rTests: RawTests = {},
+): { mergedTests: Tests; hasJsonTests: boolean } {
   // Convert $. and h. at root level into headers and json keys
   mergePrefixBasedTests(cTests);
   mergePrefixBasedTests(rTests);
@@ -162,7 +168,7 @@ function getMergedTests(cTests: RawTests = {}, rTests: RawTests = {}): [Tests, b
     json: Object.assign({}, cTests.json, rTests.json),
   };
 
-  return [mergedData, Object.keys(mergedData.json).length > 0];
+  return { mergedTests: mergedData, hasJsonTests: Object.keys(mergedData.json).length > 0 };
 }
 
 function getArrayHeadersAsObject(objectSet: Header[] | undefined): { [key: string]: string } {
@@ -204,8 +210,14 @@ export function getMergedData(commonData: Common, requestData: RawRequest): Requ
   const body = requestData.body;
   const options = getMergedOptions(commonData.options, requestData.options);
 
-  const [tests, hasJsonTests] = getMergedTests(commonData?.tests, requestData.tests);
-  const [setvars, hasJsonVars] = getMergedSetVars(requestData.setvars, requestData.capture);
+  const { mergedTests: tests, hasJsonTests: hasJsonTests } = getMergedTests(
+    commonData?.tests,
+    requestData.tests,
+  );
+  const { mergedVars: setvars, hasJsonVars: hasJsonVars } = getMergedSetVars(
+    requestData.setvars,
+    requestData.capture,
+  );
 
   const mergedData: RequestSpec = {
     name,
