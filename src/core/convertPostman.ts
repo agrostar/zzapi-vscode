@@ -97,8 +97,7 @@ export default function convertCollection(filePath: string): string {
   const contents = fs.readFileSync(filePath, "utf-8");
   const collection = JSON.parse(contents);
   if (
-    collection?.info?.schema !=
-    "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    collection?.info?.schema != "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   ) {
     throw Error("Not a Postman v2.1.0 collection. Cannot import");
   }

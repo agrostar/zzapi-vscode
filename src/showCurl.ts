@@ -9,11 +9,7 @@ import { getActiveEnv, getCurrDirPath } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
 export function showCurl(text: string, name: string, extensionVersion: string): void {
-  const loadedVariables = loadVariables(
-    getActiveEnv(),
-    text,
-    getVarFileContents(getCurrDirPath()),
-  );
+  const loadedVariables = loadVariables(getActiveEnv(), text, getVarFileContents(getCurrDirPath()));
   getVarStore().setLoadedVariables(loadedVariables);
 
   const request = getRequestSpec(text, name);

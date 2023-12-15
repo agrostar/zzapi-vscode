@@ -30,10 +30,7 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
 
     allRequestPositions.forEach((requestPosition) => {
       const name = requestPosition.name;
-      const startPos = new vscode.Position(
-        requestPosition.start.line - 1,
-        requestPosition.start.col,
-      );
+      const startPos = new vscode.Position(requestPosition.start.line - 1, requestPosition.start.col);
       const endPos = new vscode.Position(requestPosition.end.line - 1, requestPosition.end.col);
       const range = new vscode.Range(startPos, endPos);
 

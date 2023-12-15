@@ -54,10 +54,7 @@ export function getContentIfBundle(): string {
   }
 }
 
-export function createEnvironmentSelector(
-  context: ExtensionContext,
-  statusBar: StatusBarItem,
-): void {
+export function createEnvironmentSelector(context: ExtensionContext, statusBar: StatusBarItem): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     const bundleContents = getContentIfBundle();
     const envNames = getEnvNames(WORKING_DIR, bundleContents);

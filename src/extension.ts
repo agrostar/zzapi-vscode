@@ -1,12 +1,5 @@
 import * as path from "path";
-import {
-  ExtensionContext,
-  languages,
-  commands,
-  window,
-  StatusBarAlignment,
-  Disposable,
-} from "vscode";
+import { ExtensionContext, languages, commands, window, StatusBarAlignment, Disposable } from "vscode";
 
 import { documentIsBundle } from "./utils/checkDoc";
 
