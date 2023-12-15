@@ -30,6 +30,18 @@ let DISPOSABLES: Disposable[] = [];
 
 let CURR_BUNDLE_PATH: string = "";
 
+async function getReqNameAsInput(commandName: string): Promise<string> {
+  const searchQuery = await window.showInputBox({
+    placeHolder: "Request Name",
+    prompt: `Enter the request to perform ${commandName} on`,
+  });
+
+  if (!searchQuery || searchQuery.length == 0) {
+    throw new Error(`A request name is required to run ${commandName}`);
+  }
+  return searchQuery;
+}
+
 export function activate(context: ExtensionContext): void {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && documentIsBundle(activeEditor.document)) {
@@ -69,7 +81,12 @@ export function activate(context: ExtensionContext): void {
   const zzApiVersion: string = context.extension.packageJSON.version;
 
   languages.registerCodeLensProvider("*", new CodeLensProvider());
-  commands.registerCommand("extension.runRequest", async (name) => {
+  commands.registerCommand("extension.runRequest", async (name: string) => {
+    // if request is called from command pallete then name will be undefined
+    //    because we did not define args there
+    if (!name) {
+      name = await getReqNameAsInput("runRequest");
+    }
     await runRequestCommand(name, zzApiVersion);
   });
   commands.registerCommand("extension.runAllRequests", async () => {
@@ -87,7 +104,10 @@ export function activate(context: ExtensionContext): void {
   commands.registerCommand("extension.showRecentHeaders", async () => {
     await showRecentHeaders();
   });
-  commands.registerCommand("extension.showCurl", (name) => {
+  commands.registerCommand("extension.showCurl", async (name) => {
+    if (!name) {
+      name = await getReqNameAsInput("showCurl");
+    }
     showCurlCommand(name, zzApiVersion);
   });
   commands.registerCommand("extension.showSampleGET", async () => {

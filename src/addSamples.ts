@@ -93,6 +93,8 @@ async function appendContent(content: string) {
       window.showInformationMessage("Sample request appended to bundle");
     }
   } else {
-    throw new Error("Add sample request must be called on a bundle");
+    throw new Error(
+      "Add sample request must be called on a bundle. Is your bundle the current active editor?",
+    );
   }
 }

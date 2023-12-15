@@ -10,7 +10,7 @@ export function getBundleVariables(doc: string): { [key: string]: any } {
   // an empty string is parsed to null. If we are not in a bundle then doc is empty string.
   if (parsedData === null) parsedData = {};
   if (!isDict(parsedData)) {
-    throw new Error("Bundle could not be parsed");
+    throw new Error("Bundle could not be parsed. Is your bundle a valid YAML document?");
   }
 
   const variables = parsedData.variables;

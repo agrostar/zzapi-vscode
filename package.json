@@ -30,6 +30,18 @@
   "contributes": {
     "commands": [
       {
+        "command": "extension.runAllRequests",
+        "title": "zzAPI: Run All Requests"
+      },
+      {
+        "command": "extension.runRequest",
+        "title": "zzAPI: Run Request"
+      },
+      {
+        "command": "extension.showCurl",
+        "title": "zzAPI: Show cURL of Request"
+      },
+      {
         "command": "extension.clickEnvSelector",
         "title": "zzAPI: Select Environment"
       },

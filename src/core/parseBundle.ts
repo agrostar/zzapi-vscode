@@ -14,13 +14,13 @@ const VALID_KEYS = ["requests", "common", "variables"];
 // the right type.) We learn as we code! So let us convert these multiple returns to object returns.
 function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest }, Common] {
   let parsedData = YAML.parse(doc);
-  if (!isDict(parsedData) || parsedData === null) {
-    throw new Error("Bundle could not be parsed");
+  if (!isDict(parsedData)) {
+    throw new Error("Bundle could not be parsed. Is your bundle a valid YAML document?");
   }
 
   for (const key in parsedData) {
     if (!VALID_KEYS.includes(key)) {
-      throw new Error(`Invalid key: ${key}`);
+      throw new Error(`Invalid key: ${key} in bundle. Only ${VALID_KEYS} are allowed.`);
     }
   }
 
@@ -32,8 +32,8 @@ function getRawRequests(doc: string, env: string): [{ [name: string]: RawRequest
     commonData = {};
   }
   const allRequests = parsedData.requests;
-  if (typeof allRequests !== "object" || Array.isArray(allRequests) || allRequests === null) {
-    throw new Error("requests must be an object with keys as request names");
+  if (!isDict(allRequests)) {
+    throw new Error("requests must be a dictionary in the bundle.");
   }
   return [allRequests, commonData];
 }
@@ -44,9 +44,7 @@ function checkAndMergeRequest(
   name: string,
 ): RequestSpec {
   let request = allRequests[name];
-  if (request === undefined) {
-    throw new Error("Request must be defined");
-  }
+  if (request === undefined) throw new Error(`Request ${name} is not defined in this bundle`);
 
   request.name = name;
   const error = validateRawRequest(request);

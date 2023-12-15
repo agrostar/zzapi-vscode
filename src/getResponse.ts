@@ -34,6 +34,7 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
   let responses: Array<{ cancelled: boolean; name: string; response: ResponseData }> = [];
 
   let cancelled = false;
+  let message: string;
   let seconds = 0;
   await window.withProgress(
     {
@@ -47,7 +48,12 @@ export async function allRequestsWithProgress(allRequests: { [name: string]: Req
       }, 1000);
 
       token.onCancellationRequested(() => {
-        window.showInformationMessage("Cancelled Run All Requests");
+        if (Object.keys(allRequests).length === 1) {
+          message = `Cancelled ${Object.keys(allRequests)[0]} (${seconds} s)`;
+        } else {
+          message = `Cancelled Run All Requests (${seconds} s)`;
+        }
+        window.showInformationMessage(message);
         cancelGotRequest(currHttpRequest);
         cancelled = true;
         clearInterval(interval);
