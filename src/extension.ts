@@ -81,7 +81,7 @@ export function activate(context: ExtensionContext): void {
   const zzApiVersion: string = context.extension.packageJSON.version;
 
   languages.registerCodeLensProvider("*", new CodeLensProvider());
-  commands.registerCommand("extension.runRequest", async (name: string) => {
+  let disposable = commands.registerCommand("extension.runRequest", async (name: string) => {
     // if request is called from command pallete then name will be undefined
     //    because we did not define args there
     if (!name) {
@@ -89,33 +89,42 @@ export function activate(context: ExtensionContext): void {
     }
     await runRequestCommand(name, zzApiVersion);
   });
-  commands.registerCommand("extension.runAllRequests", async () => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.runAllRequests", async () => {
     await runAllRequestsCommand(zzApiVersion);
   });
-  commands.registerCommand("extension.importPostman", async () => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.importPostman", async () => {
     await importPostmanCommand();
   });
-  commands.registerCommand("extension.importEnvironment", async () => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.importEnvironment", async () => {
     await importPostmanEnvironment();
   });
-  commands.registerCommand("extension.showVariables", async () => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.showVariables", async () => {
     await showVariables();
   });
-  commands.registerCommand("extension.showRecentHeaders", async () => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.showRecentHeaders", async () => {
     await showRecentHeaders();
   });
-  commands.registerCommand("extension.showCurl", async (name) => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.showCurl", async (name) => {
     if (!name) {
       name = await getReqNameAsInput("showCurl");
     }
     showCurlCommand(name, zzApiVersion);
   });
-  commands.registerCommand("extension.showSampleGET", async () => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.showSampleGET", async () => {
     await addSampleGet();
   });
-  commands.registerCommand("extension.showSamplePOST", async () => {
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.showSamplePOST", async () => {
     await addSamplePost();
   });
+  context.subscriptions.push(disposable);
 }
 
 export function deactivate(): void {

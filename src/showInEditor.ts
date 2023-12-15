@@ -4,7 +4,7 @@ import { ResponseData } from "./core/models";
 
 import { getOutputChannel } from "./utils/outputChannel";
 
-import { getActiveVarSet } from "./EnvironmentSelection";
+import { getActiveEnv } from "./EnvironmentSelection";
 
 const KEYS_IN_BODY = ["body"];
 const KEYS_IN_HEADERS = ["rawHeaders"];
@@ -55,7 +55,7 @@ function getDataOfIndReqAsString(
   name: string,
   keepRawJSON?: boolean,
 ): [contentData: string, headersData: string] {
-  let currentEnvironment = getActiveVarSet();
+  let currentEnvironment = getActiveEnv();
   if (!currentEnvironment) {
     currentEnvironment = "None Selected";
   }

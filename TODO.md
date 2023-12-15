@@ -6,17 +6,17 @@
   * Separate out core into a new repo and create a core library npm
   * zzapi-runner: command-line runner which can use the core library
 
-* Rename varset as environment
+* Rename varset as environment (done, must change schema name)
 
 * Apparently we can make a section of the document a "snippet" and associate a different language to it. Explore using "markdown" as the language for doc-* nodes.
 
-* Fix circular dependencies (Varun)
+* Fix circular dependencies (Varun) (done, check on each change)
 
 * Read body from file when file:// is detected
 
 * Move encoding/raw for params into options. That way we don't have to support name:xxx, value: xxx way of input
 
-* Add Run Request and Run All Requests to command palette.
+* Add Run Request and Run All Requests to command palette. (+ showCurl, done)
 
 * Multipart formdata is painful. We need some way of supporting this.
 

@@ -29,9 +29,9 @@ export function getEnvironments(bundleContent: string, varFileContents: string[]
 
   const fileEnvNames: string[] = [];
   varFileContents.forEach((fileContent) => {
-    const varSets = YAML.parse(fileContent);
-    if (isDict(varSets)) {
-      fileEnvNames.push(...Object.keys(varSets));
+    const envs = YAML.parse(fileContent);
+    if (isDict(envs)) {
+      fileEnvNames.push(...Object.keys(envs));
     }
   });
 

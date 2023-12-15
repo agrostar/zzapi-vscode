@@ -4,24 +4,24 @@ import { documentIsBundle } from "./utils/checkDoc";
 
 import { getEnvNames } from "./variables";
 
-const NO_VARSET = "-- None --";
+const NO_ENV = "-- None --";
 export function getDefaultEnv(): string {
-  return NO_VARSET;
+  return NO_ENV;
 }
 
-let ACTIVE_VARSET: string = "";
+let ACTIVE_ENV: string = "";
 let WORKING_DIR: string;
 
 export function getCurrDirPath(): string {
   return WORKING_DIR;
 }
 
-export function getActiveVarSet(): string {
-  return ACTIVE_VARSET;
+export function getActiveEnv(): string {
+  return ACTIVE_ENV;
 }
 
-export function resetActiveVarSet(statusBar: StatusBarItem): void {
-  ACTIVE_VARSET = NO_VARSET;
+export function resetActiveEnv(statusBar: StatusBarItem): void {
+  ACTIVE_ENV = NO_ENV;
   storeEnv();
   statusBar.text = "zzAPI: no var-set";
   const activeEditor = window.activeTextEditor;
@@ -31,17 +31,17 @@ export function resetActiveVarSet(statusBar: StatusBarItem): void {
 }
 
 export function initialiseStatusBar(context: ExtensionContext, statusBar: StatusBarItem): void {
-  resetActiveVarSet(statusBar);
+  resetActiveEnv(statusBar);
   statusBar.command = "extension.clickEnvSelector";
   statusBar.show();
   context.subscriptions.push(statusBar);
 }
 
 export function setEnvironment(statusBar: StatusBarItem, env: string): void {
-  if (env === NO_VARSET) {
-    resetActiveVarSet(statusBar);
+  if (env === NO_ENV) {
+    resetActiveEnv(statusBar);
   } else {
-    setCurrentVarSetName(statusBar, env);
+    setCurrentEnvName(statusBar, env);
   }
 }
 
@@ -60,17 +60,17 @@ export function createEnvironmentSelector(
 ): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     const bundleContents = getContentIfBundle();
-    const varSetNames = getEnvNames(WORKING_DIR, bundleContents);
-    varSetNames.push(NO_VARSET);
+    const envNames = getEnvNames(WORKING_DIR, bundleContents);
+    envNames.push(NO_ENV);
     window
-      .showQuickPick(varSetNames, {
+      .showQuickPick(envNames, {
         placeHolder: "Select a variable set",
         matchOnDetail: true,
         matchOnDescription: true,
       })
-      .then((selectedVarSetName) => {
-        if (!selectedVarSetName) return;
-        setEnvironment(statusBar, selectedVarSetName);
+      .then((selectedEnvName) => {
+        if (!selectedEnvName) return;
+        setEnvironment(statusBar, selectedEnvName);
       });
   });
   context.subscriptions.push(statusClick);
@@ -85,10 +85,10 @@ export function setWorkingDir(dir: string): void {
   WORKING_DIR = pathStr;
 }
 
-export function setCurrentVarSetName(statusBar: StatusBarItem, varSetName: string): void {
-  ACTIVE_VARSET = varSetName;
+export function setCurrentEnvName(statusBar: StatusBarItem, envName: string): void {
+  ACTIVE_ENV = envName;
   storeEnv();
-  statusBar.text = `zzAPI var-set: ${ACTIVE_VARSET}`;
+  statusBar.text = `zzAPI var-set: ${ACTIVE_ENV}`;
   statusBar.backgroundColor = undefined;
 }
 
@@ -106,5 +106,5 @@ export function storeEnv(storeDefault?: boolean): void {
   }
 
   const envPath = activeEditor.document.uri.path;
-  SELECTED_ENVS[envPath] = storeDefault ? getDefaultEnv() : getActiveVarSet();
+  SELECTED_ENVS[envPath] = storeDefault ? getDefaultEnv() : getActiveEnv();
 }

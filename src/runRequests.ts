@@ -4,7 +4,7 @@ import { loadVariables } from "./core/variableParser";
 
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import { allRequestsWithProgress } from "./getResponse";
-import { getCurrDirPath, getActiveVarSet } from "./EnvironmentSelection";
+import { getCurrDirPath, getActiveEnv } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
 async function runRequests(
@@ -13,7 +13,7 @@ async function runRequests(
   extensionVersion: string,
 ): Promise<void> {
   const loadedVariables = loadVariables(
-    getActiveVarSet(),
+    getActiveEnv(),
     bundleContent,
     getVarFileContents(getCurrDirPath()),
   );
@@ -70,12 +70,12 @@ export async function runOneRequest(
   name: string,
   extensionVersion: string,
 ): Promise<void> {
-  const request: RequestSpec = getRequestSpec(text, getActiveVarSet(), name);
+  const request: RequestSpec = getRequestSpec(text, getActiveEnv(), name);
   const requests: { [name: string]: RequestSpec } = { [name]: request };
   await runRequests(requests, text, extensionVersion);
 }
 
 export async function runAllRequests(text: string, extensionVersion: string): Promise<void> {
-  const allRequests = getAllRequestSpecs(text, getActiveVarSet());
+  const allRequests = getAllRequestSpecs(text, getActiveEnv());
   await runRequests(allRequests, text, extensionVersion);
 }

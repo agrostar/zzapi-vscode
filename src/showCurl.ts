@@ -5,18 +5,18 @@ import { loadVariables } from "./core/variableParser";
 
 import { getOutputChannel } from "./utils/outputChannel";
 
-import { getActiveVarSet, getCurrDirPath } from "./EnvironmentSelection";
+import { getActiveEnv, getCurrDirPath } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
 export function showCurl(text: string, name: string, extensionVersion: string) {
   const loadedVariables = loadVariables(
-    getActiveVarSet(),
+    getActiveEnv(),
     text,
     getVarFileContents(getCurrDirPath()),
   );
   getVarStore().setLoadedVariables(loadedVariables);
 
-  const request = getRequestSpec(text, getActiveVarSet(), name);
+  const request = getRequestSpec(text, getActiveEnv(), name);
   const autoHeaders: { [key: string]: string } = {
     "user-agent": "zzAPI-vscode/" + extensionVersion,
   };

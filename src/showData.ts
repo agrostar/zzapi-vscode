@@ -6,11 +6,11 @@ import { getOutputChannel } from "./utils/outputChannel";
 
 import { getRecentHeadersData } from "./showInEditor";
 import { getVarFileContents, getVarStore } from "./variables";
-import { getActiveVarSet, getContentIfBundle, getCurrDirPath } from "./EnvironmentSelection";
+import { getActiveEnv, getContentIfBundle, getCurrDirPath } from "./EnvironmentSelection";
 
 export async function showVariables() {
   const loadedVariables = loadVariables(
-    getActiveVarSet(),
+    getActiveEnv(),
     getContentIfBundle(),
     getVarFileContents(getCurrDirPath()),
   );
