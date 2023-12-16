@@ -14,7 +14,7 @@
 
 * Read body from file when file:// is detected
 
-* Move encoding/raw for params into options. That way we don't have to support name:xxx, value: xxx way of input
+* Move encoding/raw for params into options. That way we don't have to support name:xxx, value: xxx way of input (done, change tests in zzAPI)
 
 * Add Run Request and Run All Requests to command palette. (+ showCurl, done)
 

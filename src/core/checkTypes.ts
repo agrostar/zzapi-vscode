@@ -1,4 +1,4 @@
-import { getStringIfNotScalar, isArrayOrDict, isDict, getObjType } from "./utils/typeUtils";
+import { getStringIfNotScalar, isArrayOrDict, isDict, getDescriptiveObjType } from "./utils/typeUtils";
 
 function checkKey(
   obj: any,
@@ -21,7 +21,7 @@ function checkKey(
 
 function checkObjIsDict(obj: any, item: string): string | undefined {
   if (!isDict(obj)) {
-    return `${item} item must be a dict: found ${getObjType(obj)}`;
+    return `${item} item must be a dict: found ${getDescriptiveObjType(obj)}`;
   } else {
     return undefined;
   }
@@ -43,10 +43,9 @@ function checkParamItem(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "param");
   if (ret !== undefined) return ret;
 
-  ret = checkKey(obj, "param", "name", ["string"], false);
+  ret = checkKey(obj, "param", "name", ["string"], true);
   if (ret !== undefined) return ret;
-  ret = checkKey(obj, "param", "raw", ["boolean"], true);
-  if (ret !== undefined) return ret;
+  // value need not exist, but if it does, it can be anything so I do not bother checking
 
   return undefined;
 }
@@ -113,10 +112,10 @@ function checkTests(obj: any): string | undefined {
     if (ret !== undefined) return ret;
   }
   if (obj.hasOwnProperty("body") && !(isDict(obj.body) || typeof obj.body === "string")) {
-    return `body tests item must be a dict or string: found ${getObjType(obj.body)}`;
+    return `body tests item must be a dict or string: found ${getDescriptiveObjType(obj.body)}`;
   }
   if (obj.hasOwnProperty("status") && !(isDict(obj.status) || typeof obj.status === "number")) {
-    return `status tests item must be a dict or number: found ${getObjType(obj.status)}`;
+    return `status tests item must be a dict or number: found ${getDescriptiveObjType(obj.status)}`;
   }
   if (obj.hasOwnProperty("headers")) {
     ret = checkObjIsDict(obj.headers, "header tests");
@@ -153,6 +152,7 @@ const VALID_OPTIONS: { [type: string]: boolean } = {
   verifySSL: true,
   keepRawJSON: true,
   showHeaders: true,
+  raw: true,
 };
 function checkOptions(obj: any): string | undefined {
   let ret = checkObjIsDict(obj, "options");
@@ -160,7 +160,7 @@ function checkOptions(obj: any): string | undefined {
 
   for (const key in obj) {
     if (VALID_OPTIONS[key]) {
-      ret = checkKey(obj, "options", "key", ["boolean"], true);
+      ret = checkKey(obj, "options", key, ["boolean"], true);
       if (ret !== undefined) return ret;
     } else {
       return `options must be among ${Object.keys(VALID_OPTIONS)}: found ${key}`;

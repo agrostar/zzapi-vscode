@@ -27,7 +27,7 @@ export function getCurlRequest(request: RequestSpec): string {
   const url = ` '${getURL(
     request.httpRequest.baseUrl,
     request.httpRequest.url,
-    getParamsForUrl(request.httpRequest.params),
+    getParamsForUrl(request.httpRequest.params, request.options.raw),
   )}'`;
 
   const finalCurl =

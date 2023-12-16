@@ -7,8 +7,7 @@ export interface Header {
 
 export interface Param {
   name: string;
-  value?: string;
-  raw?: boolean;
+  value?: any;
 }
 
 export interface Options {
@@ -16,6 +15,7 @@ export interface Options {
   verifySSL: boolean;
   keepRawJSON: boolean;
   showHeaders: boolean;
+  raw: boolean;
 }
 
 export type Assertion = number | boolean | string | null | { [op: string]: any };
@@ -49,6 +49,7 @@ export interface RawOptions {
   verifySSL?: boolean;
   keepRawJSON?: boolean;
   showHeaders?: boolean;
+  raw?: boolean;
 }
 
 export interface RawTests {

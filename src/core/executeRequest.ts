@@ -1,12 +1,14 @@
 import got, { Method } from "got";
 
+import { getStringValueIfDefined } from "./utils/typeUtils";
+
 import { GotRequest, Param, RequestSpec } from "./models";
 
 export function constructGotRequest(allData: RequestSpec): GotRequest {
   const completeUrl = getURL(
     allData.httpRequest.baseUrl,
     allData.httpRequest.url,
-    getParamsForUrl(allData.httpRequest.params),
+    getParamsForUrl(allData.httpRequest.params, allData.options.raw),
   );
 
   const options = {
@@ -72,7 +74,7 @@ export async function executeGotRequest(httpRequest: GotRequest): Promise<{
   return { response: responseObject, executionTime: executionTime, byteLength: size, error: error };
 }
 
-export function getParamsForUrl(paramsArray: Param[] | undefined): string {
+export function getParamsForUrl(paramsArray: Param[] | undefined, raw: boolean): string {
   if (paramsArray === undefined) {
     return "";
   }
@@ -85,10 +87,10 @@ export function getParamsForUrl(paramsArray: Param[] | undefined): string {
     let value = param.value;
     if (value == undefined) {
       paramArray.push(key);
-    } else if (param.raw === true) {
-      paramArray.push(`${key}=${value}`);
+    } else if (raw === true) {
+      paramArray.push(`${key}=${getStringValueIfDefined(value) as string}`);
     } else {
-      paramArray.push(`${key}=${encodeURIComponent(value)}`);
+      paramArray.push(`${key}=${encodeURIComponent(getStringValueIfDefined(value) as string)}`);
     }
   });
 

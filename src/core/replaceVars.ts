@@ -1,6 +1,7 @@
+import { getStringValueIfDefined } from "./utils/typeUtils";
+
 import { Variables } from "./variables";
 import { RequestSpec } from "./models";
-import { getStrictStringValue } from "./utils/typeUtils";
 
 function replaceVariables(data: any, variables: Variables): { data: any; undefinedVars: string[] } {
   if (typeof data === "object" && data !== null) {
@@ -130,7 +131,7 @@ function replaceVariablesInString(
           variableIsFullText = true;
           valueInNativeType = varVal;
         }
-        return getStrictStringValue(varVal);
+        return varVal ? (getStringValueIfDefined(varVal) as string) : "undefined";
       }
       undefs.push(varName);
       return match;
@@ -143,7 +144,7 @@ function replaceVariablesInString(
           variableIsFullText = true;
           valueInNativeType = varVal;
         }
-        return getStrictStringValue(varVal);
+        return varVal ? (getStringValueIfDefined(varVal) as string) : "undefined";
       }
       undefs.push(variable);
       return match;
