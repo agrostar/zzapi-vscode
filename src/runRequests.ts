@@ -2,9 +2,11 @@ import { RequestSpec, ResponseData } from "./core/models";
 import { getAllRequestSpecs, getRequestSpec } from "./core/parseBundle";
 import { loadVariables } from "./core/variableParser";
 
+import { getWorkingDir } from "./utils/pathUtils";
+
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import { allRequestsWithProgress } from "./getResponse";
-import { getCurrDirPath, getActiveEnv } from "./EnvironmentSelection";
+import { getActiveEnv } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
 async function runRequests(
@@ -15,7 +17,7 @@ async function runRequests(
   const loadedVariables = loadVariables(
     getActiveEnv(),
     bundleContent,
-    getVarFileContents(getCurrDirPath()),
+    getVarFileContents(getWorkingDir()),
   );
   getVarStore().setLoadedVariables(loadedVariables);
 

@@ -3,16 +3,17 @@ import * as YAML from "yaml";
 import { loadVariables } from "./core/variableParser";
 
 import { getOutputChannel } from "./utils/pathUtils";
+import { getWorkingDir } from "./utils/pathUtils";
 
 import { getRecentHeadersData } from "./showInEditor";
 import { getVarFileContents, getVarStore } from "./variables";
-import { getActiveEnv, getContentIfBundle, getCurrDirPath } from "./EnvironmentSelection";
+import { getActiveEnv, getContentIfBundle } from "./EnvironmentSelection";
 
 export async function showVariables(): Promise<void> {
   const loadedVariables = loadVariables(
     getActiveEnv(),
     getContentIfBundle(),
-    getVarFileContents(getCurrDirPath()),
+    getVarFileContents(getWorkingDir()),
   );
   getVarStore().setLoadedVariables(loadedVariables);
   const capturedVars = getVarStore().getCapturedVariables();

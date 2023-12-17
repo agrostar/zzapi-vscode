@@ -4,12 +4,13 @@ import { replaceVariablesInRequest } from "./core/replaceVars";
 import { loadVariables } from "./core/variableParser";
 
 import { getOutputChannel } from "./utils/pathUtils";
+import { getWorkingDir } from "./utils/pathUtils";
 
-import { getActiveEnv, getCurrDirPath } from "./EnvironmentSelection";
+import { getActiveEnv } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
 export function showCurl(text: string, name: string, extensionVersion: string): void {
-  const loadedVariables = loadVariables(getActiveEnv(), text, getVarFileContents(getCurrDirPath()));
+  const loadedVariables = loadVariables(getActiveEnv(), text, getVarFileContents(getWorkingDir()));
   getVarStore().setLoadedVariables(loadedVariables);
 
   const request = getRequestSpec(text, name);

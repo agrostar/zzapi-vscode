@@ -2,17 +2,16 @@ import * as path from "path";
 import { ExtensionContext, languages, commands, window, StatusBarAlignment, Disposable } from "vscode";
 
 import { documentIsBundle } from "./utils/checkDoc";
+import { getWorkingDir, setWorkingDir } from "./utils/pathUtils";
 
 import { CodeLensProvider } from "./CodeLensProviders";
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./registerRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import {
   createEnvironmentSelector,
-  getCurrDirPath,
   getSelectedEnvs,
   initialiseStatusBar,
   setEnvironment,
-  setWorkingDir,
   storeEnv,
 } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
@@ -64,7 +63,7 @@ export function activate(context: ExtensionContext): void {
 
       //if we are referring to a new dir
       const dirName = path.dirname(editorPath);
-      if (dirName !== getCurrDirPath()) {
+      if (dirName !== getWorkingDir()) {
         setWorkingDir(dirName);
       }
     }

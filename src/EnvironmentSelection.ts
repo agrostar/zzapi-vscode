@@ -1,8 +1,9 @@
-import { ExtensionContext, commands, window, StatusBarItem, ThemeColor, Uri } from "vscode";
+import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "vscode";
 
 import { documentIsBundle } from "./utils/checkDoc";
 
 import { getEnvNames } from "./variables";
+import { getWorkingDir } from "./utils/pathUtils";
 
 const NO_ENV = "-- None --";
 export function getDefaultEnv(): string {
@@ -10,11 +11,6 @@ export function getDefaultEnv(): string {
 }
 
 let ACTIVE_ENV: string = "";
-let WORKING_DIR: string;
-
-export function getCurrDirPath(): string {
-  return WORKING_DIR;
-}
 
 export function getActiveEnv(): string {
   return ACTIVE_ENV;
@@ -57,7 +53,7 @@ export function getContentIfBundle(): string {
 export function createEnvironmentSelector(context: ExtensionContext, statusBar: StatusBarItem): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     const bundleContents = getContentIfBundle();
-    const envNames = getEnvNames(WORKING_DIR, bundleContents);
+    const envNames = getEnvNames(getWorkingDir(), bundleContents);
     envNames.push(NO_ENV);
     window
       .showQuickPick(envNames, {
@@ -71,15 +67,6 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
       });
   });
   context.subscriptions.push(statusClick);
-}
-
-export function setWorkingDir(dir: string): void {
-  const path = dir;
-  const pathParsed = path.split("\\").join("/");
-  const pathUri = Uri.file(pathParsed);
-  const pathStr = pathUri.fsPath;
-
-  WORKING_DIR = pathStr;
 }
 
 export function setCurrentEnvName(statusBar: StatusBarItem, envName: string): void {

@@ -4,8 +4,7 @@ import * as path from "path";
 import { getEnvironments } from "./core/variableParser";
 import { VarStore } from "./core/variables";
 
-import { getCurrDirPath } from "./EnvironmentSelection";
-import { getAgnosticPath } from "./utils/pathUtils";
+import { getAgnosticPath, getWorkingDir } from "./utils/pathUtils";
 
 const VARFILE_EXTENSION = ".zzv";
 
@@ -39,7 +38,7 @@ export function replaceFileContentsInString(doc: string): string {
 
   return doc.replace(fileRegex, (match) => {
     const relFilePath = match.substring("file://".length);
-    const filePath = path.join(getCurrDirPath(), getAgnosticPath(relFilePath));
+    const filePath = path.join(getWorkingDir(), getAgnosticPath(relFilePath));
     return fs.readFileSync(filePath, "utf-8");
   });
 }
