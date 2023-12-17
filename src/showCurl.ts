@@ -3,7 +3,7 @@ import { getRequestSpec } from "./core/parseBundle";
 import { replaceVariablesInRequest } from "./core/replaceVars";
 import { loadVariables } from "./core/variableParser";
 
-import { getOutputChannel } from "./utils/outputChannel";
+import { getOutputChannel } from "./utils/pathUtils";
 
 import { getActiveEnv, getCurrDirPath } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";

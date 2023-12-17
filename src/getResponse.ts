@@ -6,7 +6,7 @@ import { runAllTests } from "./core/runTests";
 import { captureVariables } from "./core/captureVars";
 import { replaceVariablesInRequest } from "./core/replaceVars";
 
-import { getOutputChannel } from "./utils/outputChannel";
+import { getOutputChannel } from "./utils/pathUtils";
 
 import { getVarStore } from "./variables";
 

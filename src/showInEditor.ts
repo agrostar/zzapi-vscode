@@ -2,7 +2,7 @@ import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, langua
 
 import { ResponseData } from "./core/models";
 
-import { getOutputChannel } from "./utils/outputChannel";
+import { getOutputChannel } from "./utils/pathUtils";
 
 import { getActiveEnv } from "./EnvironmentSelection";
 

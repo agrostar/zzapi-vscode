@@ -4,6 +4,9 @@ import * as path from "path";
 import { getEnvironments } from "./core/variableParser";
 import { VarStore } from "./core/variables";
 
+import { getCurrDirPath } from "./EnvironmentSelection";
+import { getAgnosticPath } from "./utils/pathUtils";
+
 const VARFILE_EXTENSION = ".zzv";
 
 export function getVarFileContents(dirPath: string): string[] {
@@ -29,4 +32,14 @@ export function getEnvNames(dirPath: string, bundleContent: string): string[] {
 let variables = new VarStore();
 export function getVarStore(): VarStore {
   return variables;
+}
+
+export function replaceFileContentsInString(doc: string): string {
+  const fileRegex = /file:\/\/([^\s]+)/g;
+
+  return doc.replace(fileRegex, (match) => {
+    const relFilePath = match.substring("file://".length);
+    const filePath = path.join(getCurrDirPath(), getAgnosticPath(relFilePath));
+    return fs.readFileSync(filePath, "utf-8");
+  });
 }

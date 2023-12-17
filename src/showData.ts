@@ -2,7 +2,7 @@ import * as YAML from "yaml";
 
 import { loadVariables } from "./core/variableParser";
 
-import { getOutputChannel } from "./utils/outputChannel";
+import { getOutputChannel } from "./utils/pathUtils";
 
 import { getRecentHeadersData } from "./showInEditor";
 import { getVarFileContents, getVarStore } from "./variables";
