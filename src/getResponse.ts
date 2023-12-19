@@ -1,10 +1,10 @@
 import { window, ProgressLocation } from "vscode";
 
-import { ResponseData, RequestSpec, GotRequest, TestResult } from "./core/models";
-import { constructGotRequest, executeGotRequest } from "./core/executeRequest";
-import { runAllTests } from "./core/runTests";
-import { captureVariables } from "./core/captureVars";
-import { replaceVariablesInRequest } from "./core/replaceVars";
+import { ResponseData, RequestSpec, GotRequest, TestResult } from "zzapi";
+import { constructGotRequest, executeGotRequest } from "zzapi";
+import { runAllTests } from "zzapi";
+import { captureVariables } from "zzapi";
+import { replaceVariablesInRequest } from "zzapi";
 
 import { getOutputChannel } from "./utils/pathUtils";
 

@@ -1,6 +1,6 @@
 import * as YAML from "yaml";
 
-import { loadVariables } from "./core/variableParser";
+import { loadVariables } from "zzapi";
 
 import { getOutputChannel } from "./utils/pathUtils";
 import { getWorkingDir } from "./utils/pathUtils";

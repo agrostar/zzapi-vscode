@@ -1,6 +1,6 @@
-import { RequestSpec, ResponseData } from "./core/models";
-import { getAllRequestSpecs, getRequestSpec } from "./core/parseBundle";
-import { loadVariables } from "./core/variableParser";
+import { RequestSpec, ResponseData } from "zzapi";
+import { getAllRequestSpecs, getRequestSpec } from "zzapi";
+import { loadVariables } from "zzapi";
 
 import { getWorkingDir } from "./utils/pathUtils";
 

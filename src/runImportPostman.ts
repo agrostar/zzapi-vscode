@@ -1,6 +1,6 @@
 import { Uri, window, workspace } from "vscode";
 
-import convertCollection, { convertEnvironment } from "./core/convertPostman";
+import { convertCollection, convertEnvironment } from "zzapi";
 
 import { openDocument } from "./showInEditor";
 

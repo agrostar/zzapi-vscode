@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { getEnvironments } from "./core/variableParser";
-import { VarStore } from "./core/variables";
+import { getEnvironments } from "zzapi";
+import { VarStore } from "zzapi";
 
 import { getAgnosticPath, getWorkingDir } from "./utils/pathUtils";
 
@@ -37,9 +37,10 @@ export function replaceFileContentsInString(doc: string): string {
   const fileRegex = /file:\/\/([^\s]+)/g;
 
   return doc.replace(fileRegex, (_, givenFilePath) => {
-    const filePath = givenFilePath.startsWith("./") || givenFilePath.startsWith(".\\")
-      ? path.join(getWorkingDir(), getAgnosticPath(givenFilePath))
-      : path.resolve(givenFilePath);
+    const filePath =
+      givenFilePath.startsWith("./") || givenFilePath.startsWith(".\\")
+        ? path.join(getWorkingDir(), getAgnosticPath(givenFilePath))
+        : path.resolve(givenFilePath);
     console.log(`reading from ${filePath}`);
     return fs.readFileSync(filePath, "utf-8");
   });

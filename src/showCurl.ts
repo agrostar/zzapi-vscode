@@ -1,7 +1,7 @@
-import { getCurlRequest } from "./core/constructCurl";
-import { getRequestSpec } from "./core/parseBundle";
-import { replaceVariablesInRequest } from "./core/replaceVars";
-import { loadVariables } from "./core/variableParser";
+import { getCurlRequest } from "zzapi";
+import { getRequestSpec } from "zzapi";
+import { replaceVariablesInRequest } from "zzapi";
+import { loadVariables } from "zzapi";
 
 import { getOutputChannel } from "./utils/pathUtils";
 import { getWorkingDir } from "./utils/pathUtils";

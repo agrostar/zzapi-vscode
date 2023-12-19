@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
-import { getRequestPositions } from "./core/parseBundle";
-import { RequestPosition } from "./core/models";
+import { getRequestPositions } from "zzapi";
+import { RequestPosition } from "zzapi";
 
 import { documentIsBundle } from "./utils/checkDoc";
 

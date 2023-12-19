@@ -1,6 +1,6 @@
 import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, languages } from "vscode";
 
-import { ResponseData } from "./core/models";
+import { ResponseData } from "zzapi";
 
 import { getOutputChannel } from "./utils/pathUtils";
 
