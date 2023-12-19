@@ -2,6 +2,7 @@ import { window } from "vscode";
 import * as YAML from "yaml";
 
 import { documentIsBundle } from "./utils/checkDoc";
+import { isDict } from "./utils/typeUtils";
 
 const TAB = "  ";
 
@@ -59,20 +60,11 @@ async function appendContent(content: string): Promise<void> {
     const document = activeEditor.document;
 
     /*
-    Adding `requests:` to content if it is not in the bundle already
+    Adding `requests:` to content if it is not a valid YAML or not in the bundle already
     */
     const text = document.getText();
-    try {
-      const parsedDoc = YAML.parse(text);
-      if (
-        typeof parsedDoc !== "object" ||
-        Array.isArray(parsedDoc) ||
-        parsedDoc === null ||
-        !parsedDoc.hasOwnProperty("requests")
-      ) {
-        content = "requests:\n" + content;
-      }
-    } catch {
+    const parsedDoc = YAML.parse(text);
+    if (!isDict(parsedDoc) || !parsedDoc.hasOwnProperty("requests")) {
       content = "requests:\n" + content;
     }
 

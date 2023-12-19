@@ -3,7 +3,7 @@
 * Support .zzb.yml in addition to .zzb. This will allow people to use yml as the extension to let VS Code dectect it as yaml even without the extension, so that it can be formatted nicely. Also, it will get formatted on github, bitbucket in the browser also. (done)
 
 * CLI Tool:
-  * Separate out core into a new repo and create a core library npm
+  * Separate out core into a new repo and create a core library npm (done)
   * zzapi-runner: command-line runner which can use the core library
 
 * Rename varset as environment (done, must change schema name)
@@ -12,11 +12,11 @@
 
 * Fix circular dependencies (Varun) (done, check on each change)
 
-* Read body from file when file:// is detected
+* Read body from file when file:// is detected (done)
 
 * Move encoding/raw for params into options. That way we don't have to support name:xxx, value: xxx way of input (done, change tests in zzAPI)
 
-* Add Run Request and Run All Requests to command palette. (+ showCurl, done)
+* Add Run Request and Run All Requests to command palette. (+ showCurl, done + changed to drop-down)
 
 * Multipart formdata is painful. We need some way of supporting this.
 
