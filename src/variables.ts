@@ -36,9 +36,10 @@ export function getVarStore(): VarStore {
 export function replaceFileContentsInString(doc: string): string {
   const fileRegex = /file:\/\/([^\s]+)/g;
 
-  return doc.replace(fileRegex, (match) => {
-    const relFilePath = match.substring("file://".length);
-    const filePath = path.join(getWorkingDir(), getAgnosticPath(relFilePath));
+  return doc.replace(fileRegex, (_, givenFilePath) => {
+    const filePath = givenFilePath.startsWith("./")
+      ? path.join(getWorkingDir(), getAgnosticPath(givenFilePath))
+      : path.resolve(givenFilePath);
     return fs.readFileSync(filePath, "utf-8");
   });
 }
