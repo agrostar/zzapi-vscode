@@ -37,9 +37,10 @@ export function replaceFileContentsInString(doc: string): string {
   const fileRegex = /file:\/\/([^\s]+)/g;
 
   return doc.replace(fileRegex, (_, givenFilePath) => {
-    const filePath = givenFilePath.startsWith("./")
+    const filePath = givenFilePath.startsWith("./") || givenFilePath.startsWith(".\\")
       ? path.join(getWorkingDir(), getAgnosticPath(givenFilePath))
       : path.resolve(givenFilePath);
+    console.log(`reading from ${filePath}`);
     return fs.readFileSync(filePath, "utf-8");
   });
 }
