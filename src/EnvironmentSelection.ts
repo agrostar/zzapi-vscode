@@ -19,7 +19,7 @@ export function getActiveEnv(): string {
 export function resetActiveEnv(statusBar: StatusBarItem): void {
   ACTIVE_ENV = NO_ENV;
   storeEnv();
-  statusBar.text = "zzAPI: no var-set";
+  statusBar.text = "zzAPI: no env";
   const activeEditor = window.activeTextEditor;
   if (activeEditor && documentIsBundle(activeEditor.document)) {
     statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
@@ -72,7 +72,7 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
 export function setCurrentEnvName(statusBar: StatusBarItem, envName: string): void {
   ACTIVE_ENV = envName;
   storeEnv();
-  statusBar.text = `zzAPI var-set: ${ACTIVE_ENV}`;
+  statusBar.text = `zzAPI env: ${ACTIVE_ENV}`;
   statusBar.backgroundColor = undefined;
 }
 
@@ -82,12 +82,10 @@ export function getSelectedEnvs(): { [bundlePath: string]: string } {
   return SELECTED_ENVS;
 }
 
-// if store default is true, then we forcefully store the default var-set, else the active one
+// if store default is true, then we store the default env, else the active one
 export function storeEnv(storeDefault?: boolean): void {
   const activeEditor = window.activeTextEditor;
-  if (!(activeEditor && documentIsBundle(activeEditor.document))) {
-    return;
-  }
+  if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
   const envPath = activeEditor.document.uri.path;
   SELECTED_ENVS[envPath] = storeDefault ? getDefaultEnv() : getActiveEnv();
