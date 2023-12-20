@@ -53,17 +53,15 @@ export async function showVariables(): Promise<void> {
 }
 
 export async function showRecentHeaders(): Promise<void> {
-  let { recentHeaders: headers, recentRequestName: reqName } = getRecentHeadersData();
-  if (headers === undefined) {
-    headers = "No headers stored, run a request and try again\n";
-  }
+  const { recentHeaders: headers, recentRequestName: reqName } = getRecentHeadersData();
 
   const outputChannel = getOutputChannel();
   outputChannel.appendLine("----------");
-  if (reqName !== undefined) {
-    outputChannel.appendLine(`[debug] headers of ${reqName}`);
-  }
-  outputChannel.append(headers);
+  if (reqName) outputChannel.appendLine(`[debug] headers of ${reqName}`);
+
+  if (headers) outputChannel.append(headers);
+  else outputChannel.appendLine("No headers stored, run a request and try again");
+
   outputChannel.appendLine("----------");
   outputChannel.show(true);
 }

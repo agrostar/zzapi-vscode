@@ -36,7 +36,7 @@ async function getReqNameAsInput(commandName: string): Promise<string> {
 
   const requests = parsedDoc.requests;
   if (!requests || !isDict(requests) || Object.keys(requests).length < 1)
-    throw new Error("No requests are defined in the bundle");
+    throw new Error("No requests are defined in the active bundle");
 
   return await window
     .showQuickPick(Object.keys(requests), {
@@ -89,11 +89,9 @@ export function activate(context: ExtensionContext): void {
   const zzApiVersion: string = context.extension.packageJSON.version;
 
   languages.registerCodeLensProvider("*", new CodeLensProvider());
-  let disposable = commands.registerCommand("extension.runRequest", async (name: string) => {
-    // calls from command pallete will lead to undefined name because we do not set args
-    if (!name) {
-      name = await getReqNameAsInput("runRequest");
-    }
+  let disposable = commands.registerCommand("extension.runRequest", async (name) => {
+    // calls from command pallete will lead to undefined name because we do not set args in package.json
+    if (!name) name = await getReqNameAsInput("runRequest");
     await runRequestCommand(name, zzApiVersion);
   });
   context.subscriptions.push(disposable);
@@ -118,9 +116,7 @@ export function activate(context: ExtensionContext): void {
   });
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("extension.showCurl", async (name) => {
-    if (!name) {
-      name = await getReqNameAsInput("showCurl");
-    }
+    if (!name) name = await getReqNameAsInput("showCurl");
     showCurlCommand(name, zzApiVersion);
   });
   context.subscriptions.push(disposable);

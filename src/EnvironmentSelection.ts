@@ -10,7 +10,7 @@ export function getDefaultEnv(): string {
   return NO_ENV;
 }
 
-let ACTIVE_ENV: string = "";
+let ACTIVE_ENV: string = NO_ENV;
 
 export function getActiveEnv(): string {
   return ACTIVE_ENV;

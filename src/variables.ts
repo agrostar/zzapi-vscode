@@ -41,7 +41,7 @@ export function replaceFileContentsInString(doc: string): string {
       givenFilePath.startsWith("./") || givenFilePath.startsWith(".\\")
         ? path.join(getWorkingDir(), getAgnosticPath(givenFilePath))
         : path.resolve(givenFilePath);
-    console.log(`reading from ${filePath}`);
+    console.log(`replacing contents of ${filePath}`);
     return fs.readFileSync(filePath, "utf-8");
   });
 }

@@ -19,6 +19,16 @@ export async function openEditorForIndividualReq(
   await showContent(contentData, headersData, showHeaders, name);
 }
 
+function attemptDataParse(content: string): object | undefined {
+  let parsedData;
+  try {
+    parsedData = JSON.parse(content);
+  } catch {
+    return undefined;
+  }
+  return parsedData;
+}
+
 export async function openEditorForAllRequests(
   responses: Array<{ response: ResponseData; name: string }>,
   keepRawJSON?: boolean,
@@ -32,19 +42,8 @@ export async function openEditorForAllRequests(
       keepRawJSON,
     ).contentData;
 
-    let canParse = true;
-    let parsedData = contentData;
-    try {
-      parsedData = JSON.parse(contentData);
-    } catch {
-      canParse = false;
-    }
-
-    if (canParse) {
-      contentData = parsedData;
-    }
-
-    allResponses[responseObj.name] = contentData;
+    let parsedData = attemptDataParse(contentData);
+    allResponses[responseObj.name] = parsedData ? parsedData : contentData;
   });
 
   await showContent(JSON.stringify(allResponses, undefined, 2), "", false);
@@ -56,34 +55,20 @@ function getDataOfIndReqAsString(
   keepRawJSON?: boolean,
 ): { contentData: string; headersData: string } {
   let currentEnvironment = getActiveEnv();
-  if (!currentEnvironment) {
-    currentEnvironment = "None Selected";
-  }
 
   let contentData = "";
-  let headersData = `${name}: headers\nenv: ${currentEnvironment}\n\n`;
+  let headersData = `${name}: headers\nenvironment: ${currentEnvironment}\n\n`;
 
   for (const key in responseData) {
     let value = responseData[key as keyof ResponseData];
 
-    if (KEYS_IN_BODY.includes(key)) {
-      contentData += `${value}\n`;
-    } else if (KEYS_IN_HEADERS.includes(key)) {
-      headersData += `${key}: ${value}\n`;
-    }
+    if (KEYS_IN_BODY.includes(key)) contentData += `${value}\n`;
+    if (KEYS_IN_HEADERS.includes(key)) headersData += `${key}: ${value}\n`;
   }
 
   if (!keepRawJSON) {
-    let canFormat: boolean = true;
-    let parsedData: any;
-    try {
-      parsedData = JSON.parse(contentData);
-    } catch {
-      canFormat = false;
-    }
-    if (canFormat) {
-      contentData = JSON.stringify(parsedData, undefined, 2);
-    }
+    let parsedData = attemptDataParse(contentData);
+    if (parsedData) contentData = JSON.stringify(parsedData, undefined, 2);
   }
   return { contentData, headersData };
 }
@@ -105,9 +90,7 @@ export async function replaceContent(
   content: string,
   language?: string,
 ): Promise<void> {
-  if (language !== undefined) {
-    languages.setTextDocumentLanguage(document, language);
-  }
+  if (language) languages.setTextDocumentLanguage(document, language);
 
   const edit = new WorkspaceEdit();
   edit.replace(
@@ -177,7 +160,7 @@ async function showContent(
     OPEN_DOCS.body = bodyDoc;
   }
 
-  if (name !== undefined) {
+  if (name) {
     if (showHeaders) {
       const outputChannel = getOutputChannel();
 

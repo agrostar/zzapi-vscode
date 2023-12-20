@@ -56,37 +56,29 @@ export async function addSamplePost(): Promise<void> {
 
 async function appendContent(content: string): Promise<void> {
   const activeEditor = window.activeTextEditor;
-  if (activeEditor && documentIsBundle(activeEditor.document)) {
-    const document = activeEditor.document;
-
-    /*
-    Adding `requests:` to content if it is not a valid YAML or not in the bundle already
-    */
-    const text = document.getText();
-    const parsedDoc = YAML.parse(text);
-    if (!isDict(parsedDoc) || !parsedDoc.hasOwnProperty("requests")) {
-      content = "requests:\n" + content;
-    }
-
-    /*
-    Inserting the content
-    */
-    const lastLine = document.lineAt(document.lineCount - 1);
-    await activeEditor.edit((e) => {
-      e.insert(lastLine.range.end, "\n\n" + content);
-    });
-
-    const lineToCheck = lastLine.lineNumber;
-    const isVisible = activeEditor.visibleRanges.some((range) => {
-      return lineToCheck >= range.start.line && lineToCheck <= range.end.line;
-    });
-
-    if (!isVisible) {
-      window.showInformationMessage("Sample request appended to bundle");
-    }
-  } else {
-    throw new Error(
-      "Add sample request must be called on a bundle. Is your bundle the current active editor?",
-    );
+  if (!(activeEditor && documentIsBundle(activeEditor.document))) {
+    throw new Error("Add sample request must be called on a bundle. Is your bundle the active editor?");
   }
+
+  const document = activeEditor.document;
+
+  // Adding `requests:` to content if it is not a valid YAML or not in the bundle already
+  const text = document.getText();
+  const parsedDoc = YAML.parse(text);
+  if (!isDict(parsedDoc) || !parsedDoc.hasOwnProperty("requests")) {
+    content = "requests:\n" + content;
+  }
+
+  // Inserting the content
+  const lastLine = document.lineAt(document.lineCount - 1);
+  await activeEditor.edit((e) => {
+    e.insert(lastLine.range.end, "\n\n" + content);
+  });
+
+  const lineToCheck = lastLine.lineNumber;
+  const isVisible = activeEditor.visibleRanges.some((range) => {
+    return lineToCheck >= range.start.line && lineToCheck <= range.end.line;
+  });
+
+  if (!isVisible) window.showInformationMessage("Sample request appended to bundle");
 }
