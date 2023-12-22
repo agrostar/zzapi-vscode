@@ -1,6 +1,6 @@
 import { window } from "vscode";
 
-import { documentIsBundle } from "./utils/checkDoc";
+import { documentIsBundle } from "./utils/pathUtils";
 
 import { runOneRequest, runAllRequests } from "./runRequests";
 import { showCurl } from "./showCurl";

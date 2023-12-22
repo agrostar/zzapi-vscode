@@ -2,7 +2,7 @@ import * as YAML from "yaml";
 
 import { loadVariables } from "zzapi";
 
-import { getOutputChannel } from "./utils/pathUtils";
+import { getOutputChannel } from "./utils/outputChannel";
 import { getWorkingDir } from "./utils/pathUtils";
 
 import { getRecentHeadersData } from "./showInEditor";

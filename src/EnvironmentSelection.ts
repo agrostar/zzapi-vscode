@@ -1,9 +1,8 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "vscode";
 
-import { documentIsBundle } from "./utils/checkDoc";
+import { documentIsBundle, getWorkingDir } from "./utils/pathUtils";
 
 import { getEnvNames } from "./variables";
-import { getWorkingDir } from "./utils/pathUtils";
 
 const NO_ENV = "-- None --";
 export function getDefaultEnv(): string {

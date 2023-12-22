@@ -3,7 +3,7 @@ import { getRequestSpec } from "zzapi";
 import { replaceVariablesInRequest } from "zzapi";
 import { loadVariables } from "zzapi";
 
-import { getOutputChannel } from "./utils/pathUtils";
+import { getOutputChannel } from "./utils/outputChannel";
 import { getWorkingDir } from "./utils/pathUtils";
 
 import { getActiveEnv } from "./EnvironmentSelection";

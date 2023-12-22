@@ -2,8 +2,7 @@ import * as path from "path";
 import * as YAML from "yaml";
 import { ExtensionContext, languages, commands, window, StatusBarAlignment, Disposable } from "vscode";
 
-import { documentIsBundle } from "./utils/checkDoc";
-import { getWorkingDir, setWorkingDir } from "./utils/pathUtils";
+import { getWorkingDir, setWorkingDir, documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
 
 import { CodeLensProvider } from "./CodeLensProviders";

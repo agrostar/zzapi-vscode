@@ -1,7 +1,7 @@
 import { window } from "vscode";
 import * as YAML from "yaml";
 
-import { documentIsBundle } from "./utils/checkDoc";
+import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
 
 const TAB = "  ";

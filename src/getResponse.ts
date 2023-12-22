@@ -6,7 +6,7 @@ import { runAllTests } from "zzapi";
 import { captureVariables } from "zzapi";
 import { replaceVariablesInRequest } from "zzapi";
 
-import { getOutputChannel } from "./utils/pathUtils";
+import { getOutputChannel } from "./utils/outputChannel";
 
 import { getVarStore } from "./variables";
 

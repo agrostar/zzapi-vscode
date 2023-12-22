@@ -2,7 +2,7 @@ import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, langua
 
 import { ResponseData } from "zzapi";
 
-import { getOutputChannel } from "./utils/pathUtils";
+import { getOutputChannel } from "./utils/outputChannel";
 
 import { getActiveEnv } from "./EnvironmentSelection";
 

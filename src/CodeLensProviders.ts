@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { getRequestPositions } from "zzapi";
 import { RequestPosition } from "zzapi";
 
-import { documentIsBundle } from "./utils/checkDoc";
+import { documentIsBundle } from "./utils/pathUtils";
 
 export class CodeLensProvider implements vscode.CodeLensProvider {
   private codeLenses: vscode.CodeLens[] = [];
