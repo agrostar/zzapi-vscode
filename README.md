@@ -4,6 +4,11 @@ zzAPI (prounounced like pizza, the syllables interchanged) is an HTTP (REST) API
 
 This extension makes it easy to create, document and test API requests from within the IDE. Request bundles are YAML files with the `.zzb` extension.
 
+![License](https://img.shields.io/github/license/agrostar/zzapi-vscode?style=for-the-badge&color=green)
+![Installs](https://img.shields.io/visual-studio-marketplace/i/AgroStar.zzapi?style=for-the-badge&color=rebeccapurple)
+![Version](https://img.shields.io/visual-studio-marketplace/v/AgroStar.zzapi?style=for-the-badge&color=red)
+![Stars](https://img.shields.io/visual-studio-marketplace/stars/AgroStar.zzapi?style=for-the-badge&color=blue)
+
 ## Features
 
 ![screencast](https://raw.githubusercontent.com/agrostar/zzapi-vscode/main/images/screencast.gif)
