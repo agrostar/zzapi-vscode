@@ -20,7 +20,7 @@
 
 * Multipart formdata is painful. We need some way of supporting this.
 
-* Scaffolding: using Cmd+Shift+P activate the extension and also create a directory and basic files like zz-envs.yaml and test/staging/production/local environments.
+* Scaffolding: using Cmd+Shift+P activate the extension and also create a directory and basic files like zz-envs.yaml and test/staging/production/local environments. (preliminary scaffolding done)
 
 * A Tree View in the explorer sidebar for selecting and executing requests (replacement for OUTLINE, which does not allow commands on the tree elements). Right now using fold All etc, but it is not that convenient.
 

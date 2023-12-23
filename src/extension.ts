@@ -1,12 +1,11 @@
-import * as path from "path";
 import * as YAML from "yaml";
 import { ExtensionContext, languages, commands, window, StatusBarAlignment, Disposable } from "vscode";
 
-import { getWorkingDir, setWorkingDir, documentIsBundle } from "./utils/pathUtils";
+import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
 
 import { CodeLensProvider } from "./CodeLensProviders";
-import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./registerRequests";
+import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import {
   createEnvironmentSelector,
@@ -18,6 +17,7 @@ import {
 import { showRecentHeaders, showVariables } from "./showData";
 import { addSampleGet, addSamplePost } from "./addSamples";
 import { getVarStore } from "./variables";
+import { scaffold } from "./scaffolding";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -50,11 +50,6 @@ async function getReqNameAsInput(commandName: string): Promise<string> {
 }
 
 export function activate(context: ExtensionContext): void {
-  const activeEditor = window.activeTextEditor;
-  if (activeEditor && documentIsBundle(activeEditor.document)) {
-    setWorkingDir(path.dirname(activeEditor.document.uri.path));
-  }
-
   const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
 
   initialiseStatusBar(context, statusBar);
@@ -74,12 +69,6 @@ export function activate(context: ExtensionContext): void {
         setEnvironment(statusBar, getSelectedEnvs()[editorPath]);
 
         getVarStore().resetCapturedVariables();
-      }
-
-      //if we are referring to a new dir
-      const dirName = path.dirname(editorPath);
-      if (dirName !== getWorkingDir()) {
-        setWorkingDir(dirName);
       }
     }
   });
@@ -125,6 +114,10 @@ export function activate(context: ExtensionContext): void {
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("extension.showSamplePOST", async () => {
     await addSamplePost();
+  });
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("extension.scaffolding", () => {
+    scaffold();
   });
   context.subscriptions.push(disposable);
 }

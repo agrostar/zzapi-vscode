@@ -68,6 +68,10 @@
       {
         "command": "extension.showSamplePOST",
         "title": "zzAPI: Add Sample POST Request"
+      },
+      {
+        "command": "extension.scaffolding",
+        "title": "zzAPI: Scaffold (create sample directory)"
       }
     ],
     "submenus": [
