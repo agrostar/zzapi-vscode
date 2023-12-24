@@ -11,48 +11,30 @@ const BUNDLE_TO_OPEN = "bundle.zzb";
 
 function getEnvContent(): string {
   let content: { [key: string]: { [envName: string]: string } } = {};
-  ENV_NAMES.forEach((envName) => {
-    content[envName] = { envName: envName.toUpperCase() };
+  ENV_NAMES.forEach((env) => {
+    content[env] = { envName: env.toUpperCase() };
   });
+
   return YAML.stringify(content);
 }
+
 function getBundleContent(): string {
-  let content = {
-    common: {
-      baseUrl: "https://postman-echo.com",
-    },
-    variables: {
-      local: {
-        envName: "LOCAL",
-      },
-    },
+  const content = {
+    common: { baseUrl: "https://postman-echo.com" },
+    variables: { local: { envName: "local".toUpperCase() } },
     requests: {
       "simple-get": {
         method: "GET",
         url: "/get",
-        params: {
-          envName: "$envName",
-        },
-        tests: {
-          json: {
-            "$.args.envName": "TEST",
-          },
-        },
-        capture: {
-          json: {
-            "$.args.envName": "capturedEnv",
-          },
-        },
+        params: { envName: "$envName", foo: "bar" },
+        tests: { json: { "$.args.envName": "TEST" } },
+        capture: { json: { "$.args.foo": "capturedFoo" } },
       },
       "simple-post": {
         method: "POST",
         url: "/post",
-        body: {
-          env: "$(capturedEnv)",
-        },
-        tests: {
-          status: 200,
-        },
+        body: { foo: "$(capturedFoo)" },
+        tests: { status: 200 },
       },
     },
   };
@@ -61,23 +43,23 @@ function getBundleContent(): string {
 }
 
 function getFileContents(): { [name: string]: string } {
-  let fileContents: { [name: string]: string } = {};
-  fileContents["envs.zzv"] = getEnvContent();
-  fileContents[BUNDLE_TO_OPEN] = getBundleContent();
-  return fileContents;
+  return {
+    "envs.zzv": getEnvContent(),
+    [BUNDLE_TO_OPEN]: getBundleContent(),
+  };
 }
 
 function createDir(): string {
   const workingDir = getWorkingDir();
-  console.log(`working dir: ${workingDir}`);
-  let dirPath = path.join(workingDir, NEW_DIR);
+  let dirPath: string,
+    index: number = 0;
 
-  let index: number = 0;
-  while (fs.existsSync(dirPath)) {
-    dirPath = path.join(workingDir, `${NEW_DIR}-${index++}`);
-  }
+  do {
+    if (!index++) dirPath = path.join(workingDir, NEW_DIR);
+    else dirPath = path.join(workingDir, `${NEW_DIR}-${index}`);
+  } while (fs.existsSync(dirPath));
+
   fs.mkdirSync(dirPath);
-
   return dirPath;
 }
 
