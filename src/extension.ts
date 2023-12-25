@@ -4,7 +4,6 @@ import { ExtensionContext, languages, commands, window, StatusBarAlignment, Disp
 import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
 
-import { CodeLensProvider } from "./CodeLensProviders";
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import {
@@ -18,6 +17,8 @@ import { showRecentHeaders, showVariables } from "./showData";
 import { addSampleGet, addSamplePost } from "./addSamples";
 import { getVarStore } from "./variables";
 import { scaffold } from "./scaffolding";
+import { CodeLensProvider } from "./CodeLensProviders";
+import { getTreeView } from "./treeView";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -50,6 +51,9 @@ async function getReqNameAsInput(commandName: string): Promise<string> {
 }
 
 export function activate(context: ExtensionContext): void {
+  window.registerTreeDataProvider("zzapiCustomView", getTreeView());
+  getTreeView().refresh();
+
   const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
 
   initialiseStatusBar(context, statusBar);

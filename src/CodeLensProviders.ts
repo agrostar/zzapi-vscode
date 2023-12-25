@@ -4,6 +4,9 @@ import { getRequestPositions } from "zzapi";
 import { RequestPosition } from "zzapi";
 
 import { documentIsBundle } from "./utils/pathUtils";
+import { RequestPositions, setRequestsInfo } from "./utils/requestPositions";
+
+import { getTreeView } from "./treeView";
 
 export class CodeLensProvider implements vscode.CodeLensProvider {
   private codeLenses: vscode.CodeLens[] = [];
@@ -20,7 +23,10 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
     document: vscode.TextDocument,
     token: vscode.CancellationToken,
   ): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
+    let requestsInfo: RequestPositions = [];
     if (!documentIsBundle(document)) {
+      setRequestsInfo([]);
+      getTreeView().refresh();
       return [];
     }
 
@@ -56,6 +62,7 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             command: "extension.showCurl",
             arguments: [name],
           });
+          requestsInfo.push({ name: name, startLine: startPos.line, endLine: endPos.line });
         }
         this.codeLenses.push(newCodeLens);
         if (curlCodelens !== undefined) {
@@ -64,6 +71,8 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
       }
     });
 
+    setRequestsInfo(requestsInfo);
+    getTreeView().refresh();
     return this.codeLenses;
   }
 

@@ -28,7 +28,57 @@
   "main": "dist/extension.js",
   "icon": "images/zzapi.png",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "zzapiCustomViewContainer",
+          "title": "zzAPI Requests Container",
+          "icon": "images/icons/zzapi-view.png"
+        }
+      ]
+    },
+    "views": {
+      "zzapiCustomViewContainer": [
+        {
+          "id": "zzapiCustomView",
+          "name": "zzAPI Requests Tree View"
+
+        }
+      ]
+    },
     "commands": [
+      {
+        "command": "zzapiCustomView.treeViewRun",
+        "title": "Run Request",
+        "icon": {
+          "light": "images/icons/play.png",
+          "dark": "images/icons/play.png"
+        }
+      },
+      {
+        "command": "zzapiCustomView.refreshView",
+        "title": "Refresh zzAPI Tree View",
+        "icon": {
+          "light": "images/icons/black-refresh.png",
+          "dark": "images/icons/white-refresh.png"
+        }
+      },
+      {
+        "command": "zzapiCustomView.treeViewCurl",
+        "title": "Show cURL of Request",
+        "icon": {
+          "light": "images/icons/ribbon.png",
+          "dark": "images/icons/ribbon.png"
+        }
+      },
+      {
+        "command": "zzapiCustomView.goToRequest",
+        "title": "Navigate to the given Request",
+        "icon": {
+          "light": "images/icons/microscope.png",
+          "dark": "images/icons/microscope.png"
+        }
+      },
       {
         "command": "extension.runAllRequests",
         "title": "zzAPI: Run All Requests"
@@ -81,6 +131,30 @@
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "zzapiCustomView.refreshView",
+          "when": "view == zzapiCustomView",
+          "group": "navigation@0"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "zzapiCustomView.treeViewRun",
+          "when": "view == zzapiCustomView",
+          "group": "inline@0"
+        },
+        {
+          "command": "zzapiCustomView.treeViewCurl",
+          "when": "view == zzapiCustomView",
+          "group": "inline@1"
+        },
+        {
+          "command": "zzapiCustomView.goToRequest",
+          "when": "view == zzapiCustomView",
+          "group": "inline@2"
+        }
+      ],
       "editor/context": [
         {
           "submenu": "zzapi_submenu",

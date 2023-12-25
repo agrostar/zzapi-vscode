@@ -22,7 +22,9 @@
 
 * Scaffolding: using Cmd+Shift+P activate the extension and also create a directory and basic files like zz-envs.yaml and test/staging/production/local environments. (preliminary scaffolding done)
 
-* A Tree View in the explorer sidebar for selecting and executing requests (replacement for OUTLINE, which does not allow commands on the tree elements). Right now using fold All etc, but it is not that convenient.
+* A Tree View in the explorer sidebar for selecting and executing requests (replacement for OUTLINE, which does not allow commands on the tree elements). Right now using fold All etc, but it is not that convenient. (partially done)
+  - Consider refreshing only when bundle changes, and putting an explicit refresh for in-document changes. 
+  - Make a full outline, or just request items? 
 
 * Cookie-jar to capture cookies automatically and add them to following requests with in the same run (or even persist?)
 
