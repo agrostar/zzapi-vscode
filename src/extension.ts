@@ -19,7 +19,6 @@ import { getVarStore } from "./variables";
 import { scaffold } from "./scaffolding";
 import { CodeLensProvider } from "./CodeLensProviders";
 import { getTreeView } from "./treeView";
-import { getOutputChannel } from "./utils/outputChannel";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -86,12 +85,10 @@ export function activate(context: ExtensionContext): void {
   let disposable = commands.registerCommand("extension.runRequest", async (name) => {
     // calls from command pallete will lead to undefined name because we do not set args in package.json
     if (!name) name = await getReqNameAsInput("runRequest");
-    getOutputChannel().show(true);
     await runRequestCommand(name, zzApiVersion);
   });
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("extension.runAllRequests", async () => {
-    getOutputChannel().show(true);
     await runAllRequestsCommand(zzApiVersion);
   });
   context.subscriptions.push(disposable);
@@ -104,18 +101,15 @@ export function activate(context: ExtensionContext): void {
   });
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("extension.showVariables", async () => {
-    getOutputChannel().show(true);
     await showVariables();
   });
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("extension.showRecentHeaders", async () => {
-    getOutputChannel().show(true);
     await showRecentHeaders();
   });
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("extension.showCurl", async (name) => {
     if (!name) name = await getReqNameAsInput("showCurl");
-    getOutputChannel().show(true);
     showCurlCommand(name, zzApiVersion);
   });
   context.subscriptions.push(disposable);

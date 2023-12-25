@@ -47,14 +47,13 @@
       "zzapiCustomViewContainer": [
         {
           "id": "zzapiCustomView",
-          "name": "zzAPI Requests Tree View"
-
+          "name": "Tree View"
         }
       ]
     },
     "commands": [
       {
-        "command": "zzapiCustomView.treeViewRun",
+        "command": "extension.treeViewRun",
         "title": "Run Request",
         "icon": {
           "light": "images/icons/play.png",
@@ -62,7 +61,7 @@
         }
       },
       {
-        "command": "zzapiCustomView.treeViewRunAll", 
+        "command": "extension.treeViewRunAll",
         "title": "Run All Requests",
         "icon": {
           "light": "images/icons/playAll.png",
@@ -70,7 +69,7 @@
         }
       },
       {
-        "command": "zzapiCustomView.goToEnvFile",
+        "command": "extension.goToEnvFile",
         "title": "Open the file corresponding to the env",
         "icon": {
           "light": "images/icons/fileIcon.png",
@@ -78,7 +77,7 @@
         }
       },
       {
-        "command": "zzapiCustomView.refreshView",
+        "command": "extension.refreshView",
         "title": "Refresh zzAPI Tree View",
         "icon": {
           "light": "images/icons/black-refresh.png",
@@ -86,7 +85,7 @@
         }
       },
       {
-        "command": "zzapiCustomView.treeViewCurl",
+        "command": "extension.treeViewCurl",
         "title": "Show cURL of Request",
         "icon": {
           "light": "images/icons/ribbon.png",
@@ -94,7 +93,7 @@
         }
       },
       {
-        "command": "zzapiCustomView.goToRequest",
+        "command": "extension.goToRequest",
         "title": "Navigate to the given Request",
         "icon": {
           "light": "images/icons/microscope.png",
@@ -155,34 +154,34 @@
     "menus": {
       "view/title": [
         {
-          "command": "zzapiCustomView.refreshView",
+          "command": "extension.refreshView",
           "when": "view == zzapiCustomView",
           "group": "navigation@0"
         }
       ],
       "view/item/context": [
         {
-          "command": "zzapiCustomView.treeViewRun",
+          "command": "extension.treeViewRun",
           "when": "view == zzapiCustomView && viewItem == request",
           "group": "inline@0"
         },
         {
-          "command": "zzapiCustomView.treeViewRunAll",
+          "command": "extension.treeViewRunAll",
           "when": "view == zzapiCustomView && viewItem == requestNode",
           "group": "inline@0"
         },
         {
-          "command": "zzapiCustomView.treeViewCurl",
+          "command": "extension.treeViewCurl",
           "when": "view == zzapiCustomView && viewItem == request",
           "group": "inline@1"
         },
         {
-          "command": "zzapiCustomView.goToRequest",
+          "command": "extension.goToRequest",
           "when": "view == zzapiCustomView && (viewItem == request || viewItem == requestNode)",
           "group": "inline@2"
         },
         {
-          "command": "zzapiCustomView.goToEnvFile",
+          "command": "extension.goToEnvFile",
           "when": "view == zzapiCustomView && viewItem == env",
           "group": "inline@0"
         }
@@ -218,7 +217,9 @@
     "yamlValidation": [
       {
         "fileMatch": [
-          "*.zzb", "*.zzb.yml", "*.zzb.yaml"
+          "*.zzb",
+          "*.zzb.yml",
+          "*.zzb.yaml"
         ],
         "url": "https://agrostar.in/schemas/zzapi-bundle.schema.json"
       },
@@ -268,6 +269,7 @@
   "dependencies": {
     "got": "11.8.6",
     "jsonpath": "^1.1.1",
-    "yaml": "^2.3.1"
+    "yaml": "^2.3.1",
+    "zzapi": "^1.0.0"
   }
 }

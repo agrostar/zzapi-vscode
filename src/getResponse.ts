@@ -98,6 +98,7 @@ export async function allRequestsWithProgress(allRequests: {
               `\t[warn]  Undefined variable(s): ${undefs.join(",")}. Did you choose an env?`,
             );
           }
+          out.show(true);
           continue;
         }
 
@@ -128,6 +129,7 @@ export async function allRequestsWithProgress(allRequests: {
           out.appendLine(
             `${method} ${name} status: ${status} size: ${size} B time: ${et} parse error(${parseError})`,
           );
+          out.show(true);
           continue;
         }
 
@@ -156,6 +158,8 @@ export async function allRequestsWithProgress(allRequests: {
         if (undefs.length > 0) {
           out.appendLine(`\t[WARN]  Undefined variable(s): ${undefs.join(",")}. Did you choose an env?`);
         }
+
+        out.show(true);
       }
     },
   );

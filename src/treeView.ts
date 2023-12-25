@@ -44,24 +44,24 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
   readonly onDidChangeTreeData?: Event<_TreeItem | undefined> = this._onDidChangeTreeData.event;
 
   constructor() {
-    commands.registerCommand("zzapiCustomView.treeViewRun", async (item) => {
+    commands.registerCommand("extension.treeViewRun", async (item) => {
       await this.treeViewRun(item);
     });
-    commands.registerCommand("zzapiCustomView.treeViewRunAll", async () => {
+    commands.registerCommand("extension.treeViewRunAll", async () => {
       await this.treeViewRunAll();
     });
-    commands.registerCommand("zzapiCustomView.treeViewCurl", (item) => {
+    commands.registerCommand("extension.treeViewCurl", (item) => {
       this.treeViewCurl(item);
     });
-    commands.registerCommand("zzapiCustomView.goToRequest", (item) => {
+    commands.registerCommand("extension.goToRequest", (item) => {
       this.goToRequest(item);
     });
 
-    commands.registerCommand("zzapiCustomView.goToEnvFile", (item) => {
+    commands.registerCommand("extension.goToEnvFile", (item) => {
       this.goToEnvFile(item);
     });
 
-    commands.registerCommand("zzapiCustomView.refreshView", () => {
+    commands.registerCommand("extension.refreshView", () => {
       this.refresh();
     });
   }
@@ -81,11 +81,10 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
   }
 
   goToRequest(item: _TreeItem) {
-    let startPos = new Position(item.startLine, 0);
-    let endPos = new Position(item.endLine, 0);
     const activeEditor = window.activeTextEditor;
-    // do something if not. TODO: make refresh be called on bundle change
     if (activeEditor && documentIsBundle(activeEditor.document)) {
+      let startPos = new Position(item.startLine, 0);
+      let endPos = new Position(item.endLine, 0);
       activeEditor.revealRange(new Range(startPos, endPos), 3); // 3 = AtTop
     }
   }
@@ -98,7 +97,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
   }
 
   getTreeItem(item: _TreeItem): TreeItem | Thenable<TreeItem> {
-    const title = item.label ? item.label.toString() : "requests";
+    const title = item.label!.toString();
     const resItem = new TreeItem(title, item.collapsibleState);
     resItem.contextValue = item.contextValue;
     return resItem;
@@ -144,7 +143,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     });
 
     if (requestNodeStart >= 0) {
-      const mainRequestNode = new _TreeItem("", requestNodeStart, requestNodeEnd);
+      const mainRequestNode = new _TreeItem("requests", requestNodeStart, requestNodeEnd);
       mainRequestNode.contextValue = "requestNode";
 
       requests.forEach((req) => mainRequestNode.addChild(req));

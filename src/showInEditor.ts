@@ -167,6 +167,7 @@ async function showContent(
       outputChannel.appendLine("----------");
       outputChannel.appendLine(headersContent);
       outputChannel.appendLine("----------");
+      outputChannel.show(true);
     }
     MOST_RECENT_HEADERS = headersContent;
     MOST_RECENT_REQUEST_NAME = name;
