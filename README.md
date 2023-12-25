@@ -40,11 +40,11 @@ This extension makes it easy to create, document and test API requests from with
 
 ## Detailed Usage
 
-The extension works with `.zzb` files, which are YAML request bundles as [described here](https://github.com/agrostar/zzapi/blob/main/zzapi-bundle-description.md).
+The extension works with `.zzb` files, which are YAML request bundles as [described here](https://github.com/agrostar/zzapi/blob/v0.0.9/zzapi-bundle-description.md).
 
-You can use variables within the bundle, and also common variable set files and environments as [described here](https://github.com/agrostar/zzapi/blob/main/zzapi-varset-description.md).
+You can use variables within the bundle, and also common variable set files and environments as [described here](https://github.com/agrostar/zzapi/blob/v0.0.9/zzapi-varset-description.md).
 
-You can best learn about the `.zzb` file format by just browsing the bundle used for comprehensively testing zzAPI itself: [tests-bundle.zzb](https://github.com/agrostar/zzapi/blob/main/tests-bundle.zzb).
+You can best learn about the `.zzb` file format by just browsing the bundle used for comprehensively testing zzAPI itself: [tests-bundle.zzb](https://github.com/agrostar/zzapi/blob/v0.0.9/tests-bundle.zzb).
 
 ## Tips and Tricks
 

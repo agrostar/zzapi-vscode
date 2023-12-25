@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.6]
+- Point to tagged versions of docs in zzapi (core)
+
 ## [1.0.5]
 - Bug: show output channel on errors
 
