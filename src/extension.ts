@@ -67,10 +67,7 @@ export function activate(context: ExtensionContext): void {
       // if we are referring to a new bundle
       if (editorPath !== CURR_BUNDLE_PATH) {
         CURR_BUNDLE_PATH = editorPath;
-
-        if (!getSelectedEnvs().hasOwnProperty(editorPath)) {
-          storeEnv(true);
-        }
+        if (!getSelectedEnvs().hasOwnProperty(editorPath)) storeEnv(true);
         setEnvironment(statusBar, getSelectedEnvs()[editorPath]);
 
         getVarStore().resetCapturedVariables();

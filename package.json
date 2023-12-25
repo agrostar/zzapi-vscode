@@ -152,6 +152,28 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "extension.treeViewRun",
+          "when": "false"
+        },
+        {
+          "command": "extension.treeViewRunAll",
+          "when": "false"
+        },
+        {
+          "command": "extension.treeViewCurl",
+          "when": "false"
+        },
+        {
+          "command": "extension.goToEnvFile",
+          "when": "false"
+        },
+        {
+          "command": "extension.refreshView",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "extension.refreshView",
