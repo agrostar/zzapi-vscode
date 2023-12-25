@@ -6,7 +6,6 @@ const BUNDLE_FILE_NAME_ENDINGS = [".zzb", ".zzb.yml", ".zzb.yaml"] as const;
 
 export function documentIsBundle(document: TextDocument): boolean {
   const docFsPath = document.uri.fsPath;
-
   return BUNDLE_FILE_NAME_ENDINGS.some((ENDING) => docFsPath.endsWith(ENDING));
 }
 
@@ -18,7 +17,8 @@ export function getAgnosticPath(path: string): string {
 
 export function getWorkingDir(): string {
   const activeEditor = window.activeTextEditor;
-  if (!activeEditor) {
+  // an untitled document has its directory as home, so we check workspace folders for this too
+  if (!activeEditor || activeEditor.document.isUntitled) {
     // check if workspace files/folders exist, else throw an error
     if (workspace.workspaceFolders) {
       const wf = workspace.workspaceFolders[0];

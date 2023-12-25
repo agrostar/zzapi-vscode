@@ -49,7 +49,6 @@ export async function showVariables(): Promise<void> {
   }
 
   getOutputChannel().append(content);
-  getOutputChannel().show(true);
 }
 
 export async function showRecentHeaders(): Promise<void> {
@@ -63,5 +62,4 @@ export async function showRecentHeaders(): Promise<void> {
   else outputChannel.appendLine("No headers stored, run a request and try again");
 
   outputChannel.appendLine("----------");
-  outputChannel.show(true);
 }

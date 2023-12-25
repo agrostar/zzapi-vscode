@@ -28,6 +28,12 @@
   "main": "dist/extension.js",
   "icon": "images/zzapi.png",
   "contributes": {
+    "viewsWelcome": [
+      {
+        "view": "zzapiCustomView",
+        "contents": "Select a zzAPI bundle to see the corresponding tree view here!\n[Add Sample Directory](command:extension.scaffolding)"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -53,6 +59,22 @@
         "icon": {
           "light": "images/icons/play.png",
           "dark": "images/icons/play.png"
+        }
+      },
+      {
+        "command": "zzapiCustomView.treeViewRunAll", 
+        "title": "Run All Requests",
+        "icon": {
+          "light": "images/icons/playAll.png",
+          "dark": "images/icons/playAll.png"
+        }
+      },
+      {
+        "command": "zzapiCustomView.goToEnvFile",
+        "title": "Open the file corresponding to the env",
+        "icon": {
+          "light": "images/icons/fileIcon.png",
+          "dark": "images/icons/fileIcon.png"
         }
       },
       {
@@ -141,18 +163,28 @@
       "view/item/context": [
         {
           "command": "zzapiCustomView.treeViewRun",
-          "when": "view == zzapiCustomView",
+          "when": "view == zzapiCustomView && viewItem == request",
+          "group": "inline@0"
+        },
+        {
+          "command": "zzapiCustomView.treeViewRunAll",
+          "when": "view == zzapiCustomView && viewItem == requestNode",
           "group": "inline@0"
         },
         {
           "command": "zzapiCustomView.treeViewCurl",
-          "when": "view == zzapiCustomView",
+          "when": "view == zzapiCustomView && viewItem == request",
           "group": "inline@1"
         },
         {
           "command": "zzapiCustomView.goToRequest",
-          "when": "view == zzapiCustomView",
+          "when": "view == zzapiCustomView && (viewItem == request || viewItem == requestNode)",
           "group": "inline@2"
+        },
+        {
+          "command": "zzapiCustomView.goToEnvFile",
+          "when": "view == zzapiCustomView && viewItem == env",
+          "group": "inline@0"
         }
       ],
       "editor/context": [
