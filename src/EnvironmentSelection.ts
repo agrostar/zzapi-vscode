@@ -40,12 +40,12 @@ export function setEnvironment(statusBar: StatusBarItem, env: string): void {
   }
 }
 
-export function getContentIfBundle(): string {
+export function getContentIfBundle(): string | undefined {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && documentIsBundle(activeEditor.document)) {
     return activeEditor.document.getText();
   } else {
-    return "";
+    return undefined;
   }
 }
 
@@ -53,6 +53,12 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     const bundleContents = getContentIfBundle();
     const envNames = getEnvNames(getWorkingDir(), bundleContents);
+    if (envNames.includes(NO_ENV)) {
+      window.showWarningMessage(
+        `${NO_ENV} is the default environment denoting "no-selection".` +
+          ` Using it as your own env name could lead to undesired results.`,
+      );
+    }
     envNames.push(NO_ENV);
     window
       .showQuickPick(envNames, {

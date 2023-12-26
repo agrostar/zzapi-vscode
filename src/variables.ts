@@ -58,7 +58,7 @@ export function getEnvPaths(dirPath: string): { [name: string]: string } {
   return filePaths;
 }
 
-export function getEnvNames(dirPath: string, bundleContent: string): string[] {
+export function getEnvNames(dirPath: string, bundleContent: string | undefined): string[] {
   return getEnvironments(bundleContent, getVarFileContents(dirPath));
 }
 
