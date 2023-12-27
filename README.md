@@ -11,7 +11,7 @@ This extension makes it easy to create, document and test API requests from with
 
 ## Features
 
-![screencast](https<video src="./images/screencast.mp4" controls title="zzapi-demo"></video>)
+<video src="./images/screencast.mp4" controls title="zzapi-demo"></video>
 
 * Provides Code Lenses above requests when a `.zzb` file is opened. These are mini-buttons that execute a request or all requests in a bundle.
 * Provides the ability to choose environments (sets of variables) to use when running requests.
