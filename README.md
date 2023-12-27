@@ -11,7 +11,7 @@ This extension makes it easy to create, document and test API requests from with
 
 ## Features
 
-https://github.com/agrostar/zzapi-vscode/assets/125901917/51043822-e5e7-4eea-b9bc-ae3c5783e028
+![screencast](https://raw.githubusercontent.com/agrostar/zzapi-vscode/main/images/screencast.gif)
 
 * Provides Code Lenses above requests when a `.zzb` file is opened. These are mini-buttons that execute a request or all requests in a bundle.
 * Provides the ability to choose environments (sets of variables) to use when running requests.
