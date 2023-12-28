@@ -17,8 +17,6 @@ import { getSelectedEnvs, storeEnv } from "./utils/environmentUtils";
 
 let DISPOSABLES: Disposable[] = [];
 
-let CURR_BUNDLE_PATH: string = "";
-
 async function getReqNameAsInput(commandName: string): Promise<string> {
   const activeEditor = window.activeTextEditor;
   if (!activeEditor) throw new Error("Ensure your bundle is the active text editor");
@@ -59,21 +57,15 @@ export function activate(context: ExtensionContext): void {
     if (activeEditor && documentIsBundle(activeEditor.document)) {
       const editorPath = activeEditor.document.uri.path;
 
-      // if we are referring to a new bundle
-      if (editorPath !== CURR_BUNDLE_PATH) {
-        CURR_BUNDLE_PATH = editorPath;
-        if (!getSelectedEnvs().hasOwnProperty(editorPath)) storeEnv();
-        setEnvironment(statusBar, getSelectedEnvs()[editorPath]);
+      if (!getSelectedEnvs().hasOwnProperty(editorPath)) storeEnv();
+      setEnvironment(statusBar, getSelectedEnvs()[editorPath]);
 
-        getVarStore().resetCapturedVariables();
-      }
+      getVarStore().resetCapturedVariables();
     }
   });
   context.subscriptions.push(bundleChangeHandler);
 
   const zzApiVersion: string = context.extension.packageJSON.version;
-
-  languages.registerCodeLensProvider("*", new CodeLensProvider());
   let disposable = commands.registerCommand("extension.runRequest", async (name) => {
     // calls from command pallete will lead to undefined name because we do not set args in package.json
     if (!name) name = await getReqNameAsInput("runRequest");
@@ -117,6 +109,8 @@ export function activate(context: ExtensionContext): void {
     scaffold();
   });
   context.subscriptions.push(disposable);
+
+  languages.registerCodeLensProvider("*", new CodeLensProvider());
 }
 
 export function deactivate(): void {
