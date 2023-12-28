@@ -1,5 +1,13 @@
 import * as YAML from "yaml";
-import { ExtensionContext, languages, commands, window, StatusBarAlignment, Disposable } from "vscode";
+import {
+  ExtensionContext,
+  languages,
+  commands,
+  window,
+  StatusBarAlignment,
+  Disposable,
+  workspace,
+} from "vscode";
 
 import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
@@ -64,6 +72,12 @@ export function activate(context: ExtensionContext): void {
     }
   });
   context.subscriptions.push(bundleChangeHandler);
+
+  const documentChangeHandler = workspace.onDidChangeTextDocument((changeEvent) => {
+    if (changeEvent.document !== window.activeTextEditor?.document) return;
+    getTreeView().refresh();
+  });
+  context.subscriptions.push(documentChangeHandler);
 
   const zzApiVersion: string = context.extension.packageJSON.version;
   let disposable = commands.registerCommand("extension.runRequest", async (name) => {

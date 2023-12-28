@@ -154,6 +154,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
   }
 
   envPaths: { [env: string]: string } = {};
+  readonly selectedSuffix = " (selected)";
 
   private readEnvironments() {
     this.envPaths = {};
@@ -163,33 +164,36 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
 
     let environments: _TreeItem[] = [];
     this.envPaths = getEnvPaths(getWorkingDir());
-    Object.keys(this.envPaths).forEach((env) => {
-      const envName = env + (env === getActiveEnv() ? " (selected)" : "");
+    for (const env in this.envPaths) {
+      const envName = env + (env === getActiveEnv() ? this.selectedSuffix : "");
       const item = new _TreeItem(envName);
       item.contextValue = "env";
       environments.push(item);
-    });
-
-    if (environments.length > 0) {
-      const mainEnvNode = new _TreeItem("environments");
-      mainEnvNode.contextValue = "envNode";
-      environments.forEach((env) => mainEnvNode.addChild(env));
-      this.data.push(mainEnvNode);
     }
+
+    const mainEnvNode = new _TreeItem("environments" + (environments.length === 0 ? " (none)" : ""));
+    mainEnvNode.contextValue = "envNode";
+    environments.forEach((env) => mainEnvNode.addChild(env));
+    this.data.push(mainEnvNode);
   }
 
   goToEnvFile(item: _TreeItem) {
     if (!(item && item.label)) return;
 
-    const openPath = this.envPaths[item.label.toString()];
+    let envName = item.label.toString();
+    if (envName.endsWith(this.selectedSuffix)) envName = envName.slice(0, -this.selectedSuffix.length);
+
+    const openPath = this.envPaths[envName];
     if (openPath) {
       if (openPath === window.activeTextEditor?.document.uri.fsPath) {
-        window.showInformationMessage(`env "${item.label.toString()}" is contained in the current file`);
+        window.showInformationMessage(`env "${envName}" is contained in the current file`);
       } else {
         workspace.openTextDocument(openPath).then((doc) => {
           window.showTextDocument(doc);
         });
       }
+    } else {
+      window.showErrorMessage(`Could not find path to env ${envName}`);
     }
   }
 }
