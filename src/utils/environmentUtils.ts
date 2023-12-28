@@ -1,4 +1,5 @@
 import { window } from "vscode";
+
 import { documentIsBundle } from "./pathUtils";
 
 const NO_ENV = "-- None --" as const;

@@ -3,6 +3,7 @@ import { ExtensionContext, languages, commands, window, StatusBarAlignment, Disp
 
 import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
+import { getSelectedEnvs, storeEnv } from "./utils/environmentUtils";
 
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
@@ -13,7 +14,6 @@ import { getVarStore } from "./variables";
 import { scaffold } from "./scaffolding";
 import { CodeLensProvider } from "./CodeLensProviders";
 import { getTreeView } from "./treeView";
-import { getSelectedEnvs, storeEnv } from "./utils/environmentUtils";
 
 let DISPOSABLES: Disposable[] = [];
 

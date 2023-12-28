@@ -1,13 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as YAML from "yaml";
+import { window } from "vscode";
 
 import { getEnvironments } from "zzapi";
 import { VarStore } from "zzapi";
 
 import { documentIsBundle, getAgnosticPath, getWorkingDir } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
-import { window } from "vscode";
 
 const VARFILE_EXTENSION = ".zzv";
 
