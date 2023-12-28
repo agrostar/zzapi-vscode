@@ -9,6 +9,15 @@ export function documentIsBundle(document: TextDocument): boolean {
   return BUNDLE_FILE_NAME_ENDINGS.some((ENDING) => docFsPath.endsWith(ENDING));
 }
 
+export function getContentIfBundle(): string | undefined {
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor && documentIsBundle(activeEditor.document)) {
+    return activeEditor.document.getText();
+  } else {
+    return undefined;
+  }
+}
+
 export function getAgnosticPath(path: string): string {
   const pathParsed = path.split("\\").join("/");
   const pathUri = Uri.file(pathParsed);

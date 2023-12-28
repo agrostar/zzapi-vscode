@@ -11,11 +11,12 @@ import {
   window,
   workspace,
 } from "vscode";
+import { RequestPosition, getRequestPositions } from "zzapi";
 
 import { documentIsBundle, getWorkingDir } from "./utils/pathUtils";
-import { RequestPosition, getRequestPositions } from "zzapi";
+import { getActiveEnv } from "./utils/environmentUtils";
+
 import { getEnvPaths } from "./variables";
-import { getActiveEnv } from "./EnvironmentSelection";
 
 class _TreeItem extends TreeItem {
   readonly startLine: number;

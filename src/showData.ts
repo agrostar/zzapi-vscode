@@ -3,11 +3,11 @@ import * as YAML from "yaml";
 import { loadVariables } from "zzapi";
 
 import { getOutputChannel } from "./utils/outputChannel";
-import { getWorkingDir } from "./utils/pathUtils";
+import { getContentIfBundle, getWorkingDir } from "./utils/pathUtils";
+import { getActiveEnv } from "./utils/environmentUtils";
 
 import { getRecentHeadersData } from "./showInEditor";
 import { getVarFileContents, getVarStore } from "./variables";
-import { getActiveEnv, getContentIfBundle } from "./EnvironmentSelection";
 
 export async function showVariables(): Promise<void> {
   const loadedVariables = loadVariables(

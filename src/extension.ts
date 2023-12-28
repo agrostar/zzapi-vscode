@@ -6,19 +6,14 @@ import { isDict } from "./utils/typeUtils";
 
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
-import {
-  createEnvironmentSelector,
-  getSelectedEnvs,
-  initialiseStatusBar,
-  setEnvironment,
-  storeEnv,
-} from "./EnvironmentSelection";
+import { createEnvironmentSelector, initialiseStatusBar, setEnvironment } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
 import { addSampleGet, addSamplePost } from "./addSamples";
 import { getVarStore } from "./variables";
 import { scaffold } from "./scaffolding";
 import { CodeLensProvider } from "./CodeLensProviders";
 import { getTreeView } from "./treeView";
+import { getSelectedEnvs, storeEnv } from "./utils/environmentUtils";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -67,7 +62,7 @@ export function activate(context: ExtensionContext): void {
       // if we are referring to a new bundle
       if (editorPath !== CURR_BUNDLE_PATH) {
         CURR_BUNDLE_PATH = editorPath;
-        if (!getSelectedEnvs().hasOwnProperty(editorPath)) storeEnv(true);
+        if (!getSelectedEnvs().hasOwnProperty(editorPath)) storeEnv();
         setEnvironment(statusBar, getSelectedEnvs()[editorPath]);
 
         getVarStore().resetCapturedVariables();

@@ -5,8 +5,8 @@ import { loadVariables } from "zzapi";
 
 import { getOutputChannel } from "./utils/outputChannel";
 import { getWorkingDir } from "./utils/pathUtils";
+import { getActiveEnv } from "./utils/environmentUtils";
 
-import { getActiveEnv } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
 export function showCurl(text: string, name: string, extensionVersion: string): void {

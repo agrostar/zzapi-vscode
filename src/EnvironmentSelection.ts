@@ -1,52 +1,35 @@
 import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "vscode";
 
-import { documentIsBundle, getWorkingDir } from "./utils/pathUtils";
+import { getContentIfBundle, getWorkingDir } from "./utils/pathUtils";
+import { getActiveEnv, getDefaultEnv, setActiveEnv } from "./utils/environmentUtils";
 
 import { getEnvNames } from "./variables";
 import { getTreeView } from "./treeView";
 
-const NO_ENV = "-- None --";
-export function getDefaultEnv(): string {
-  return NO_ENV;
-}
-
-let ACTIVE_ENV: string = NO_ENV;
-
-export function getActiveEnv(): string {
-  return ACTIVE_ENV;
-}
-
-export function resetActiveEnv(statusBar: StatusBarItem): void {
-  ACTIVE_ENV = NO_ENV;
-  storeEnv();
-  statusBar.text = "zzAPI: no env";
-  const activeEditor = window.activeTextEditor;
-  if (activeEditor && documentIsBundle(activeEditor.document)) {
-    statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
-  }
-}
-
 export function initialiseStatusBar(context: ExtensionContext, statusBar: StatusBarItem): void {
-  resetActiveEnv(statusBar);
+  resetActiveEnvInStatusBar(statusBar);
   statusBar.command = "extension.clickEnvSelector";
   statusBar.show();
   context.subscriptions.push(statusBar);
 }
 
-export function setEnvironment(statusBar: StatusBarItem, env: string): void {
-  if (env === NO_ENV) {
-    resetActiveEnv(statusBar);
-  } else {
-    setCurrentEnvName(statusBar, env);
-  }
+function resetActiveEnvInStatusBar(statusBar: StatusBarItem): void {
+  setActiveEnv();
+  statusBar.text = "zzAPI: no env";
+  statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
 }
 
-export function getContentIfBundle(): string | undefined {
-  const activeEditor = window.activeTextEditor;
-  if (activeEditor && documentIsBundle(activeEditor.document)) {
-    return activeEditor.document.getText();
+function setCurrentEnvNameInStatusBar(statusBar: StatusBarItem, envName: string): void {
+  setActiveEnv(envName);
+  statusBar.text = `zzAPI env: ${getActiveEnv()}`;
+  statusBar.backgroundColor = undefined;
+}
+
+export function setEnvironment(statusBar: StatusBarItem, env: string): void {
+  if (env === getDefaultEnv()) {
+    resetActiveEnvInStatusBar(statusBar);
   } else {
-    return undefined;
+    setCurrentEnvNameInStatusBar(statusBar, env);
   }
 }
 
@@ -54,13 +37,13 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     const bundleContents = getContentIfBundle();
     const envNames = getEnvNames(getWorkingDir(), bundleContents);
-    if (envNames.includes(NO_ENV)) {
+    if (envNames.includes(getDefaultEnv())) {
       window.showWarningMessage(
-        `${NO_ENV} is the default environment denoting "no-selection".` +
+        `${getDefaultEnv()} is the default environment denoting "no-selection".` +
           ` Using it as your own env name could lead to undesired results.`,
       );
     }
-    envNames.push(NO_ENV);
+    envNames.push(getDefaultEnv());
     window
       .showQuickPick(envNames, {
         placeHolder: "Select a variable set",
@@ -74,26 +57,4 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
       });
   });
   context.subscriptions.push(statusClick);
-}
-
-export function setCurrentEnvName(statusBar: StatusBarItem, envName: string): void {
-  ACTIVE_ENV = envName;
-  storeEnv();
-  statusBar.text = `zzAPI env: ${ACTIVE_ENV}`;
-  statusBar.backgroundColor = undefined;
-}
-
-let SELECTED_ENVS: { [bundlePath: string]: string } = {};
-
-export function getSelectedEnvs(): { [bundlePath: string]: string } {
-  return SELECTED_ENVS;
-}
-
-// if store default is true, then we store the default env, else the active one
-export function storeEnv(storeDefault?: boolean): void {
-  const activeEditor = window.activeTextEditor;
-  if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
-
-  const envPath = activeEditor.document.uri.path;
-  SELECTED_ENVS[envPath] = storeDefault ? getDefaultEnv() : getActiveEnv();
 }

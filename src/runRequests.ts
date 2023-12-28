@@ -3,10 +3,10 @@ import { getAllRequestSpecs, getRequestSpec } from "zzapi";
 import { loadVariables } from "zzapi";
 
 import { getWorkingDir } from "./utils/pathUtils";
+import { getActiveEnv } from "./utils/environmentUtils";
 
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import { allRequestsWithProgress } from "./getResponse";
-import { getActiveEnv } from "./EnvironmentSelection";
 import { getVarFileContents, getVarStore } from "./variables";
 
 async function runRequests(

@@ -3,8 +3,7 @@ import { window, commands, workspace, TextDocument, WorkspaceEdit, Range, langua
 import { ResponseData } from "zzapi";
 
 import { getOutputChannel } from "./utils/outputChannel";
-
-import { getActiveEnv } from "./EnvironmentSelection";
+import { getActiveEnv } from "./utils/environmentUtils";
 
 const KEYS_IN_BODY = ["body"];
 const KEYS_IN_HEADERS = ["rawHeaders"];
