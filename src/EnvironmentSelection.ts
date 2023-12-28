@@ -3,6 +3,7 @@ import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "v
 import { documentIsBundle, getWorkingDir } from "./utils/pathUtils";
 
 import { getEnvNames } from "./variables";
+import { getTreeView } from "./treeView";
 
 const NO_ENV = "-- None --";
 export function getDefaultEnv(): string {
@@ -69,6 +70,7 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
       .then((selectedEnvName) => {
         if (!selectedEnvName) return;
         setEnvironment(statusBar, selectedEnvName);
+        getTreeView().refresh();
       });
   });
   context.subscriptions.push(statusClick);

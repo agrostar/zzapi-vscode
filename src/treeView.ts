@@ -15,6 +15,7 @@ import {
 import { documentIsBundle, getWorkingDir } from "./utils/pathUtils";
 import { RequestPosition, getRequestPositions } from "zzapi";
 import { getEnvPaths } from "./variables";
+import { getActiveEnv } from "./EnvironmentSelection";
 
 class _TreeItem extends TreeItem {
   readonly startLine: number;
@@ -162,7 +163,8 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     let environments: _TreeItem[] = [];
     this.envPaths = getEnvPaths(getWorkingDir());
     Object.keys(this.envPaths).forEach((env) => {
-      const item = new _TreeItem(env);
+      const envName = env + (env === getActiveEnv() ? " (selected)" : "");
+      const item = new _TreeItem(envName);
       item.contextValue = "env";
       environments.push(item);
     });
