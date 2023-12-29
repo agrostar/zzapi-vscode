@@ -6,7 +6,7 @@ import { window } from "vscode";
 import { getEnvironments } from "zzapi";
 import { VarStore } from "zzapi";
 
-import { documentIsBundle, getAgnosticPath, getWorkingDir } from "./utils/pathUtils";
+import { documentIsBundle, getWorkingDir } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
 
 const VARFILE_EXTENSION = ".zzv";
@@ -71,10 +71,7 @@ export function replaceFileContentsInString(doc: string): string {
   const fileRegex = /file:\/\/([^\s]+)/g;
 
   return doc.replace(fileRegex, (_, givenFilePath) => {
-    const filePath =
-      givenFilePath.startsWith("./") || givenFilePath.startsWith(".\\")
-        ? path.join(getWorkingDir(), getAgnosticPath(givenFilePath))
-        : path.resolve(givenFilePath);
+    const filePath = path.resolve(getWorkingDir(), givenFilePath);
     return fs.readFileSync(filePath, "utf-8");
   });
 }

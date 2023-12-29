@@ -1,5 +1,5 @@
 import path from "path";
-import { TextDocument, Uri, window, workspace } from "vscode";
+import { TextDocument, window, workspace } from "vscode";
 
 // remember to check the package.json and add yamlValidation to all paths here
 const BUNDLE_FILE_NAME_ENDINGS = [".zzb", ".zzb.yml", ".zzb.yaml"] as const;
@@ -16,12 +16,6 @@ export function getContentIfBundle(): string | undefined {
   } else {
     return undefined;
   }
-}
-
-export function getAgnosticPath(path: string): string {
-  const pathParsed = path.split("\\").join("/");
-  const pathUri = Uri.file(pathParsed);
-  return pathUri.fsPath;
 }
 
 export function getWorkingDir(): string {
