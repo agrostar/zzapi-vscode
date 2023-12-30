@@ -1,4 +1,4 @@
-import { Uri, window, workspace } from "vscode";
+import { window, workspace } from "vscode";
 
 import { convertCollection, convertEnvironment } from "zzapi";
 
@@ -15,13 +15,9 @@ export async function importPostmanCommand(): Promise<void> {
     return;
   }
 
-  const path = file[0].path;
-  const pathParsed = path.split("\\").join("/");
-  const pathUri = Uri.file(pathParsed);
-  const pathStr = pathUri.fsPath;
-
+  const path = file[0].fsPath;
   try {
-    const content = convertCollection(pathStr);
+    const content = convertCollection(path);
     const doc = await workspace.openTextDocument({ content, language: "yaml" });
     window.showTextDocument(doc);
   } catch (e: any) {
@@ -43,13 +39,9 @@ export async function importPostmanEnvironment(): Promise<void> {
     return;
   }
 
-  const path = file[0].path;
-  const pathParsed = path.split("\\").join("/");
-  const pathUri = Uri.file(pathParsed);
-  const pathStr = pathUri.fsPath;
-
+  const path = file[0].fsPath;
   try {
-    const content = convertEnvironment(pathStr);
+    const content = convertEnvironment(path);
     await openDocument(content, "yaml");
   } catch (e: any) {
     console.log(e);
