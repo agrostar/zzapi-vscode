@@ -11,7 +11,7 @@ import {
 
 import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
-import { getSelectedEnvs, storeEnv } from "./utils/environmentUtils";
+import { getActiveEnv } from "./utils/environmentUtils";
 
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
@@ -63,11 +63,7 @@ export function activate(context: ExtensionContext): void {
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
     getTreeView().refresh();
     if (activeEditor && documentIsBundle(activeEditor.document)) {
-      const editorPath = activeEditor.document.uri.path;
-
-      if (!getSelectedEnvs().hasOwnProperty(editorPath)) storeEnv();
-      setEnvironment(statusBar, getSelectedEnvs()[editorPath]);
-
+      setEnvironment(statusBar, getActiveEnv());
       getVarStore().resetCapturedVariables();
     }
   });
