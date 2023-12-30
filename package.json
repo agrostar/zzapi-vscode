@@ -188,9 +188,19 @@
           "group": "inline@0"
         },
         {
+          "command": "extension.treeViewRun",
+          "when": "view == zzapiCustomView && viewItem == request",
+          "group": "zzapiCustomView@0"
+        },
+        {
           "command": "extension.treeViewRunAll",
           "when": "view == zzapiCustomView && viewItem == requestNode",
           "group": "inline@0"
+        },
+        {
+          "command": "extension.treeViewRunAll",
+          "when": "view == zzapiCustomView && viewItem == requestNode",
+          "group": "zzapiCustomView@0"
         },
         {
           "command": "extension.treeViewCurl",
@@ -198,14 +208,29 @@
           "group": "inline@1"
         },
         {
+          "command": "extension.treeViewCurl",
+          "when": "view == zzapiCustomView && viewItem == request",
+          "group": "zzapiCustomView@1"
+        },
+        {
           "command": "extension.goToRequest",
           "when": "view == zzapiCustomView && (viewItem == request || viewItem == requestNode)",
           "group": "inline@2"
         },
         {
+          "command": "extension.goToRequest",
+          "when": "view == zzapiCustomView && (viewItem == request || viewItem == requestNode)",
+          "group": "zzapiCustomView@2"
+        },
+        {
           "command": "extension.goToEnvFile",
           "when": "view == zzapiCustomView && viewItem == env",
           "group": "inline@0"
+        },
+        {
+          "command": "extension.goToEnvFile",
+          "when": "view == zzapiCustomView && viewItem == env",
+          "group": "zzapiCustomView@0"
         }
       ],
       "editor/context": [
