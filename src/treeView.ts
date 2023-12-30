@@ -146,8 +146,8 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     }
   }
 
-  envPaths: { [env: string]: string } = {};
-  readonly selectedSuffix = " (selected)";
+  private envPaths: { [env: string]: string } = {};
+  private readonly selectedSuffix = " (selected)";
 
   private readEnvironments() {
     this.envPaths = {};

@@ -106,37 +106,19 @@ export function isOpenAndUntitled(document: TextDocument): boolean {
 
 let MOST_RECENT_HEADERS: string | undefined = undefined;
 let MOST_RECENT_REQUEST_NAME: string | undefined = undefined;
-export function getRecentHeadersData(): {
-  recentHeaders: string | undefined;
-  recentRequestName: string | undefined;
-} {
+export function getRecentHeadersData(): { recentHeaders?: string; recentRequestName?: string } {
   return { recentHeaders: MOST_RECENT_HEADERS, recentRequestName: MOST_RECENT_REQUEST_NAME };
 }
 
-/**
- * Master function to show the content in the new windows or replace them
- *  in the current windows
- *
- * @param bodyContent The body of the response, or the set of all responses
- * @param headersContent The headers of the response, or the set of all
- *  responses
- * @param name Optional parameter. If name is specified then we are trying to
- *  show an individual request's response, else we are trying to show runAllRequest's
- *  response. Thus, any name === undefined test is to determine this.
- * @returns (void)
- */
 async function showContent(
   bodyContent: string,
   headersContent: string,
   showHeaders: boolean,
   name?: string,
 ): Promise<void> {
-  if (window.activeTextEditor === undefined) {
-    return;
-  }
+  if (!window.activeTextEditor) return;
 
-  let bodyLanguage: string | undefined;
-  bodyLanguage = "json";
+  let bodyLanguage: string | undefined = "json";
   try {
     JSON.parse(bodyContent);
   } catch {
@@ -144,16 +126,11 @@ async function showContent(
   }
 
   const bodyDoc = OPEN_DOCS.body;
-
-  if (bodyDoc === undefined || !isOpenAndUntitled(bodyDoc)) {
+  if (!(bodyDoc && isOpenAndUntitled(bodyDoc))) {
     // insert a new group to the right, insert the content
     commands.executeCommand("workbench.action.newGroupRight");
     await openDocument(bodyContent, bodyLanguage);
-    let bodyDocument: TextDocument | undefined = undefined;
-    if (window.activeTextEditor !== undefined) {
-      bodyDocument = window.activeTextEditor.document;
-    }
-    OPEN_DOCS.body = bodyDocument;
+    OPEN_DOCS.body = window.activeTextEditor?.document;
   } else {
     await replaceContent(bodyDoc, bodyContent, bodyLanguage);
     OPEN_DOCS.body = bodyDoc;
@@ -161,6 +138,7 @@ async function showContent(
 
   if (name) {
     if (showHeaders) {
+      // if showheaders and if we are running an individual request, then show them
       const outputChannel = getOutputChannel();
 
       outputChannel.appendLine("----------");
@@ -168,6 +146,7 @@ async function showContent(
       outputChannel.appendLine("----------");
       outputChannel.show(true);
     }
+    // save the most recent headers and request name if we are running an individual request
     MOST_RECENT_HEADERS = headersContent;
     MOST_RECENT_REQUEST_NAME = name;
   }

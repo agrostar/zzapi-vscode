@@ -9,34 +9,22 @@ import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEd
 import { allRequestsWithProgress } from "./getResponse";
 import { getVarFileContents, getVarStore } from "./variables";
 
-async function runRequests(
+async function runRequestSpecs(
   requests: { [name: string]: RequestSpec },
-  bundleContent: string,
   extensionVersion: string,
 ): Promise<void> {
-  const loadedVariables = loadVariables(
-    getActiveEnv(),
-    bundleContent,
-    getVarFileContents(getWorkingDir()),
-  );
-  getVarStore().setLoadedVariables(loadedVariables);
-
   for (const name in requests) {
     const request = requests[name];
-    const autoHeaders: { [key: string]: string } = {
-      "user-agent": "zzAPI-vscode/" + extensionVersion,
-    };
 
-    if (request.httpRequest.body && typeof request.httpRequest.body == "object") {
+    const autoHeaders: { [key: string]: string } = {};
+    autoHeaders["user-agent"] = "zzAPI-vscode/" + extensionVersion;
+    if (request.httpRequest.body && typeof request.httpRequest.body == "object")
       autoHeaders["content-type"] = "application/json";
-    }
 
     request.httpRequest.headers = Object.assign(autoHeaders, request.httpRequest.headers);
   }
 
   const allResponses = await allRequestsWithProgress(requests);
-
-  let atleastOneExecuted = false;
   let responses: Array<{ name: string; response: ResponseData }> = [];
 
   allResponses.forEach((ResponseData) => {
@@ -44,40 +32,25 @@ async function runRequests(
     const response = ResponseData.response;
     const name = ResponseData.name;
 
-    if (!cancelled) {
-      atleastOneExecuted = true;
-      responses.push({ name: name, response: response });
-    }
+    if (!cancelled) responses.push({ name: name, response: response });
   });
 
-  if (atleastOneExecuted) {
-    if (Object.keys(requests).length > 1) {
-      await openEditorForAllRequests(responses);
-    } else {
-      const name = Object.keys(requests)[0];
-      const theRequest = requests[name];
-      const theResponse = allResponses[0].response;
-      await openEditorForIndividualReq(
-        theResponse,
-        name,
-        theRequest.options.keepRawJSON,
-        theRequest.options.showHeaders,
-      );
-    }
+  if (responses.length > 1) {
+    await openEditorForAllRequests(responses);
+  } else if (responses.length === 1) {
+    const resp = responses[0].response;
+    const name = responses[0].name;
+    const req = requests[name];
+    await openEditorForIndividualReq(resp, name, req.options.keepRawJSON, req.options.showHeaders);
   }
 }
 
-export async function runOneRequest(
-  text: string,
-  name: string,
-  extensionVersion: string,
-): Promise<void> {
-  const request: RequestSpec = getRequestSpec(text, name);
-  const requests: { [name: string]: RequestSpec } = { [name]: request };
-  await runRequests(requests, text, extensionVersion);
-}
+export async function runRequests(text: string, extensionVersion: string, name?: string): Promise<void> {
+  const loadedVariables = loadVariables(getActiveEnv(), text, getVarFileContents(getWorkingDir()));
+  getVarStore().setLoadedVariables(loadedVariables);
 
-export async function runAllRequests(text: string, extensionVersion: string): Promise<void> {
-  const allRequests = getAllRequestSpecs(text);
-  await runRequests(allRequests, text, extensionVersion);
+  const requests: { [req: string]: RequestSpec } = name
+    ? { [name]: getRequestSpec(text, name) }
+    : getAllRequestSpecs(text);
+  await runRequestSpecs(requests, extensionVersion);
 }

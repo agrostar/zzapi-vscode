@@ -51,6 +51,8 @@ async function getReqNameAsInput(commandName: string): Promise<string> {
     });
 }
 
+let CURR_BUNDLE_PATH: string | undefined = undefined;
+
 export function activate(context: ExtensionContext): void {
   window.registerTreeDataProvider("zzapiCustomView", getTreeView());
   getTreeView().refresh();
@@ -64,7 +66,11 @@ export function activate(context: ExtensionContext): void {
     getTreeView().refresh();
     if (activeEditor && documentIsBundle(activeEditor.document)) {
       setEnvironment(statusBar, getActiveEnv());
-      getVarStore().resetCapturedVariables();
+      // even output channel etc triggers bundleChangeHandler. So we explicitly store the previous bundle
+      if (activeEditor.document.uri.fsPath !== CURR_BUNDLE_PATH) {
+        getVarStore().resetCapturedVariables();
+        CURR_BUNDLE_PATH = activeEditor.document.uri.fsPath;
+      }
     }
   });
   context.subscriptions.push(bundleChangeHandler);

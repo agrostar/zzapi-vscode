@@ -48,7 +48,7 @@ export function getEnvPaths(dirPath: string): { [name: string]: string } {
   if (activeEditor && documentIsBundle(activeEditor.document)) {
     const text = activeEditor.document.getText();
     const parsedData = YAML.parse(text);
-    if (isDict(parsedData) && parsedData.hasOwnProperty("variables") && isDict(parsedData.variables)) {
+    if (isDict(parsedData) && isDict(parsedData.variables)) {
       Object.keys(parsedData.variables).forEach(
         (env) => (filePaths[env] = activeEditor.document.uri.fsPath),
       );
