@@ -12,11 +12,56 @@ import {
   workspace,
 } from "vscode";
 import { RequestPosition, getRequestPositions } from "zzapi";
+import path from "path";
+import * as fs from "fs";
+import * as YAML from "yaml";
 
-import { documentIsBundle, getWorkingDir } from "./utils/pathUtils";
-import { getActiveEnv } from "./utils/environmentUtils";
+import { BUNDLE_FILE_NAME_ENDINGS, documentIsBundle, getWorkingDir } from "./utils/pathUtils";
+import { getActiveEnv, getDefaultEnv } from "./utils/environmentUtils";
+import { isDict } from "./utils/typeUtils";
 
-import { getEnvPaths } from "./variables";
+import { setEnvironment } from "./EnvironmentSelection";
+import { getVarFilePaths } from "./variables";
+
+export function getEnvPaths(dirPath: string): { [name: string]: string } {
+  let filePaths: { [name: string]: string } = {};
+
+  const varFiles = getVarFilePaths(dirPath);
+  varFiles.forEach((vf) => {
+    const fileData = fs.readFileSync(vf, "utf-8");
+    const parsedData = YAML.parse(fileData);
+    if (isDict(parsedData)) {
+      Object.keys(parsedData).forEach((env) => (filePaths[env] = vf));
+    }
+  });
+
+  const activeEditor = window.activeTextEditor;
+  if (activeEditor && documentIsBundle(activeEditor.document)) {
+    const text = activeEditor.document.getText();
+    const parsedData = YAML.parse(text);
+    if (isDict(parsedData) && isDict(parsedData.variables)) {
+      Object.keys(parsedData.variables).forEach(
+        (env) => (filePaths[env] = activeEditor.document.uri.fsPath),
+      );
+    }
+  }
+
+  return filePaths;
+}
+
+export function getBundlePaths(dirPath: string): { [name: string]: string } {
+  let filePaths: { [name: string]: string } = {};
+
+  const dirContents = fs.readdirSync(dirPath, { recursive: false, encoding: "utf-8" });
+  const bundles = dirContents.filter((file) =>
+    BUNDLE_FILE_NAME_ENDINGS.some((ending) => path.extname(file) === ending),
+  );
+  const bundlePaths = bundles.map((file) => path.join(dirPath, file));
+
+  bundlePaths.forEach((bp) => (filePaths[path.basename(bp)] = bp));
+
+  return filePaths;
+}
 
 class _TreeItem extends TreeItem {
   readonly startLine: number;
@@ -62,36 +107,20 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     commands.registerCommand("extension.goToEnvFile", (item) => {
       this.goToEnvFile(item);
     });
+    commands.registerCommand("extension.selectEnvFromTreeView", (item) => {
+      this.selectEnvironment(item);
+    });
+
+    commands.registerCommand("extension.goToBundleFile", (item) => {
+      this.goToBundleFile(item);
+    });
 
     commands.registerCommand("extension.refreshView", () => {
       this.refresh();
     });
   }
 
-  async treeViewRun(item: _TreeItem) {
-    if (!(item && item.label)) return;
-    await commands.executeCommand("extension.runRequest", item.label.toString());
-  }
-
-  async treeViewRunAll() {
-    await commands.executeCommand("extension.runAllRequests");
-  }
-
-  treeViewCurl(item: _TreeItem) {
-    if (!(item && item.label)) return;
-    commands.executeCommand("extension.showCurl", item.label.toString());
-  }
-
-  goToRequest(item: _TreeItem) {
-    const activeEditor = window.activeTextEditor;
-    if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
-    // try to start at the previous line so the codelens is also visible
-    const startPos = new Position(item.startLine > 0 ? item.startLine - 1 : 0, 0);
-    const endPos = new Position(item.endLine, 0);
-    activeEditor.revealRange(new Range(startPos, endPos), 3); // 3 = AtTop
-  }
-
-  getTreeItem(item: _TreeItem): TreeItem | Thenable<TreeItem> {
+  getTreeItem(item: _TreeItem): TreeItem {
     const title = item.label!.toString();
     const resItem = new TreeItem(title, item.collapsibleState);
     resItem.contextValue = item.contextValue;
@@ -106,7 +135,30 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     }
   }
 
-  private readDocument() {
+  async treeViewRun(item: _TreeItem): Promise<void> {
+    if (!(item && item.label)) return;
+    await commands.executeCommand("extension.runRequest", item.label.toString());
+  }
+
+  async treeViewRunAll(): Promise<void> {
+    await commands.executeCommand("extension.runAllRequests");
+  }
+
+  treeViewCurl(item: _TreeItem): void {
+    if (!(item && item.label)) return;
+    commands.executeCommand("extension.showCurl", item.label.toString());
+  }
+
+  goToRequest(item: _TreeItem): void {
+    const activeEditor = window.activeTextEditor;
+    if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
+    // try to start at the previous line so the codelens is also visible
+    const startPos = new Position(item.startLine > 0 ? item.startLine - 1 : 0, 0);
+    const endPos = new Position(item.endLine, 0);
+    activeEditor.revealRange(new Range(startPos, endPos), 3); // 3 = AtTop
+  }
+
+  private readDocument(): void {
     const activeEditor = window.activeTextEditor;
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
@@ -121,35 +173,33 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       const name = requestPosition.name;
       const startPos = new Position(requestPosition.start.line - 1, requestPosition.start.col);
       const endPos = new Position(requestPosition.end.line - 1, requestPosition.end.col);
-      const range = new Range(startPos, endPos);
 
-      if (range) {
-        if (!name) {
-          // requests node
-          requestNodeStart = startPos.line;
-          requestNodeEnd = endPos.line;
-        } else {
-          // individual request node
-          const newRequest: _TreeItem = new _TreeItem(name, startPos.line, endPos.line);
-          newRequest.contextValue = "request";
-          requests.push(newRequest);
-        }
+      if (!name) {
+        // requests node
+        requestNodeStart = startPos.line;
+        requestNodeEnd = endPos.line;
+      } else {
+        // individual request node
+        const newRequest: _TreeItem = new _TreeItem(name, startPos.line, endPos.line);
+        newRequest.contextValue = "request";
+        requests.push(newRequest);
       }
     });
 
-    if (requestNodeStart >= 0) {
-      const mainRequestNode = new _TreeItem("requests", requestNodeStart, requestNodeEnd);
-      mainRequestNode.contextValue = "requestNode";
+    const requestsNodeName = "requests" + (requestNodeStart < 0 ? " (none)" : "");
 
+    const mainRequestNode = new _TreeItem(requestsNodeName, requestNodeStart, requestNodeEnd);
+    if (requestNodeStart >= 0) {
+      mainRequestNode.contextValue = "requestNode";
       requests.forEach((req) => mainRequestNode.addChild(req));
-      this.data.push(mainRequestNode);
     }
+    this.data.push(mainRequestNode);
   }
 
   private envPaths: { [env: string]: string } = {};
   private readonly selectedSuffix = " (selected)";
 
-  private readEnvironments() {
+  private readEnvironments(): void {
     this.envPaths = {};
 
     const activeEditor = window.activeTextEditor;
@@ -157,27 +207,59 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
 
     let environments: _TreeItem[] = [];
     this.envPaths = getEnvPaths(getWorkingDir());
+    if (Object.keys(this.envPaths).length) this.envPaths[getDefaultEnv()] = "";
+
     for (const env in this.envPaths) {
       const envName = env + (env === getActiveEnv() ? this.selectedSuffix : "");
       const item = new _TreeItem(envName);
-      item.contextValue = "env";
+      item.contextValue = env === getDefaultEnv() ? "noEnv" : "env";
       environments.push(item);
     }
 
     const mainEnvNode = new _TreeItem("environments" + (environments.length === 0 ? " (none)" : ""));
-    mainEnvNode.contextValue = "envNode";
-    environments.forEach((env) => mainEnvNode.addChild(env));
+    if (environments.length > 0) {
+      mainEnvNode.contextValue = "envNode";
+      environments.forEach((env) => mainEnvNode.addChild(env));
+    }
     this.data.push(mainEnvNode);
   }
 
-  refresh() {
+  private bundlePaths: { [env: string]: string } = {};
+  private readonly currentSuffix = " (current)";
+
+  private readBundles(): void {
+    this.bundlePaths = {};
+
+    const activeEditor = window.activeTextEditor;
+    if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
+    const currBundleName = path.basename(activeEditor.document.uri.fsPath);
+
+    let bundles: _TreeItem[] = [];
+    this.bundlePaths = getBundlePaths(getWorkingDir());
+    for (const bundle in this.bundlePaths) {
+      const bundleName = bundle + (bundle === currBundleName ? this.currentSuffix : "");
+      const item = new _TreeItem(bundleName);
+      item.contextValue = "bundle";
+      bundles.push(item);
+    }
+
+    const mainBundleNode = new _TreeItem("bundles" + (bundles.length === 0 ? " (none)" : ""));
+    if (bundles.length > 0) {
+      mainBundleNode.contextValue = "bundleNode";
+      bundles.forEach((bundle) => mainBundleNode.addChild(bundle));
+    }
+    this.data.push(mainBundleNode);
+  }
+
+  refresh(): void {
     this.data = [];
     this.readDocument();
     this.readEnvironments();
+    this.readBundles();
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  goToEnvFile(item: _TreeItem) {
+  private goToEnvFile(item: _TreeItem): void {
     if (!(item && item.label)) return;
 
     let envName = item.label.toString();
@@ -188,17 +270,44 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       if (openPath === window.activeTextEditor?.document.uri.fsPath) {
         window.showInformationMessage(`env "${envName}" is contained in the current file`);
       } else {
-        workspace.openTextDocument(openPath).then((doc) => {
-          window.showTextDocument(doc);
-        });
+        workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
       }
-    } else {
-      window.showErrorMessage(`Could not find path to env ${envName}`);
+    }
+  }
+
+  private selectEnvironment(item: _TreeItem): void {
+    if (!(item && item.label)) return;
+
+    let env = item.label.toString();
+    if (env.endsWith(this.selectedSuffix)) {
+      window.showInformationMessage(
+        `env "${env.slice(0, -this.selectedSuffix.length)}" is selected already`,
+      );
+      return;
+    }
+
+    setEnvironment(env);
+  }
+
+  private goToBundleFile(item: _TreeItem): void {
+    if (!(item && item.label)) return;
+
+    let bundleName = item.label.toString();
+    if (bundleName.endsWith(this.currentSuffix))
+      bundleName = bundleName.slice(0, -this.currentSuffix.length);
+
+    const openPath = this.bundlePaths[bundleName];
+    if (openPath) {
+      if (openPath === window.activeTextEditor?.document.uri.fsPath) {
+        window.showInformationMessage(`"${bundleName}" is the current bundle`);
+      } else {
+        workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
+      }
     }
   }
 }
 
-const TREE = new _TreeView();
-export function getTreeView(): _TreeView {
-  return TREE;
+let TREE_VIEW: _TreeView = new _TreeView();
+export default function getTreeView(): _TreeView {
+  return TREE_VIEW;
 }

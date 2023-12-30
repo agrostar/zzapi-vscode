@@ -1,39 +1,46 @@
-import { ExtensionContext, commands, window, StatusBarItem, ThemeColor } from "vscode";
+import { ExtensionContext, commands, window, ThemeColor } from "vscode";
 
 import { getContentIfBundle, getWorkingDir } from "./utils/pathUtils";
 import { getActiveEnv, getDefaultEnv, setActiveEnv } from "./utils/environmentUtils";
+import { getStatusBar } from "./utils/statusBarUtils";
 
 import { getEnvNames } from "./variables";
-import { getTreeView } from "./treeView";
 
-export function initialiseStatusBar(context: ExtensionContext, statusBar: StatusBarItem): void {
-  resetActiveEnvInStatusBar(statusBar);
+export function initialiseStatusBar(context: ExtensionContext): void {
+  const statusBar = getStatusBar();
+
+  resetActiveEnvInStatusBar();
   statusBar.command = "extension.clickEnvSelector";
   statusBar.show();
   context.subscriptions.push(statusBar);
 }
 
-function resetActiveEnvInStatusBar(statusBar: StatusBarItem): void {
+function resetActiveEnvInStatusBar(): void {
   setActiveEnv();
+
+  const statusBar = getStatusBar();
   statusBar.text = "zzAPI: no env";
   statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
 }
 
-function setCurrentEnvNameInStatusBar(statusBar: StatusBarItem, envName: string): void {
+function setCurrentEnvNameInStatusBar(envName: string): void {
   setActiveEnv(envName);
+
+  const statusBar = getStatusBar();
   statusBar.text = `zzAPI env: ${getActiveEnv()}`;
   statusBar.backgroundColor = undefined;
 }
 
-export function setEnvironment(statusBar: StatusBarItem, env: string): void {
+export function setEnvironment(env: string): void {
   if (env === getDefaultEnv()) {
-    resetActiveEnvInStatusBar(statusBar);
+    resetActiveEnvInStatusBar();
   } else {
-    setCurrentEnvNameInStatusBar(statusBar, env);
+    setCurrentEnvNameInStatusBar(env);
   }
+  commands.executeCommand("extension.refreshView");
 }
 
-export function createEnvironmentSelector(context: ExtensionContext, statusBar: StatusBarItem): void {
+export function createEnvironmentSelector(context: ExtensionContext): void {
   const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
     const bundleContents = getContentIfBundle();
     const envNames = getEnvNames(getWorkingDir(), bundleContents);
@@ -52,8 +59,7 @@ export function createEnvironmentSelector(context: ExtensionContext, statusBar: 
       })
       .then((selectedEnvName) => {
         if (!selectedEnvName) return;
-        setEnvironment(statusBar, selectedEnvName);
-        getTreeView().refresh();
+        setEnvironment(selectedEnvName);
       });
   });
   context.subscriptions.push(statusClick);

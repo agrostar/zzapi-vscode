@@ -32,33 +32,31 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
       const endPos = new vscode.Position(requestPosition.end.line - 1, requestPosition.end.col);
       const range = new vscode.Range(startPos, endPos);
 
-      if (range) {
-        let newCodeLens: vscode.CodeLens;
-        let curlCodelens: vscode.CodeLens | undefined = undefined;
-        if (name === undefined) {
-          newCodeLens = new vscode.CodeLens(range, {
-            title: "↪ Run all requests",
-            tooltip: "Click to run all requests",
-            command: "extension.runAllRequests",
-          });
-        } else {
-          newCodeLens = new vscode.CodeLens(range, {
-            title: `▶ Run request`,
-            tooltip: `Click to run '${name}'`,
-            command: "extension.runRequest",
-            arguments: [name],
-          });
-          curlCodelens = new vscode.CodeLens(range, {
-            title: `➰ Show cURL`,
-            tooltip: `Click to show the cURL of '${name}'`,
-            command: "extension.showCurl",
-            arguments: [name],
-          });
-        }
-        this.codeLenses.push(newCodeLens);
-        if (curlCodelens !== undefined) {
-          this.codeLenses.push(curlCodelens);
-        }
+      let newCodeLens: vscode.CodeLens;
+      let curlCodelens: vscode.CodeLens | undefined = undefined;
+      if (name === undefined) {
+        newCodeLens = new vscode.CodeLens(range, {
+          title: "↪ Run all requests",
+          tooltip: "Click to run all requests",
+          command: "extension.runAllRequests",
+        });
+      } else {
+        newCodeLens = new vscode.CodeLens(range, {
+          title: `▶ Run request`,
+          tooltip: `Click to run '${name}'`,
+          command: "extension.runRequest",
+          arguments: [name],
+        });
+        curlCodelens = new vscode.CodeLens(range, {
+          title: `➰ Show cURL`,
+          tooltip: `Click to show the cURL of '${name}'`,
+          command: "extension.showCurl",
+          arguments: [name],
+        });
+      }
+      this.codeLenses.push(newCodeLens);
+      if (curlCodelens !== undefined) {
+        this.codeLenses.push(curlCodelens);
       }
     });
 

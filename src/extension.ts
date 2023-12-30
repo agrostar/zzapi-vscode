@@ -1,13 +1,5 @@
 import * as YAML from "yaml";
-import {
-  ExtensionContext,
-  languages,
-  commands,
-  window,
-  StatusBarAlignment,
-  Disposable,
-  workspace,
-} from "vscode";
+import { ExtensionContext, languages, commands, window, Disposable, workspace } from "vscode";
 
 import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
@@ -21,7 +13,7 @@ import { addSampleGet, addSamplePost } from "./addSamples";
 import { getVarStore } from "./variables";
 import { scaffold } from "./scaffolding";
 import { CodeLensProvider } from "./CodeLensProviders";
-import { getTreeView } from "./treeView";
+import getTreeView from "./treeView";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -55,17 +47,15 @@ let CURR_BUNDLE_PATH: string | undefined = undefined;
 
 export function activate(context: ExtensionContext): void {
   window.registerTreeDataProvider("zzapiCustomView", getTreeView());
-  getTreeView().refresh();
+  commands.executeCommand("extension.refreshView");
 
-  const statusBar = window.createStatusBarItem(StatusBarAlignment.Left);
-
-  initialiseStatusBar(context, statusBar);
-  createEnvironmentSelector(context, statusBar);
+  initialiseStatusBar(context);
+  createEnvironmentSelector(context);
 
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
-    getTreeView().refresh();
+    commands.executeCommand("extension.refreshView");
     if (activeEditor && documentIsBundle(activeEditor.document)) {
-      setEnvironment(statusBar, getActiveEnv());
+      setEnvironment(getActiveEnv());
       // even output channel etc triggers bundleChangeHandler. So we explicitly store the previous bundle
       if (activeEditor.document.uri.fsPath !== CURR_BUNDLE_PATH) {
         getVarStore().resetCapturedVariables();
@@ -77,7 +67,7 @@ export function activate(context: ExtensionContext): void {
 
   const documentChangeHandler = workspace.onDidChangeTextDocument((changeEvent) => {
     if (changeEvent.document !== window.activeTextEditor?.document) return;
-    getTreeView().refresh();
+    commands.executeCommand("extension.refreshView");
   });
   context.subscriptions.push(documentChangeHandler);
 

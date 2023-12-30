@@ -77,6 +77,22 @@
         }
       },
       {
+        "command": "extension.selectEnvFromTreeView",
+        "title": "Select the env",
+        "icon": {
+          "light": "images/icons/cursor.png",
+          "dark": "images/icons/cursor.png"
+        }
+      },
+      {
+        "command": "extension.goToBundleFile",
+        "title": "Open the file corresponding to the bundle",
+        "icon": {
+          "light": "images/icons/fileIcon.png",
+          "dark": "images/icons/fileIcon.png"
+        }
+      },
+      {
         "command": "extension.refreshView",
         "title": "Refresh zzAPI Tree View",
         "icon": {
@@ -223,13 +239,33 @@
           "group": "zzapiCustomView@2"
         },
         {
-          "command": "extension.goToEnvFile",
-          "when": "view == zzapiCustomView && viewItem == env",
+          "command": "extension.selectEnvFromTreeView",
+          "when": "view == zzapiCustomView && (viewItem == env || viewItem == noEnv)",
           "group": "inline@0"
+        },
+        {
+          "command": "extension.selectEnvFromTreeView",
+          "when": "view == zzapiCustomView && (viewItem == env || viewItem == noEnv)",
+          "group": "zzapiCustomView@0"
         },
         {
           "command": "extension.goToEnvFile",
           "when": "view == zzapiCustomView && viewItem == env",
+          "group": "inline@1"
+        },
+        {
+          "command": "extension.goToEnvFile",
+          "when": "view == zzapiCustomView && viewItem == env",
+          "group": "zzapiCustomView@1"
+        },
+        {
+          "command": "extension.goToBundleFile",
+          "when": "view == zzapiCustomView && viewItem == bundle",
+          "group": "inline@0"
+        },
+        {
+          "command": "extension.goToBundleFile",
+          "when": "view == zzapiCustomView && viewItem == bundle",
           "group": "zzapiCustomView@0"
         }
       ],
