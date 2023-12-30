@@ -84,18 +84,11 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
 
   goToRequest(item: _TreeItem) {
     const activeEditor = window.activeTextEditor;
-    if (activeEditor && documentIsBundle(activeEditor.document)) {
-      let startPos = new Position(item.startLine, 0);
-      let endPos = new Position(item.endLine, 0);
-      activeEditor.revealRange(new Range(startPos, endPos), 3); // 3 = AtTop
-    }
-  }
-
-  refresh() {
-    this.data = [];
-    this.readDocument();
-    this.readEnvironments();
-    this._onDidChangeTreeData.fire(undefined);
+    if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
+    // try to start at the previous line so the codelens is also visible
+    const startPos = new Position(item.startLine > 0 ? item.startLine - 1 : 0, 0);
+    const endPos = new Position(item.endLine, 0);
+    activeEditor.revealRange(new Range(startPos, endPos), 3); // 3 = AtTop
   }
 
   getTreeItem(item: _TreeItem): TreeItem | Thenable<TreeItem> {
@@ -175,6 +168,13 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     mainEnvNode.contextValue = "envNode";
     environments.forEach((env) => mainEnvNode.addChild(env));
     this.data.push(mainEnvNode);
+  }
+
+  refresh() {
+    this.data = [];
+    this.readDocument();
+    this.readEnvironments();
+    this._onDidChangeTreeData.fire(undefined);
   }
 
   goToEnvFile(item: _TreeItem) {
