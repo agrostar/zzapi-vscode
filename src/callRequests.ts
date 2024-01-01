@@ -3,7 +3,6 @@ import { TextEditor, window } from "vscode";
 import { documentIsBundle } from "./utils/pathUtils";
 
 import { showCurl } from "./showCurl";
-import { replaceFileContentsInString } from "./variables";
 import { runRequests } from "./runRequests";
 
 function getEditorContents(activeEditor: TextEditor | undefined): string {
@@ -11,7 +10,7 @@ function getEditorContents(activeEditor: TextEditor | undefined): string {
   if (!documentIsBundle(activeEditor.document))
     throw new Error("Active editor is not a valid bundle. Is your bundle the active editor?");
 
-  return replaceFileContentsInString(activeEditor.document.getText());
+  return activeEditor.document.getText();
 }
 
 export async function runRequestCommand(name: string, extensionVersion: string): Promise<void> {

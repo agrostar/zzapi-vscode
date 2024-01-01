@@ -4,8 +4,6 @@ import * as path from "path";
 import { getEnvironments } from "zzapi";
 import { VarStore } from "zzapi";
 
-import { getWorkingDir } from "./utils/pathUtils";
-
 const VARFILE_EXTENSION = ".zzv";
 
 export function getVarFilePaths(dirPath: string): string[] {
@@ -36,13 +34,4 @@ export function getEnvNames(dirPath: string, bundleContent: string | undefined):
 let variables = new VarStore();
 export function getVarStore(): VarStore {
   return variables;
-}
-
-export function replaceFileContentsInString(doc: string): string {
-  const fileRegex = /file:\/\/([^\s]+)/g;
-
-  return doc.replace(fileRegex, (_, givenFilePath) => {
-    const filePath = path.resolve(getWorkingDir(), givenFilePath);
-    return fs.readFileSync(filePath, "utf-8");
-  });
 }

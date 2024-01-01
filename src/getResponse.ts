@@ -9,6 +9,7 @@ import { replaceVariablesInRequest } from "zzapi";
 import { getOutputChannel } from "./utils/outputChannel";
 
 import { getVarStore } from "./variables";
+import { replaceFileContents } from "./fileContents";
 
 function formatTestResults(results: TestResult[]): string {
   const resultLines: string[] = [];
@@ -66,6 +67,7 @@ export async function allRequestsWithProgress(allRequests: {
         let requestData = allRequests[name];
         const method = requestData.httpRequest.method;
 
+        requestData.httpRequest.body = replaceFileContents(requestData.httpRequest.body);
         const undefs = replaceVariablesInRequest(requestData, getVarStore().getAllVariables());
         currHttpRequest = constructGotRequest(requestData);
 
