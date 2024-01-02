@@ -186,7 +186,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       }
     });
 
-    const requestsNodeName = "requests" + (requestNodeStart < 0 ? " (none)" : "");
+    const requestsNodeName = "REQUESTS" + (requestNodeStart < 0 ? " (none)" : "");
 
     const mainRequestNode = new _TreeItem(requestsNodeName, requestNodeStart, requestNodeEnd);
     if (requestNodeStart >= 0) {
@@ -216,7 +216,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       environments.push(item);
     }
 
-    const mainEnvNode = new _TreeItem("environments" + (environments.length === 0 ? " (none)" : ""));
+    const mainEnvNode = new _TreeItem("ENVIRONMENTS" + (environments.length === 0 ? " (none)" : ""));
     if (environments.length > 0) {
       mainEnvNode.contextValue = "envNode";
       environments.forEach((env) => mainEnvNode.addChild(env));
@@ -243,7 +243,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       bundles.push(item);
     }
 
-    const mainBundleNode = new _TreeItem("bundles" + (bundles.length === 0 ? " (none)" : ""));
+    const mainBundleNode = new _TreeItem("BUNDLES" + (bundles.length === 0 ? " (none)" : ""));
     if (bundles.length > 0) {
       mainBundleNode.contextValue = "bundleNode";
       bundles.forEach((bundle) => mainBundleNode.addChild(bundle));
@@ -253,9 +253,9 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
 
   refresh(): void {
     this.data = [];
-    this.readDocument();
-    this.readEnvironments();
     this.readBundles();
+    this.readEnvironments();
+    this.readDocument();
     this._onDidChangeTreeData.fire(undefined);
   }
 
