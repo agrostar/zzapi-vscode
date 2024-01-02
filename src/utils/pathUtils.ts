@@ -18,16 +18,24 @@ export function getContentIfBundle(): string | undefined {
   }
 }
 
+export function getWorkspaceRootDir(): string {
+  if (!workspace.workspaceFolders)
+    throw new Error("zzAPI: Open a workspace folder for optimal functionality");
+
+  const wf = workspace.workspaceFolders[0];
+  if (workspace.workspaceFolders.length > 1)
+    window.showWarningMessage(`Multi-root workspace: using ${wf.name} as working dir.`);
+
+  return wf.uri.fsPath;
+}
+
 export function getWorkingDir(): string {
   const activeEditor = window.activeTextEditor;
   // an untitled document has its directory as home, so we check workspace folders for this too
   if (!activeEditor || activeEditor.document.isUntitled) {
     // check if workspace files/folders exist, else throw an error
     if (workspace.workspaceFolders) {
-      const wf = workspace.workspaceFolders[0];
-      if (workspace.workspaceFolders.length > 1)
-        window.showWarningMessage(`Multi-root workspace: using ${wf.name} as working dir.`);
-      return wf.uri.fsPath;
+      return getWorkspaceRootDir();
     } else {
       if (workspace.workspaceFile) return path.dirname(workspace.workspaceFile.fsPath);
       throw new Error("Open a document, or add workspace folder or file to get a working dir");

@@ -13,10 +13,15 @@ import {
 } from "vscode";
 import { RequestPosition, getRequestPositions } from "zzapi";
 import path from "path";
-import * as fs from "fs";
 import * as YAML from "yaml";
+import * as fs from "fs";
 
-import { BUNDLE_FILE_NAME_ENDINGS, documentIsBundle, getWorkingDir } from "./utils/pathUtils";
+import {
+  BUNDLE_FILE_NAME_ENDINGS,
+  documentIsBundle,
+  getWorkingDir,
+  getWorkspaceRootDir,
+} from "./utils/pathUtils";
 import { getActiveEnv, getDefaultEnv } from "./utils/environmentUtils";
 import { isDict } from "./utils/typeUtils";
 
@@ -49,17 +54,28 @@ export function getEnvPaths(dirPath: string): { [name: string]: string } {
   return filePaths;
 }
 
-export function getBundlePaths(dirPath: string): { [name: string]: string } {
+function getAllBundles(dirPath: string): string[] {
+  let bundles: string[] = [];
+
+  const dirContents = fs.readdirSync(dirPath, { encoding: "utf-8" });
+  dirContents.forEach((item) => {
+    const itemPath = path.join(dirPath, item);
+    if (fs.lstatSync(itemPath).isDirectory()) {
+      bundles.push(...getAllBundles(itemPath));
+    } else if (BUNDLE_FILE_NAME_ENDINGS.some((ending) => path.extname(item) === ending)) {
+      bundles.push(itemPath);
+    }
+  });
+
+  return bundles;
+}
+
+export function getBundlePaths(): { [name: string]: string } {
+  const workspaceDirPath = getWorkspaceRootDir();
+  const bundlePaths = getAllBundles(workspaceDirPath);
+
   let filePaths: { [name: string]: string } = {};
-
-  const dirContents = fs.readdirSync(dirPath, { recursive: false, encoding: "utf-8" });
-  const bundles = dirContents.filter((file) =>
-    BUNDLE_FILE_NAME_ENDINGS.some((ending) => path.extname(file) === ending),
-  );
-  const bundlePaths = bundles.map((file) => path.join(dirPath, file));
-
-  bundlePaths.forEach((bp) => (filePaths[path.basename(bp)] = bp));
-
+  bundlePaths.forEach((bp) => (filePaths[path.relative(workspaceDirPath, bp)] = bp));
   return filePaths;
 }
 
@@ -235,7 +251,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     const currBundleName = path.basename(activeEditor.document.uri.fsPath);
 
     let bundles: _TreeItem[] = [];
-    this.bundlePaths = getBundlePaths(getWorkingDir());
+    this.bundlePaths = getBundlePaths();
     for (const bundle in this.bundlePaths) {
       const bundleName = bundle + (bundle === currBundleName ? this.currentSuffix : "");
       const item = new _TreeItem(bundleName);
