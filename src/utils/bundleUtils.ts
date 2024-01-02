@@ -15,7 +15,7 @@ function getBundles(dirPath: string, currDepth: number): string[] {
     const itemPath = path.join(dirPath, item);
     if (fs.lstatSync(itemPath).isDirectory()) {
       directories.push(itemPath);
-    } else if (BUNDLE_FILE_NAME_ENDINGS.some((ending) => path.extname(item) === ending)) {
+    } else if (BUNDLE_FILE_NAME_ENDINGS.some((ending) => item.endsWith(ending))) {
       bundles.push(itemPath);
     }
   });
