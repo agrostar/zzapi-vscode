@@ -16,14 +16,10 @@ import path from "path";
 import * as YAML from "yaml";
 import * as fs from "fs";
 
-import {
-  BUNDLE_FILE_NAME_ENDINGS,
-  documentIsBundle,
-  getWorkingDir,
-  getWorkspaceRootDir,
-} from "./utils/pathUtils";
+import { documentIsBundle, getWorkingDir, getWorkspaceRootDir } from "./utils/pathUtils";
 import { getActiveEnv, getDefaultEnv } from "./utils/environmentUtils";
 import { isDict } from "./utils/typeUtils";
+import { getAllBundles } from "./utils/bundleUtils";
 
 import { setEnvironment } from "./EnvironmentSelection";
 import { getVarFilePaths } from "./variables";
@@ -52,22 +48,6 @@ export function getEnvPaths(dirPath: string): { [name: string]: string } {
   }
 
   return filePaths;
-}
-
-function getAllBundles(dirPath: string): string[] {
-  let bundles: string[] = [];
-
-  const dirContents = fs.readdirSync(dirPath, { encoding: "utf-8" });
-  dirContents.forEach((item) => {
-    const itemPath = path.join(dirPath, item);
-    if (fs.lstatSync(itemPath).isDirectory()) {
-      bundles.push(...getAllBundles(itemPath));
-    } else if (BUNDLE_FILE_NAME_ENDINGS.some((ending) => path.extname(item) === ending)) {
-      bundles.push(itemPath);
-    }
-  });
-
-  return bundles;
 }
 
 export function getBundlePaths(): { [name: string]: string } {
