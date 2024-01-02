@@ -10,14 +10,17 @@ function getBundles(dirPath: string, currDepth: number): string[] {
   if (MAX_DEPTH && currDepth > MAX_DEPTH) return bundles;
 
   const dirContents = fs.readdirSync(dirPath, { encoding: "utf-8" });
+  let directories: string[] = [];
   dirContents.forEach((item) => {
     const itemPath = path.join(dirPath, item);
     if (fs.lstatSync(itemPath).isDirectory()) {
-      bundles.push(...getBundles(itemPath, currDepth + 1));
+      directories.push(itemPath);
     } else if (BUNDLE_FILE_NAME_ENDINGS.some((ending) => path.extname(item) === ending)) {
       bundles.push(itemPath);
     }
   });
+  // recursion after initial additions so secondary directories get pushed lower for uniformity
+  directories.forEach((dirPath) => bundles.push(...getBundles(dirPath, currDepth + 1)));
 
   return bundles;
 }
