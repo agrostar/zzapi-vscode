@@ -60,21 +60,51 @@ export function getBundlePaths(): { [name: string]: string } {
 }
 
 class _TreeItem extends TreeItem {
-  readonly startLine: number;
-  readonly endLine: number;
-
   public children: _TreeItem[] = [];
 
-  constructor(label: string, startLine?: number, endLine?: number) {
+  constructor(label: string) {
     super(label, TreeItemCollapsibleState.None);
-    this.startLine = startLine ? startLine : -1;
-    this.endLine = endLine ? endLine : -1;
     this.collapsibleState = TreeItemCollapsibleState.None;
   }
 
   public addChild(child: _TreeItem) {
     this.collapsibleState = TreeItemCollapsibleState.Expanded;
     this.children.push(child);
+  }
+}
+
+class RequestItem extends _TreeItem {
+  readonly startLine: number;
+  readonly endLine: number;
+
+  constructor(label: string, startLine: number, endLine: number) {
+    super(label);
+    this.startLine = startLine;
+    this.endLine = endLine;
+  }
+}
+
+const CURR_ENV_SUFFIX = " (selected)";
+class EnvItem extends _TreeItem {
+  readonly itemPath: string | undefined;
+  readonly selected: boolean = false;
+
+  constructor(label: string, itemPath?: string, selected?: boolean) {
+    super(label);
+    this.itemPath = itemPath;
+    this.selected = selected === true;
+  }
+}
+
+const CURR_BUNDLE_SUFFIX = " (current)";
+class BundleItem extends _TreeItem {
+  readonly itemPath: string | undefined;
+  readonly current: boolean = false;
+
+  constructor(label: string, itemPath?: string, current?: boolean) {
+    super(label);
+    this.itemPath = itemPath;
+    this.current = current === true;
   }
 }
 
@@ -131,7 +161,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     }
   }
 
-  async treeViewRun(item: _TreeItem): Promise<void> {
+  async treeViewRun(item: RequestItem): Promise<void> {
     if (!(item && item.label)) return;
     await commands.executeCommand("extension.runRequest", item.label.toString());
   }
@@ -140,12 +170,12 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     await commands.executeCommand("extension.runAllRequests");
   }
 
-  treeViewCurl(item: _TreeItem): void {
+  treeViewCurl(item: RequestItem): void {
     if (!(item && item.label)) return;
     commands.executeCommand("extension.showCurl", item.label.toString());
   }
 
-  goToRequest(item: _TreeItem): void {
+  goToRequest(item: RequestItem): void {
     const activeEditor = window.activeTextEditor;
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
     // try to start at the previous line so the codelens is also visible
@@ -158,7 +188,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     const activeEditor = window.activeTextEditor;
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
-    let requests: _TreeItem[] = [];
+    let requests: RequestItem[] = [];
     let requestNodeStart: number = -1,
       requestNodeEnd: number = -1;
 
@@ -176,7 +206,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
         requestNodeEnd = endPos.line;
       } else {
         // individual request node
-        const newRequest: _TreeItem = new _TreeItem(name, startPos.line, endPos.line);
+        const newRequest: RequestItem = new RequestItem(name, startPos.line, endPos.line);
         newRequest.contextValue = "request";
         requests.push(newRequest);
       }
@@ -184,7 +214,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
 
     const requestsNodeName = "REQUESTS" + (requestNodeStart < 0 ? " (none)" : "");
 
-    const mainRequestNode = new _TreeItem(requestsNodeName, requestNodeStart, requestNodeEnd);
+    const mainRequestNode = new RequestItem(requestsNodeName, requestNodeStart, requestNodeEnd);
     if (requestNodeStart >= 0) {
       mainRequestNode.contextValue = "requestNode";
       requests.forEach((req) => mainRequestNode.addChild(req));
@@ -192,27 +222,24 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     this.data.push(mainRequestNode);
   }
 
-  private envPaths: { [env: string]: string } = {};
-  private readonly selectedSuffix = " (selected)";
-
   private readEnvironments(): void {
-    this.envPaths = {};
-
     const activeEditor = window.activeTextEditor;
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
-    let environments: _TreeItem[] = [];
-    this.envPaths = getEnvPaths(getWorkingDir());
-    if (Object.keys(this.envPaths).length) this.envPaths[getDefaultEnv()] = "";
+    let environments: EnvItem[] = [];
+    const envPaths = getEnvPaths(getWorkingDir());
+    if (Object.keys(envPaths).length) envPaths[getDefaultEnv()] = "";
 
-    for (const env in this.envPaths) {
-      const envName = env + (env === getActiveEnv() ? this.selectedSuffix : "");
-      const item = new _TreeItem(envName);
+    for (const env in envPaths) {
+      const selected = env === getActiveEnv();
+      const envName = env + (selected ? CURR_ENV_SUFFIX : "");
+
+      const item = new EnvItem(envName, envPaths[env], selected);
       item.contextValue = env === getDefaultEnv() ? "noEnv" : "env";
       environments.push(item);
     }
 
-    const mainEnvNode = new _TreeItem("ENVIRONMENTS" + (environments.length === 0 ? " (none)" : ""));
+    const mainEnvNode = new EnvItem("ENVIRONMENTS" + (environments.length === 0 ? " (none)" : ""));
     if (environments.length > 0) {
       mainEnvNode.contextValue = "envNode";
       environments.forEach((env) => mainEnvNode.addChild(env));
@@ -220,26 +247,22 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     this.data.push(mainEnvNode);
   }
 
-  private bundlePaths: { [env: string]: string } = {};
-  private readonly currentSuffix = " (current)";
-
   private readBundles(): void {
-    this.bundlePaths = {};
-
     const activeEditor = window.activeTextEditor;
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
-    const currBundleName = path.basename(activeEditor.document.uri.fsPath);
 
-    let bundles: _TreeItem[] = [];
-    this.bundlePaths = getBundlePaths();
-    for (const bundle in this.bundlePaths) {
-      const bundleName = bundle + (bundle === currBundleName ? this.currentSuffix : "");
-      const item = new _TreeItem(bundleName);
+    let bundles: BundleItem[] = [];
+    const bundlePaths = getBundlePaths();
+    for (const bundle in bundlePaths) {
+      const selected = bundlePaths[bundle] === window.activeTextEditor?.document.uri.fsPath;
+      const bundleName = bundle + (selected ? CURR_BUNDLE_SUFFIX : "");
+
+      const item = new BundleItem(bundleName, bundlePaths[bundle], selected);
       item.contextValue = "bundle";
       bundles.push(item);
     }
 
-    const mainBundleNode = new _TreeItem("BUNDLES" + (bundles.length === 0 ? " (none)" : ""));
+    const mainBundleNode = new BundleItem("BUNDLES" + (bundles.length === 0 ? " (none)" : ""));
     if (bundles.length > 0) {
       mainBundleNode.contextValue = "bundleNode";
       bundles.forEach((bundle) => mainBundleNode.addChild(bundle));
@@ -255,15 +278,15 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  private goToEnvFile(item: _TreeItem): void {
-    if (!(item && item.label)) return;
+  private goToEnvFile(item: EnvItem): void {
+    if (!(item && item.label && item.itemPath)) return;
 
-    let envName = item.label.toString();
-    if (envName.endsWith(this.selectedSuffix)) envName = envName.slice(0, -this.selectedSuffix.length);
-
-    const openPath = this.envPaths[envName];
+    const openPath = item.itemPath;
     if (openPath) {
       if (openPath === window.activeTextEditor?.document.uri.fsPath) {
+        let envName = item.label.toString();
+        if (item.selected) envName = envName.slice(0, -CURR_ENV_SUFFIX.length);
+
         window.showInformationMessage(`env "${envName}" is contained in the current file`);
       } else {
         workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
@@ -271,30 +294,25 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     }
   }
 
-  private selectEnvironment(item: _TreeItem): void {
+  private selectEnvironment(item: EnvItem): void {
     if (!(item && item.label)) return;
 
-    let env = item.label.toString();
-    if (env.endsWith(this.selectedSuffix)) {
-      window.showInformationMessage(
-        `env "${env.slice(0, -this.selectedSuffix.length)}" is selected already`,
-      );
+    if (item.selected) {
+      const env = item.label.toString().slice(0, -CURR_ENV_SUFFIX.length);
+      window.showInformationMessage(`env "${env}" is selected already`);
       return;
     }
 
-    setEnvironment(env);
+    setEnvironment(item.label.toString());
   }
 
-  private goToBundleFile(item: _TreeItem): void {
-    if (!(item && item.label)) return;
+  private goToBundleFile(item: BundleItem): void {
+    if (!(item && item.label && item.itemPath)) return;
 
-    let bundleName = item.label.toString();
-    if (bundleName.endsWith(this.currentSuffix))
-      bundleName = bundleName.slice(0, -this.currentSuffix.length);
-
-    const openPath = this.bundlePaths[bundleName];
+    const openPath = item.itemPath;
     if (openPath) {
-      if (openPath === window.activeTextEditor?.document.uri.fsPath) {
+      if (item.current) {
+        const bundleName = item.label.toString().slice(0, -CURR_BUNDLE_SUFFIX.length);
         window.showInformationMessage(`"${bundleName}" is the current bundle`);
       } else {
         workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
