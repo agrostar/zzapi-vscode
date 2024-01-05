@@ -4,7 +4,7 @@
 
 * CLI Tool:
   * Separate out core into a new repo and create a core library npm (done)
-  * zzapi-runner: command-line runner which can use the core library
+  * zzapi-runner: command-line runner which can use the core library (done)
 
 * Rename varset as environment (done, must change schema name)
 
@@ -23,7 +23,6 @@
 * Scaffolding: using Cmd+Shift+P activate the extension and also create a directory and basic files like zz-envs.yaml and test/staging/production/local environments. (preliminary scaffolding done)
 
 * A Tree View in the explorer sidebar for selecting and executing requests (replacement for OUTLINE, which does not allow commands on the tree elements). Right now using fold All etc, but it is not that convenient. (partially done)
-  - Figure out how to ensure continuous reloads on file change and see if it makes it slow. 
 
 * Cookie-jar to capture cookies automatically and add them to following requests with in the same run (or even persist?)
 
