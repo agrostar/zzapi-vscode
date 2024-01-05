@@ -24,7 +24,7 @@ import { Bundles, getAllBundles } from "./utils/bundleUtils";
 import { setEnvironment } from "./EnvironmentSelection";
 import { getVarFilePaths } from "./variables";
 
-export function getEnvPaths(dirPath: string): { [name: string]: string } {
+function getEnvPaths(dirPath: string): { [name: string]: string } {
   let filePaths: { [name: string]: string } = {};
 
   const varFiles = getVarFilePaths(dirPath);
@@ -176,7 +176,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     activeEditor.revealRange(new Range(startPos, endPos), 3); // 3 = AtTop
   }
 
-  private readDocument(): void {
+  private readRequests(): void {
     const activeEditor = window.activeTextEditor;
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
@@ -282,7 +282,7 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     this.data = [];
     this.readBundles();
     this.readEnvironments();
-    this.readDocument();
+    this.readRequests();
     this._onDidChangeTreeData.fire(undefined);
   }
 
@@ -290,15 +290,13 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     if (!(item && item.label && item.itemPath)) return;
 
     const openPath = item.itemPath;
-    if (openPath) {
-      if (openPath === window.activeTextEditor?.document.uri.fsPath) {
-        let envName = item.label.toString();
-        if (item.selected) envName = envName.slice(0, -CURR_ENV_SUFFIX.length);
+    if (openPath === window.activeTextEditor?.document.uri.fsPath) {
+      let envName = item.label.toString();
+      if (item.selected) envName = envName.slice(0, -CURR_ENV_SUFFIX.length);
 
-        window.showInformationMessage(`env "${envName}" is contained in the current file`);
-      } else {
-        workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
-      }
+      window.showInformationMessage(`env "${envName}" is contained in the current file`);
+    } else {
+      workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
     }
   }
 
@@ -308,23 +306,20 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     if (item.selected) {
       const env = item.label.toString().slice(0, -CURR_ENV_SUFFIX.length);
       window.showInformationMessage(`env "${env}" is selected already`);
-      return;
+    } else {
+      setEnvironment(item.label.toString());
     }
-
-    setEnvironment(item.label.toString());
   }
 
   private goToBundleFile(item: BundleItem): void {
     if (!(item && item.label && item.itemPath)) return;
 
     const openPath = item.itemPath;
-    if (openPath) {
-      if (item.current) {
-        const bundleName = item.label.toString().slice(0, -CURR_BUNDLE_SUFFIX.length);
-        window.showInformationMessage(`"${bundleName}" is the current bundle`);
-      } else {
-        workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
-      }
+    if (item.current) {
+      const bundleName = item.label.toString().slice(0, -CURR_BUNDLE_SUFFIX.length);
+      window.showInformationMessage(`"${bundleName}" is the current bundle`);
+    } else {
+      workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
     }
   }
 }
