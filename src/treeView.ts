@@ -269,16 +269,10 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
   }
 
   private readBundles(): void {
-    const activeEditor = window.activeTextEditor;
-    if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
-
     const bundles: BundleItem[] = this.getBundleItems(getAllBundles(getWorkspaceRootDir()));
+    if (bundles.length < 1) return;
 
-    const bundlesPresent = bundles.length > 0;
-    const bundleNodeName = "BUNDLES" + (bundlesPresent ? "" : " (none)");
-    const bundleNodeContextVal = bundlesPresent ? "bundleNode" : "emptyBundleNode";
-
-    const mainBundleNode = new BundleItem(bundleNodeName, bundleNodeContextVal);
+    const mainBundleNode = new BundleItem("BUNDLES", "bundleNode");
     bundles.forEach((bundle) => mainBundleNode.addChild(bundle));
 
     this.data.push(mainBundleNode);
