@@ -19,7 +19,7 @@ import * as fs from "fs";
 import { documentIsBundle, getWorkingDir, getWorkspaceRootDir } from "./utils/pathUtils";
 import { getActiveEnv, getDefaultEnv } from "./utils/environmentUtils";
 import { isDict } from "./utils/typeUtils";
-import { getAllBundles } from "./utils/bundleUtils";
+import { Bundles, getAllBundles } from "./utils/bundleUtils";
 
 import { setEnvironment } from "./EnvironmentSelection";
 import { getVarFilePaths } from "./variables";
@@ -47,15 +47,6 @@ export function getEnvPaths(dirPath: string): { [name: string]: string } {
     }
   }
 
-  return filePaths;
-}
-
-export function getBundlePaths(): { [name: string]: string } {
-  const workspaceDirPath = getWorkspaceRootDir();
-  const bundlePaths = getAllBundles(workspaceDirPath);
-
-  let filePaths: { [name: string]: string } = {};
-  bundlePaths.forEach((bp) => (filePaths[path.relative(workspaceDirPath, bp)] = bp));
   return filePaths;
 }
 
@@ -248,19 +239,40 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     this.data.push(mainEnvNode);
   }
 
+  private getBundleItems(bundles: Bundles): BundleItem[] {
+    let bundleItems: BundleItem[] = [];
+    const dirPath = bundles.dirPath;
+    const contents = bundles.contents;
+
+    contents.forEach((item) => {
+      if (typeof item === "string") {
+        // it is a valid bundle file
+        const itemPath = path.join(dirPath, item);
+        const selected = itemPath === window.activeTextEditor?.document.uri.fsPath;
+        const bundleName = item + (selected ? CURR_BUNDLE_SUFFIX : "");
+
+        const bundleItem = new BundleItem(bundleName, "bundle", itemPath, selected);
+        bundleItems.push(bundleItem);
+      } else {
+        // it is a directory containing some bundles
+        const childBundles = this.getBundleItems(item);
+        if (childBundles.length > 0) {
+          const bundleNode = new BundleItem(path.basename(item.dirPath), "bundleNode");
+          childBundles.forEach((item) => bundleNode.addChild(item));
+
+          bundleItems.push(bundleNode);
+        }
+      }
+    });
+
+    return bundleItems;
+  }
+
   private readBundles(): void {
     const activeEditor = window.activeTextEditor;
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
-    let bundles: BundleItem[] = [];
-    const bundlePaths = getBundlePaths();
-    for (const bundle in bundlePaths) {
-      const selected = bundlePaths[bundle] === window.activeTextEditor?.document.uri.fsPath;
-      const bundleName = bundle + (selected ? CURR_BUNDLE_SUFFIX : "");
-
-      const item = new BundleItem(bundleName, "bundle", bundlePaths[bundle], selected);
-      bundles.push(item);
-    }
+    const bundles: BundleItem[] = this.getBundleItems(getAllBundles(getWorkspaceRootDir()));
 
     const bundlesPresent = bundles.length > 0;
     const bundleNodeName = "BUNDLES" + (bundlesPresent ? "" : " (none)");
