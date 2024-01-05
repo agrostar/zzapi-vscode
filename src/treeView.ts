@@ -62,8 +62,9 @@ export function getBundlePaths(): { [name: string]: string } {
 class _TreeItem extends TreeItem {
   public children: _TreeItem[] = [];
 
-  constructor(label: string) {
+  constructor(label: string, contextValue: string) {
     super(label, TreeItemCollapsibleState.None);
+    this.contextValue = contextValue;
     this.collapsibleState = TreeItemCollapsibleState.None;
   }
 
@@ -77,8 +78,8 @@ class RequestItem extends _TreeItem {
   readonly startLine: number;
   readonly endLine: number;
 
-  constructor(label: string, startLine: number, endLine: number) {
-    super(label);
+  constructor(label: string, contextValue: string, startLine: number, endLine: number) {
+    super(label, contextValue);
     this.startLine = startLine;
     this.endLine = endLine;
   }
@@ -89,8 +90,8 @@ class EnvItem extends _TreeItem {
   readonly itemPath: string | undefined;
   readonly selected: boolean = false;
 
-  constructor(label: string, itemPath?: string, selected?: boolean) {
-    super(label);
+  constructor(label: string, contextValue: string, itemPath?: string, selected?: boolean) {
+    super(label, contextValue);
     this.itemPath = itemPath;
     this.selected = selected === true;
   }
@@ -101,8 +102,8 @@ class BundleItem extends _TreeItem {
   readonly itemPath: string | undefined;
   readonly current: boolean = false;
 
-  constructor(label: string, itemPath?: string, current?: boolean) {
-    super(label);
+  constructor(label: string, contextValue: string, itemPath?: string, current?: boolean) {
+    super(label, contextValue);
     this.itemPath = itemPath;
     this.current = current === true;
   }
@@ -189,8 +190,8 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
     let requests: RequestItem[] = [];
-    let requestNodeStart: number = -1,
-      requestNodeEnd: number = -1;
+    let reqNodeStart: number = -1,
+      reqNodeEnd: number = -1;
 
     const text = activeEditor.document.getText();
     const allRequestPositions: RequestPosition[] = getRequestPositions(text);
@@ -202,23 +203,22 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
 
       if (!name) {
         // requests node
-        requestNodeStart = startPos.line;
-        requestNodeEnd = endPos.line;
+        reqNodeStart = startPos.line;
+        reqNodeEnd = endPos.line;
       } else {
         // individual request node
-        const newRequest: RequestItem = new RequestItem(name, startPos.line, endPos.line);
-        newRequest.contextValue = "request";
+        const newRequest: RequestItem = new RequestItem(name, "request", startPos.line, endPos.line);
         requests.push(newRequest);
       }
     });
 
-    const requestsNodeName = "REQUESTS" + (requestNodeStart < 0 ? " (none)" : "");
+    const valid = reqNodeStart >= 0;
+    const reqNodeName = "REQUESTS" + (!valid ? " (none)" : "");
+    const reqNodeContextValue = valid ? "requestNode" : "emptyRequestNode";
 
-    const mainRequestNode = new RequestItem(requestsNodeName, requestNodeStart, requestNodeEnd);
-    if (requestNodeStart >= 0) {
-      mainRequestNode.contextValue = "requestNode";
-      requests.forEach((req) => mainRequestNode.addChild(req));
-    }
+    const mainRequestNode = new RequestItem(reqNodeName, reqNodeContextValue, reqNodeStart, reqNodeEnd);
+    requests.forEach((req) => mainRequestNode.addChild(req));
+
     this.data.push(mainRequestNode);
   }
 
@@ -234,16 +234,17 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       const selected = env === getActiveEnv();
       const envName = env + (selected ? CURR_ENV_SUFFIX : "");
 
-      const item = new EnvItem(envName, envPaths[env], selected);
-      item.contextValue = env === getDefaultEnv() ? "noEnv" : "env";
+      const item = new EnvItem(envName, "env", envPaths[env], selected);
       environments.push(item);
     }
 
-    const mainEnvNode = new EnvItem("ENVIRONMENTS" + (environments.length === 0 ? " (none)" : ""));
-    if (environments.length > 0) {
-      mainEnvNode.contextValue = "envNode";
-      environments.forEach((env) => mainEnvNode.addChild(env));
-    }
+    const envsPresent = environments.length > 0;
+    const envNodeName = "ENVIRONMENTS" + (envsPresent ? "" : " (none)");
+    const envNodeContextVal = envsPresent ? "envNode" : "emptyEnvNode";
+
+    const mainEnvNode = new EnvItem(envNodeName, envNodeContextVal);
+    environments.forEach((env) => mainEnvNode.addChild(env));
+
     this.data.push(mainEnvNode);
   }
 
@@ -257,16 +258,17 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       const selected = bundlePaths[bundle] === window.activeTextEditor?.document.uri.fsPath;
       const bundleName = bundle + (selected ? CURR_BUNDLE_SUFFIX : "");
 
-      const item = new BundleItem(bundleName, bundlePaths[bundle], selected);
-      item.contextValue = "bundle";
+      const item = new BundleItem(bundleName, "bundle", bundlePaths[bundle], selected);
       bundles.push(item);
     }
 
-    const mainBundleNode = new BundleItem("BUNDLES" + (bundles.length === 0 ? " (none)" : ""));
-    if (bundles.length > 0) {
-      mainBundleNode.contextValue = "bundleNode";
-      bundles.forEach((bundle) => mainBundleNode.addChild(bundle));
-    }
+    const bundlesPresent = bundles.length > 0;
+    const bundleNodeName = "BUNDLES" + (bundlesPresent ? "" : " (none)");
+    const bundleNodeContextVal = bundlesPresent ? "bundleNode" : "emptyBundleNode";
+
+    const mainBundleNode = new BundleItem(bundleNodeName, bundleNodeContextVal);
+    bundles.forEach((bundle) => mainBundleNode.addChild(bundle));
+
     this.data.push(mainBundleNode);
   }
 

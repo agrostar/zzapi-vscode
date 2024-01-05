@@ -240,12 +240,12 @@
         },
         {
           "command": "extension.selectEnvFromTreeView",
-          "when": "view == zzapiCustomView && (viewItem == env || viewItem == noEnv)",
+          "when": "view == zzapiCustomView && (viewItem == env)",
           "group": "inline@0"
         },
         {
           "command": "extension.selectEnvFromTreeView",
-          "when": "view == zzapiCustomView && (viewItem == env || viewItem == noEnv)",
+          "when": "view == zzapiCustomView && (viewItem == env)",
           "group": "zzapiCustomView@0"
         },
         {
