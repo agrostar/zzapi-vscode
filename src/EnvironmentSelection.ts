@@ -37,7 +37,7 @@ export function setEnvironment(env: string): void {
   } else {
     setCurrentEnvNameInStatusBar(env);
   }
-  commands.executeCommand("extension.refreshView");
+  commands.executeCommand("extension.refreshView", false, true, false);
 }
 
 export function createEnvironmentSelector(context: ExtensionContext): void {

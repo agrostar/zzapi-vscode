@@ -97,7 +97,7 @@ export async function allRequestsWithProgress(allRequests: {
           out.appendLine(`${method} ${name} Error executing request: ${error})`);
           if (undefs.length > 0) {
             out.appendLine(
-              `\t[warn]  Undefined variable(s): ${undefs.join(",")}. Did you choose an env?`,
+              `\t[warn]  Undefined variable(s): ${undefs.join(",")}. Did you choose the correct env?`,
             );
           }
           out.show(true);
@@ -158,7 +158,9 @@ export async function allRequestsWithProgress(allRequests: {
           out.appendLine(capturedErrors);
         }
         if (undefs.length > 0) {
-          out.appendLine(`\t[WARN]  Undefined variable(s): ${undefs.join(",")}. Did you choose an env?`);
+          out.appendLine(
+            `\t[WARN]  Undefined variable(s): ${undefs.join(",")}. Did you choose the correct env?`,
+          );
         }
 
         out.show(true);
@@ -181,15 +183,12 @@ function getStrictStringValue(value: any): string {
 
 function getHeadersAsString(rawHeaders: string[]): string {
   let formattedString = "\n";
-  if (rawHeaders === undefined) {
-    return formattedString;
-  }
+  if (rawHeaders === undefined) return formattedString;
 
-  const numElement = rawHeaders.length;
-  for (let i = 0; i < numElement - 1; i += 2) {
+  const numEle = rawHeaders.length;
+  for (let i = 0; i < numEle - 1; i += 2) {
     formattedString += `  ${rawHeaders[i]} : ${getStrictStringValue(rawHeaders[i + 1])}\n`;
   }
 
-  formattedString = formattedString.trim();
-  return `\n  ${formattedString}`;
+  return `\n  ${formattedString.trim()}`;
 }

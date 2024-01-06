@@ -5,6 +5,7 @@ import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
 import { getActiveEnv } from "./utils/environmentUtils";
 
+import _TreeView from "./treeView";
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import { createEnvironmentSelector, initialiseStatusBar, setEnvironment } from "./EnvironmentSelection";
@@ -13,7 +14,6 @@ import { addSampleGet, addSamplePost } from "./addSamples";
 import { getVarStore } from "./variables";
 import { scaffold } from "./scaffolding";
 import { CodeLensProvider } from "./CodeLensProviders";
-import getTreeView from "./treeView";
 
 let DISPOSABLES: Disposable[] = [];
 
@@ -46,7 +46,7 @@ async function getReqNameAsInput(commandName: string): Promise<string> {
 let CURR_BUNDLE_PATH: string | undefined = undefined;
 
 export function activate(context: ExtensionContext): void {
-  window.registerTreeDataProvider("zzapiCustomView", getTreeView());
+  window.registerTreeDataProvider("zzapiCustomView", new _TreeView());
   commands.executeCommand("extension.refreshView");
 
   initialiseStatusBar(context);
@@ -67,7 +67,7 @@ export function activate(context: ExtensionContext): void {
 
   const documentChangeHandler = workspace.onDidChangeTextDocument((changeEvent) => {
     if (changeEvent.document !== window.activeTextEditor?.document) return;
-    commands.executeCommand("extension.refreshView");
+    commands.executeCommand("extension.refreshView", false);
   });
   context.subscriptions.push(documentChangeHandler);
 

@@ -50,6 +50,21 @@ function getEnvPaths(dirPath: string): { [name: string]: string } {
   return filePaths;
 }
 
+const BUNDLE_CONTEXT_VALS: { [name: string]: string } = {
+  item: "bundle",
+  root: "bundleNode",
+};
+const ENV_CONTEXT_VALS: { [name: string]: string } = {
+  item: "env",
+  root: "envNode",
+  emptyRoot: "emptyEnvNode",
+};
+const REQ_CONTEXT_VALS: { [name: string]: string } = {
+  item: "request",
+  root: "requestNode",
+  emptyRoot: "emptyRequestNode",
+};
+
 class _TreeItem extends TreeItem {
   public children: _TreeItem[] = [];
 
@@ -100,7 +115,7 @@ class BundleItem extends _TreeItem {
   }
 }
 
-class _TreeView implements TreeDataProvider<_TreeItem> {
+export default class _TreeView implements TreeDataProvider<_TreeItem> {
   data: _TreeItem[] = [];
 
   private _onDidChangeTreeData: EventEmitter<_TreeItem | undefined> = new EventEmitter<
@@ -133,9 +148,12 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       this.goToBundleFile(item);
     });
 
-    commands.registerCommand("extension.refreshView", () => {
-      this.refresh();
-    });
+    commands.registerCommand(
+      "extension.refreshView",
+      (refreshBundle?: boolean, refreshEnv?: boolean, refreshReq?: boolean) => {
+        this.refresh(refreshBundle, refreshEnv, refreshReq);
+      },
+    );
   }
 
   getTreeItem(item: _TreeItem): TreeItem {
@@ -198,14 +216,19 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
         reqNodeEnd = endPos.line;
       } else {
         // individual request node
-        const newRequest: RequestItem = new RequestItem(name, "request", startPos.line, endPos.line);
+        const newRequest: RequestItem = new RequestItem(
+          name,
+          REQ_CONTEXT_VALS.item,
+          startPos.line,
+          endPos.line,
+        );
         requests.push(newRequest);
       }
     });
 
     const valid = reqNodeStart >= 0;
     const reqNodeName = "REQUESTS" + (!valid ? " (none)" : "");
-    const reqNodeContextValue = valid ? "requestNode" : "emptyRequestNode";
+    const reqNodeContextValue = valid ? REQ_CONTEXT_VALS.root : REQ_CONTEXT_VALS.emptyRoot;
 
     const mainRequestNode = new RequestItem(reqNodeName, reqNodeContextValue, reqNodeStart, reqNodeEnd);
     requests.forEach((req) => mainRequestNode.addChild(req));
@@ -225,13 +248,13 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       const selected = env === getActiveEnv();
       const envName = env + (selected ? CURR_ENV_SUFFIX : "");
 
-      const item = new EnvItem(envName, "env", envPaths[env], selected);
+      const item = new EnvItem(envName, ENV_CONTEXT_VALS.item, envPaths[env], selected);
       environments.push(item);
     }
 
     const envsPresent = environments.length > 0;
     const envNodeName = "ENVIRONMENTS" + (envsPresent ? "" : " (none)");
-    const envNodeContextVal = envsPresent ? "envNode" : "emptyEnvNode";
+    const envNodeContextVal = envsPresent ? ENV_CONTEXT_VALS.root : ENV_CONTEXT_VALS.emptyRoot;
 
     const mainEnvNode = new EnvItem(envNodeName, envNodeContextVal);
     environments.forEach((env) => mainEnvNode.addChild(env));
@@ -251,13 +274,13 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
         const selected = itemPath === window.activeTextEditor?.document.uri.fsPath;
         const bundleName = item + (selected ? CURR_BUNDLE_SUFFIX : "");
 
-        const bundleItem = new BundleItem(bundleName, "bundle", itemPath, selected);
+        const bundleItem = new BundleItem(bundleName, BUNDLE_CONTEXT_VALS.item, itemPath, selected);
         bundleItems.push(bundleItem);
       } else {
         // it is a directory containing some bundles
         const childBundles = this.getBundleItems(item);
         if (childBundles.length > 0) {
-          const bundleNode = new BundleItem(path.basename(item.dirPath), "bundleNode");
+          const bundleNode = new BundleItem(path.basename(item.dirPath), BUNDLE_CONTEXT_VALS.root);
           childBundles.forEach((item) => bundleNode.addChild(item));
 
           bundleItems.push(bundleNode);
@@ -272,17 +295,40 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
     const bundles: BundleItem[] = this.getBundleItems(getAllBundles(getWorkspaceRootDir()));
     if (bundles.length < 1) return;
 
-    const mainBundleNode = new BundleItem("BUNDLES", "bundleNode");
+    const mainBundleNode = new BundleItem("BUNDLES", BUNDLE_CONTEXT_VALS.root);
     bundles.forEach((bundle) => mainBundleNode.addChild(bundle));
 
     this.data.push(mainBundleNode);
   }
 
-  refresh(): void {
+  refresh(refreshBundle?: boolean, refreshEnv?: boolean, refreshReq?: boolean): void {
+    const hasOwnValue = (obj: { [key: string]: string }, val: string): boolean => {
+      return Object.keys(obj).some((key) => val === obj[key]);
+    };
+
+    let bundleItems: _TreeItem[] = [],
+      envItems: _TreeItem[] = [],
+      reqItems: _TreeItem[] = [];
+
+    this.data.forEach((item) => {
+      if (item.contextValue) {
+        if (hasOwnValue(BUNDLE_CONTEXT_VALS, item.contextValue)) bundleItems.push(item);
+        else if (hasOwnValue(ENV_CONTEXT_VALS, item.contextValue)) envItems.push(item);
+        else reqItems.push(item);
+      }
+    });
+
     this.data = [];
-    this.readBundles();
-    this.readEnvironments();
-    this.readRequests();
+
+    if (refreshBundle === false) this.data.push(...bundleItems);
+    else this.readBundles();
+
+    if (refreshEnv === false) this.data.push(...envItems);
+    else this.readEnvironments();
+
+    if (refreshReq === false) this.data.push(...reqItems);
+    else this.readRequests();
+
     this._onDidChangeTreeData.fire(undefined);
   }
 
@@ -322,9 +368,4 @@ class _TreeView implements TreeDataProvider<_TreeItem> {
       workspace.openTextDocument(openPath).then((doc) => window.showTextDocument(doc));
     }
   }
-}
-
-let TREE_VIEW: _TreeView = new _TreeView();
-export default function getTreeView(): _TreeView {
-  return TREE_VIEW;
 }
