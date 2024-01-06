@@ -72,38 +72,48 @@ function getDataOfIndReqAsString(
   return { contentData, headersData };
 }
 
-export async function openDocument(content: string, language?: string): Promise<void> {
-  await workspace.openTextDocument({ content: content, language: language }).then(async (document) => {
-    await window.showTextDocument(document, {
-      preserveFocus: false,
+export async function openDocument(content: string, language?: string): Promise<TextDocument> {
+  return await workspace
+    .openTextDocument({ content: content, language: language })
+    .then(async (document) => {
+      await window.showTextDocument(document, { preserveFocus: false });
+      return document;
     });
-  });
 }
 
-export async function replaceContent(
+async function openDocumentToRight(content: string, language?: string): Promise<TextDocument> {
+  commands.executeCommand("workbench.action.newGroupRight");
+  return await openDocument(content, language);
+}
+
+async function replaceContent(
   document: TextDocument,
   content: string,
   language?: string,
-): Promise<void> {
+): Promise<TextDocument> {
   if (language) languages.setTextDocumentLanguage(document, language);
+  const docStart = document.lineAt(0).range.start;
+  const docEnd = document.lineAt(document.lineCount - 1).range.end;
 
   const edit = new WorkspaceEdit();
-  edit.replace(
-    document.uri,
-    new Range(document.lineAt(0).range.start, document.lineAt(document.lineCount - 1).range.end),
-    content,
-  );
-  await workspace.applyEdit(edit); // this returns boolean for true or false maybe incorporate that?
+  edit.replace(document.uri, new Range(docStart, docEnd), content);
+  if (await workspace.applyEdit(edit)) {
+    return document;
+  } else {
+    return await openDocumentToRight(content, language); // if the replace fails, then open a new doc
+  }
 }
 
-export function isOpenAndUntitled(document: TextDocument): boolean {
+function isOpenAndUntitled(document: TextDocument): boolean {
   return !document.isClosed && document.isUntitled;
 }
 
-let MOST_RECENT_HEADERS: string | undefined = undefined;
-let MOST_RECENT_REQUEST_NAME: string | undefined = undefined;
+let MOST_RECENT_HEADERS: { name: string | undefined; headers: string | undefined } = {
+  name: undefined,
+  headers: undefined,
+};
 export function getRecentHeadersData(): { recentHeaders?: string; recentRequestName?: string } {
-  return { recentHeaders: MOST_RECENT_HEADERS, recentRequestName: MOST_RECENT_REQUEST_NAME };
+  return { recentHeaders: MOST_RECENT_HEADERS.headers, recentRequestName: MOST_RECENT_HEADERS.name };
 }
 
 let OPEN_DOC: TextDocument | undefined = undefined;
@@ -116,25 +126,15 @@ async function showContent(
 ): Promise<void> {
   if (!window.activeTextEditor) return;
 
-  let bodyLanguage: string | undefined = "json";
-  try {
-    JSON.parse(bodyContent);
-  } catch {
-    bodyLanguage = undefined;
-  }
-
-  if (!(OPEN_DOC && isOpenAndUntitled(OPEN_DOC))) {
-    // insert a new group to the right, insert the content
-    commands.executeCommand("workbench.action.newGroupRight");
-    await openDocument(bodyContent, bodyLanguage);
-    OPEN_DOC = window.activeTextEditor?.document;
-  } else {
-    await replaceContent(OPEN_DOC, bodyContent, bodyLanguage);
-  }
+  const bodyLanguage = attemptDataParse(bodyContent) !== undefined ? "json" : undefined;
+  OPEN_DOC =
+    OPEN_DOC && isOpenAndUntitled(OPEN_DOC)
+      ? await replaceContent(OPEN_DOC, bodyContent, bodyLanguage)
+      : await openDocumentToRight(bodyContent, bodyLanguage);
 
   if (name) {
+    // if we are running an individual request
     if (showHeaders) {
-      // if showheaders and if we are running an individual request, then show them
       const outputChannel = getOutputChannel();
 
       outputChannel.appendLine("----------");
@@ -142,8 +142,8 @@ async function showContent(
       outputChannel.appendLine("----------");
       outputChannel.show(true);
     }
-    // save the most recent headers and request name if we are running an individual request
-    MOST_RECENT_HEADERS = headersContent;
-    MOST_RECENT_REQUEST_NAME = name;
+    // save the most recent headers and request name
+    MOST_RECENT_HEADERS.headers = headersContent;
+    MOST_RECENT_HEADERS.name = name;
   }
 }

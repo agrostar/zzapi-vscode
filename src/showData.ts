@@ -57,7 +57,7 @@ export async function showRecentHeaders(): Promise<void> {
 
   const outputChannel = getOutputChannel();
   outputChannel.appendLine("----------");
-  if (reqName) outputChannel.appendLine(`[debug] headers of ${reqName}`);
+  if (reqName) outputChannel.append(`[debug] `);
 
   if (headers) outputChannel.append(headers);
   else outputChannel.appendLine("No headers stored, run a request and try again");
