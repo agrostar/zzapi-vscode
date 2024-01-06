@@ -72,10 +72,6 @@ function getDataOfIndReqAsString(
   return { contentData, headersData };
 }
 
-let OPEN_DOCS: {
-  body: TextDocument | undefined;
-} = { body: undefined };
-
 export async function openDocument(content: string, language?: string): Promise<void> {
   await workspace.openTextDocument({ content: content, language: language }).then(async (document) => {
     await window.showTextDocument(document, {
@@ -110,6 +106,8 @@ export function getRecentHeadersData(): { recentHeaders?: string; recentRequestN
   return { recentHeaders: MOST_RECENT_HEADERS, recentRequestName: MOST_RECENT_REQUEST_NAME };
 }
 
+let OPEN_DOC: TextDocument | undefined = undefined;
+
 async function showContent(
   bodyContent: string,
   headersContent: string,
@@ -125,15 +123,13 @@ async function showContent(
     bodyLanguage = undefined;
   }
 
-  const bodyDoc = OPEN_DOCS.body;
-  if (!(bodyDoc && isOpenAndUntitled(bodyDoc))) {
+  if (!(OPEN_DOC && isOpenAndUntitled(OPEN_DOC))) {
     // insert a new group to the right, insert the content
     commands.executeCommand("workbench.action.newGroupRight");
     await openDocument(bodyContent, bodyLanguage);
-    OPEN_DOCS.body = window.activeTextEditor?.document;
+    OPEN_DOC = window.activeTextEditor?.document;
   } else {
-    await replaceContent(bodyDoc, bodyContent, bodyLanguage);
-    OPEN_DOCS.body = bodyDoc;
+    await replaceContent(OPEN_DOC, bodyContent, bodyLanguage);
   }
 
   if (name) {
