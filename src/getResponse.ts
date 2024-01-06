@@ -186,9 +186,8 @@ function getHeadersAsString(rawHeaders: string[]): string {
   if (rawHeaders === undefined) return formattedString;
 
   const numEle = rawHeaders.length;
-  for (let i = 0; i < numEle - 1; i += 2) {
+  for (let i = 0; i < numEle - 1; i += 2)
     formattedString += `  ${rawHeaders[i]} : ${getStrictStringValue(rawHeaders[i + 1])}\n`;
-  }
 
   return `\n  ${formattedString.trim()}`;
 }
