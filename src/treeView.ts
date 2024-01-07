@@ -124,32 +124,32 @@ export default class _TreeView implements TreeDataProvider<_TreeItem> {
   readonly onDidChangeTreeData?: Event<_TreeItem | undefined> = this._onDidChangeTreeData.event;
 
   constructor() {
-    commands.registerCommand("extension.treeViewRun", async (item) => {
+    commands.registerCommand("zzAPI.treeViewRun", async (item) => {
       await this.treeViewRun(item);
     });
-    commands.registerCommand("extension.treeViewRunAll", async () => {
+    commands.registerCommand("zzAPI.treeViewRunAll", async () => {
       await this.treeViewRunAll();
     });
-    commands.registerCommand("extension.treeViewCurl", (item) => {
+    commands.registerCommand("zzAPI.treeViewCurl", (item) => {
       this.treeViewCurl(item);
     });
-    commands.registerCommand("extension.goToRequest", (item) => {
+    commands.registerCommand("zzAPI.goToRequest", (item) => {
       this.goToRequest(item);
     });
 
-    commands.registerCommand("extension.goToEnvFile", (item) => {
+    commands.registerCommand("zzAPI.goToEnvFile", (item) => {
       this.goToEnvFile(item);
     });
-    commands.registerCommand("extension.selectEnvFromTreeView", (item) => {
+    commands.registerCommand("zzAPI.selectEnvFromTreeView", (item) => {
       this.selectEnvironment(item);
     });
 
-    commands.registerCommand("extension.goToBundleFile", (item) => {
+    commands.registerCommand("zzAPI.goToBundleFile", (item) => {
       this.goToBundleFile(item);
     });
 
     commands.registerCommand(
-      "extension.refreshView",
+      "zzAPI.refreshView",
       (refreshBundle?: boolean, refreshEnv?: boolean, refreshReq?: boolean) => {
         this.refresh(refreshBundle, refreshEnv, refreshReq);
       },
@@ -173,16 +173,16 @@ export default class _TreeView implements TreeDataProvider<_TreeItem> {
 
   async treeViewRun(item: RequestItem): Promise<void> {
     if (!(item && item.label)) return;
-    await commands.executeCommand("extension.runRequest", item.label.toString());
+    await commands.executeCommand("zzAPI.runRequest", item.label.toString());
   }
 
   async treeViewRunAll(): Promise<void> {
-    await commands.executeCommand("extension.runAllRequests");
+    await commands.executeCommand("zzAPI.runAllRequests");
   }
 
   treeViewCurl(item: RequestItem): void {
     if (!(item && item.label)) return;
-    commands.executeCommand("extension.showCurl", item.label.toString());
+    commands.executeCommand("zzAPI.showCurl", item.label.toString());
   }
 
   goToRequest(item: RequestItem): void {

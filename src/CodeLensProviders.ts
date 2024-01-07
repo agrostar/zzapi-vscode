@@ -38,19 +38,19 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
         newCodeLens = new vscode.CodeLens(range, {
           title: "↪ Run all requests",
           tooltip: "Click to run all requests",
-          command: "extension.runAllRequests",
+          command: "zzAPI.runAllRequests",
         });
       } else {
         newCodeLens = new vscode.CodeLens(range, {
           title: `▶ Run request`,
           tooltip: `Click to run '${name}'`,
-          command: "extension.runRequest",
+          command: "zzAPI.runRequest",
           arguments: [name],
         });
         curlCodelens = new vscode.CodeLens(range, {
           title: `➰ Show cURL`,
           tooltip: `Click to show the cURL of '${name}'`,
-          command: "extension.showCurl",
+          command: "zzAPI.showCurl",
           arguments: [name],
         });
       }

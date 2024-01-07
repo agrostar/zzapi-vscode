@@ -47,13 +47,13 @@ let CURR_BUNDLE_PATH: string | undefined = undefined;
 
 export function activate(context: ExtensionContext): void {
   window.registerTreeDataProvider("zzapiCustomView", new _TreeView());
-  commands.executeCommand("extension.refreshView");
+  commands.executeCommand("zzAPI.refreshView");
 
   initialiseStatusBar(context);
   createEnvironmentSelector(context);
 
   const bundleChangeHandler = window.onDidChangeActiveTextEditor((activeEditor) => {
-    commands.executeCommand("extension.refreshView");
+    commands.executeCommand("zzAPI.refreshView");
     if (activeEditor && documentIsBundle(activeEditor.document)) {
       setEnvironment(getActiveEnv());
       // even output channel etc triggers bundleChangeHandler. So we explicitly store the previous bundle
@@ -67,51 +67,51 @@ export function activate(context: ExtensionContext): void {
 
   const documentChangeHandler = workspace.onDidChangeTextDocument((changeEvent) => {
     if (changeEvent.document !== window.activeTextEditor?.document) return;
-    commands.executeCommand("extension.refreshView", false);
+    commands.executeCommand("zzAPI.refreshView", false);
   });
   context.subscriptions.push(documentChangeHandler);
 
   const zzApiVersion: string = context.extension.packageJSON.version;
-  let disposable = commands.registerCommand("extension.runRequest", async (name) => {
+  let disposable = commands.registerCommand("zzAPI.runRequest", async (name) => {
     // calls from command pallete will lead to undefined name because we do not set args in package.json
     if (!name) name = await getReqNameAsInput("runRequest");
     await runRequestCommand(name, zzApiVersion);
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.runAllRequests", async () => {
+  disposable = commands.registerCommand("zzAPI.runAllRequests", async () => {
     await runAllRequestsCommand(zzApiVersion);
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.importPostman", async () => {
+  disposable = commands.registerCommand("zzAPI.importPostman", async () => {
     await importPostmanCommand();
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.importEnvironment", async () => {
+  disposable = commands.registerCommand("zzAPI.importEnvironment", async () => {
     await importPostmanEnvironment();
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.showVariables", async () => {
+  disposable = commands.registerCommand("zzAPI.showVariables", async () => {
     await showVariables();
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.showRecentHeaders", async () => {
+  disposable = commands.registerCommand("zzAPI.showRecentHeaders", async () => {
     await showRecentHeaders();
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.showCurl", async (name) => {
+  disposable = commands.registerCommand("zzAPI.showCurl", async (name) => {
     if (!name) name = await getReqNameAsInput("showCurl");
     showCurlCommand(name, zzApiVersion);
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.showSampleGET", async () => {
+  disposable = commands.registerCommand("zzAPI.showSampleGET", async () => {
     await addSampleGet();
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.showSamplePOST", async () => {
+  disposable = commands.registerCommand("zzAPI.showSamplePOST", async () => {
     await addSamplePost();
   });
   context.subscriptions.push(disposable);
-  disposable = commands.registerCommand("extension.scaffolding", () => {
+  disposable = commands.registerCommand("zzAPI.scaffolding", () => {
     scaffold();
   });
   context.subscriptions.push(disposable);

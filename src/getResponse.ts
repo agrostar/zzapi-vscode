@@ -1,15 +1,14 @@
 import { window, ProgressLocation } from "vscode";
 
 import { ResponseData, RequestSpec, GotRequest, TestResult } from "zzapi";
-import { constructGotRequest, executeGotRequest } from "zzapi";
+import { executeGotRequest } from "zzapi";
 import { runAllTests } from "zzapi";
 import { captureVariables } from "zzapi";
-import { replaceVariablesInRequest } from "zzapi";
 
-import { getOutputChannel } from "./utils/outputChannel";
+import { displayUndefs, getOutputChannel } from "./utils/outputChannel";
 
 import { getVarStore } from "./variables";
-import { replaceFileContents } from "./fileContents";
+import { getGotRequest } from "./reformatRequest";
 
 function formatTestResults(results: TestResult[]): string {
   const resultLines: string[] = [];
@@ -28,9 +27,12 @@ function formatTestResults(results: TestResult[]): string {
   return resultLines.join("\n");
 }
 
-export async function allRequestsWithProgress(allRequests: {
-  [name: string]: RequestSpec;
-}): Promise<Array<{ cancelled: boolean; name: string; response: ResponseData }>> {
+export async function allRequestsWithProgress(
+  allRequests: {
+    [name: string]: RequestSpec;
+  },
+  extensionVersion: string,
+): Promise<Array<{ cancelled: boolean; name: string; response: ResponseData }>> {
   let currHttpRequest: GotRequest;
   let currRequestName: string = "";
 
@@ -67,9 +69,9 @@ export async function allRequestsWithProgress(allRequests: {
         let requestData = allRequests[name];
         const method = requestData.httpRequest.method;
 
-        requestData.httpRequest.body = replaceFileContents(requestData.httpRequest.body);
-        const undefs = replaceVariablesInRequest(requestData, getVarStore().getAllVariables());
-        currHttpRequest = constructGotRequest(requestData);
+        const gotRequestDetails = getGotRequest(requestData, extensionVersion);
+        currHttpRequest = gotRequestDetails.gotRequest;
+        const undefs = gotRequestDetails.undefinedVars;
 
         const {
           response: httpResponse,
@@ -95,11 +97,7 @@ export async function allRequestsWithProgress(allRequests: {
         if (error) {
           out.append(`${new Date().toLocaleString()} [ERROR] `);
           out.appendLine(`${method} ${name} Error executing request: ${error})`);
-          if (undefs.length > 0) {
-            out.appendLine(
-              `\t[warn]  Undefined variable(s): ${undefs.join(",")}. Did you choose the correct env?`,
-            );
-          }
+          displayUndefs(undefs);
           out.show(true);
           continue;
         }
@@ -157,11 +155,7 @@ export async function allRequestsWithProgress(allRequests: {
         if (capturedErrors) {
           out.appendLine(capturedErrors);
         }
-        if (undefs.length > 0) {
-          out.appendLine(
-            `\t[WARN]  Undefined variable(s): ${undefs.join(",")}. Did you choose the correct env?`,
-          );
-        }
+        displayUndefs(undefs);
 
         out.show(true);
       }

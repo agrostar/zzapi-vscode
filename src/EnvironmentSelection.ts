@@ -10,7 +10,7 @@ export function initialiseStatusBar(context: ExtensionContext): void {
   const statusBar = getStatusBar();
 
   resetActiveEnvInStatusBar();
-  statusBar.command = "extension.clickEnvSelector";
+  statusBar.command = "zzAPI.clickEnvSelector";
   statusBar.show();
   context.subscriptions.push(statusBar);
 }
@@ -37,11 +37,11 @@ export function setEnvironment(env: string): void {
   } else {
     setCurrentEnvNameInStatusBar(env);
   }
-  commands.executeCommand("extension.refreshView", false, true, false);
+  commands.executeCommand("zzAPI.refreshView", false, true, false);
 }
 
 export function createEnvironmentSelector(context: ExtensionContext): void {
-  const statusClick = commands.registerCommand("extension.clickEnvSelector", () => {
+  const statusClick = commands.registerCommand("zzAPI.clickEnvSelector", () => {
     const bundleContents = getContentIfBundle();
     const envNames = getEnvNames(getWorkingDir(), bundleContents);
     if (envNames.includes(getDefaultEnv())) {

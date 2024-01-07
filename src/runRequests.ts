@@ -13,18 +13,7 @@ async function runRequestSpecs(
   requests: { [name: string]: RequestSpec },
   extensionVersion: string,
 ): Promise<void> {
-  for (const name in requests) {
-    const request = requests[name];
-
-    const autoHeaders: { [key: string]: string } = {};
-    autoHeaders["user-agent"] = "zzAPI-vscode/" + extensionVersion;
-    if (request.httpRequest.body && typeof request.httpRequest.body == "object")
-      autoHeaders["content-type"] = "application/json";
-
-    request.httpRequest.headers = Object.assign(autoHeaders, request.httpRequest.headers);
-  }
-
-  const allResponses = await allRequestsWithProgress(requests);
+  const allResponses = await allRequestsWithProgress(requests, extensionVersion);
   let responses: Array<{ name: string; response: ResponseData }> = [];
 
   allResponses.forEach((ResponseData) => {
