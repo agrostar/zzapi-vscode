@@ -4,7 +4,7 @@
   "publisher": "AgroStar",
   "description": "Tool for testing and documenting REST APIs",
   "repository": "https://github.com/agrostar/zzapi-vscode",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -308,7 +308,9 @@
       },
       {
         "fileMatch": [
-          "*.zzv"
+          "*.zzv",
+          "*.zzv.yml",
+          "*.zzv.yaml"
         ],
         "url": "https://agrostar.in/schemas/zzapi-varset.schema.json"
       }
@@ -350,6 +352,6 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "zzapi": "^1.0.3"
+    "zzapi": "^1.1.0"
   }
 }

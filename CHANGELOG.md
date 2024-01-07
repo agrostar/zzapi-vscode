@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.0.1]
+- Hierarchical tree view including variable sets and environments
+
+## [2.0.0]
+- Tree view added
+
 ## [1.0.4]
 - Consistent output messages
 - Import postman will parse json if content-type header is found and is application/json
