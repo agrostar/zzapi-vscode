@@ -1,5 +1,9 @@
 # Change Log
 
+## [2.0.2]
+- Renamed commands from extenstion.* to zzapi.* (namespace)
+- Fixed bug: show cURL to honour file contents as body 
+
 ## [2.0.1]
 - Hierarchical tree view including variable sets and environments
 
