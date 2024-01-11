@@ -16,10 +16,14 @@ import path from "path";
 import * as YAML from "yaml";
 import * as fs from "fs";
 
-import { documentIsBundle, getWorkingDir, getWorkspaceRootDir } from "./utils/pathUtils";
+import {
+  BUNDLE_FILE_NAME_ENDINGS,
+  documentIsBundle,
+  getWorkingDir,
+  getWorkspaceRootDir,
+} from "./utils/pathUtils";
 import { getActiveEnv, getDefaultEnv } from "./utils/environmentUtils";
 import { isDict } from "./utils/typeUtils";
-import { Bundles, getAllBundles } from "./utils/bundleUtils";
 
 import { setEnvironment } from "./EnvironmentSelection";
 import { getVarFilePaths } from "./variables";
@@ -49,6 +53,9 @@ function getEnvPaths(dirPath: string): { [name: string]: string } {
 
   return filePaths;
 }
+
+let MAX_SEARCH_DEPTH: number | undefined = 3;
+// export function setMaxSearchDepth if required later
 
 const BUNDLE_CONTEXT_VALS: { [name: string]: string } = {
   item: "bundle",
@@ -226,9 +233,9 @@ export default class _TreeView implements TreeDataProvider<_TreeItem> {
       }
     });
 
-    const valid = reqNodeStart >= 0;
-    const reqNodeName = "REQUESTS" + (!valid ? " (none)" : "");
-    const reqNodeContextValue = valid ? REQ_CONTEXT_VALS.root : REQ_CONTEXT_VALS.emptyRoot;
+    const reqsPresent = reqNodeStart >= 0 && requests.length > 0;
+    const reqNodeName = "REQUESTS" + (!reqsPresent ? " (none)" : "");
+    const reqNodeContextValue = reqsPresent ? REQ_CONTEXT_VALS.root : REQ_CONTEXT_VALS.emptyRoot;
 
     const mainRequestNode = new RequestItem(reqNodeName, reqNodeContextValue, reqNodeStart, reqNodeEnd);
     requests.forEach((req) => mainRequestNode.addChild(req));
@@ -262,37 +269,39 @@ export default class _TreeView implements TreeDataProvider<_TreeItem> {
     this.data.push(mainEnvNode);
   }
 
-  private getBundleItems(bundles: Bundles): BundleItem[] {
-    let bundleItems: BundleItem[] = [];
-    const dirPath = bundles.dirPath;
-    const contents = bundles.contents;
+  private getBundleItems(dirPath: string, depth?: number): BundleItem[] {
+    const currDepth = depth ?? 1;
+    if (MAX_SEARCH_DEPTH && currDepth > MAX_SEARCH_DEPTH) return [];
 
-    contents.forEach((item) => {
-      if (typeof item === "string") {
-        // it is a valid bundle file
-        const itemPath = path.join(dirPath, item);
+    let bundles: BundleItem[] = [];
+
+    let dirs: BundleItem[] = [];
+    const dirContents = fs.readdirSync(dirPath, { encoding: "utf-8" });
+    dirContents.forEach((item) => {
+      const itemPath = path.join(dirPath, item);
+      if (fs.lstatSync(itemPath).isDirectory()) {
+        const childBundleItems = this.getBundleItems(itemPath, currDepth + 1);
+        if (childBundleItems.length > 0) {
+          const bundleNode = new BundleItem(item, BUNDLE_CONTEXT_VALS.root);
+          childBundleItems.forEach((item) => bundleNode.addChild(item));
+
+          dirs.push(bundleNode);
+        }
+      } else if (BUNDLE_FILE_NAME_ENDINGS.some((ending) => item.endsWith(ending))) {
         const selected = itemPath === window.activeTextEditor?.document.uri.fsPath;
         const bundleName = item + (selected ? CURR_BUNDLE_SUFFIX : "");
 
         const bundleItem = new BundleItem(bundleName, BUNDLE_CONTEXT_VALS.item, itemPath, selected);
-        bundleItems.push(bundleItem);
-      } else {
-        // it is a directory containing some bundles
-        const childBundles = this.getBundleItems(item);
-        if (childBundles.length > 0) {
-          const bundleNode = new BundleItem(path.basename(item.dirPath), BUNDLE_CONTEXT_VALS.root);
-          childBundles.forEach((item) => bundleNode.addChild(item));
-
-          bundleItems.push(bundleNode);
-        }
+        bundles.push(bundleItem);
       }
     });
+    bundles.push(...dirs);
 
-    return bundleItems;
+    return bundles;
   }
 
   private readBundles(): void {
-    const bundles: BundleItem[] = this.getBundleItems(getAllBundles(getWorkspaceRootDir()));
+    const bundles: BundleItem[] = this.getBundleItems(getWorkspaceRootDir());
     if (bundles.length < 1) return;
 
     const mainBundleNode = new BundleItem("BUNDLES", BUNDLE_CONTEXT_VALS.root);
