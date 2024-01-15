@@ -11,10 +11,11 @@ import {
   window,
   workspace,
 } from "vscode";
-import { RequestPosition, getRequestPositions } from "zzapi";
 import path from "path";
 import * as YAML from "yaml";
 import * as fs from "fs";
+
+import { RequestPosition, getRequestPositions } from "zzapi";
 
 import {
   BUNDLE_FILE_NAME_ENDINGS,
