@@ -20,7 +20,7 @@ function replaceFileContents(body: any, replaceWithFileRef?: boolean): any {
   finds all file:// instances with atleast 1 succeeding word character
   matches the file-name referred to by this instance
   */
-  const fileRegex = /file:\/\/([^\s]+)/g; 
+  const fileRegex = /file:\/\/([^\s]+)/g;
   return body.replace(fileRegex, (match, givenFilePath) => {
     if (match !== body) return match; // we only perform a replacement if file:// is the ENTIRE body
 
