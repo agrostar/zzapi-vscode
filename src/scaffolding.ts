@@ -63,7 +63,7 @@ function createDir(): string {
   return dirPath;
 }
 
-export function scaffold() {
+export default function scaffold() {
   const dirPath = createDir();
 
   const FILE_CONTENTS = getFileContents();

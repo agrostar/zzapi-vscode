@@ -35,13 +35,13 @@ export async function openEditorForAllRequests(
   let allResponses: { [key: string]: any } = {};
 
   responses.forEach((responseObj) => {
-    let contentData = getDataOfIndReqAsString(
+    const contentData = getDataOfIndReqAsString(
       responseObj.response,
       responseObj.name,
       keepRawJSON,
     ).contentData;
 
-    let parsedData = attemptDataParse(contentData);
+    const parsedData = attemptDataParse(contentData);
     allResponses[responseObj.name] = parsedData ? parsedData : contentData;
   });
 
@@ -59,14 +59,14 @@ function getDataOfIndReqAsString(
   let headersData = `${name}: headers\nenvironment: ${currentEnvironment}\n\n`;
 
   for (const key in responseData) {
-    let value = responseData[key as keyof ResponseData];
+    const value = responseData[key as keyof ResponseData];
 
     if (KEYS_IN_BODY.includes(key)) contentData += `${value}\n`;
     if (KEYS_IN_HEADERS.includes(key)) headersData += `${key}: ${value}\n`;
   }
 
   if (!keepRawJSON) {
-    let parsedData = attemptDataParse(contentData);
+    const parsedData = attemptDataParse(contentData);
     if (parsedData) contentData = JSON.stringify(parsedData, undefined, 2);
   }
   return { contentData, headersData };

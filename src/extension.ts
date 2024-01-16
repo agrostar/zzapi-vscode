@@ -3,45 +3,17 @@ import { ExtensionContext, languages, commands, window, Disposable, workspace } 
 
 import { documentIsBundle } from "./utils/pathUtils";
 import { isDict } from "./utils/typeUtils";
-import { getActiveEnv } from "./utils/environmentUtils";
+import { getActiveEnv, getInvalidEnv } from "./utils/environmentUtils";
 
 import _TreeView from "./treeView";
+import CodeLensProvider from "./CodeLensProviders";
+import scaffold from "./scaffolding";
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import { createEnvironmentSelector, initialiseStatusBar, setEnvironment } from "./EnvironmentSelection";
 import { showRecentHeaders, showVariables } from "./showData";
 import { addSampleGet, addSamplePost } from "./addSamples";
 import { getVarStore } from "./variables";
-import { scaffold } from "./scaffolding";
-import { CodeLensProvider } from "./CodeLensProviders";
-
-let DISPOSABLES: Disposable[] = [];
-
-async function getReqNameAsInput(commandName: string): Promise<string> {
-  const activeEditor = window.activeTextEditor;
-  if (!activeEditor) throw new Error("Ensure your bundle is the active text editor");
-  if (!documentIsBundle(activeEditor.document))
-    throw new Error("The active text editor is not a valid bundle");
-
-  const text = activeEditor.document.getText();
-  const parsedDoc = YAML.parse(text);
-  if (!isDict(parsedDoc)) throw new Error("Unable to parse selected bundle");
-
-  const requests = parsedDoc.requests;
-  if (!requests || !isDict(requests) || Object.keys(requests).length < 1)
-    throw new Error("No requests are defined in the active bundle");
-
-  return await window
-    .showQuickPick(Object.keys(requests), {
-      placeHolder: `Select the request to perform ${commandName} on`,
-      matchOnDetail: true,
-      matchOnDescription: true,
-    })
-    .then((selectedRequest) => {
-      if (!selectedRequest) throw new Error("No request selected");
-      return selectedRequest;
-    });
-}
 
 let CURR_BUNDLE_PATH: string | undefined = undefined;
 
@@ -61,6 +33,8 @@ export function activate(context: ExtensionContext): void {
         getVarStore().resetCapturedVariables();
         CURR_BUNDLE_PATH = activeEditor.document.uri.fsPath;
       }
+    } else {
+      setEnvironment(getInvalidEnv());
     }
   });
   context.subscriptions.push(bundleChangeHandler);
@@ -119,9 +93,34 @@ export function activate(context: ExtensionContext): void {
   languages.registerCodeLensProvider("*", new CodeLensProvider());
 }
 
+async function getReqNameAsInput(commandName: string): Promise<string> {
+  const activeEditor = window.activeTextEditor;
+  if (!activeEditor) throw new Error("Ensure your bundle is the active text editor");
+  if (!documentIsBundle(activeEditor.document))
+    throw new Error("The active text editor is not a valid bundle");
+
+  const text = activeEditor.document.getText();
+  const parsedDoc = YAML.parse(text);
+  if (!isDict(parsedDoc)) throw new Error("Unable to parse selected bundle");
+
+  const requests = parsedDoc.requests;
+  if (!requests || !isDict(requests) || Object.keys(requests).length < 1)
+    throw new Error("No requests are defined in the active bundle");
+
+  return await window
+    .showQuickPick(Object.keys(requests), {
+      placeHolder: `Select the request to perform ${commandName} on`,
+      matchOnDetail: true,
+      matchOnDescription: true,
+    })
+    .then((selectedRequest) => {
+      if (!selectedRequest) throw new Error("No request selected");
+      return selectedRequest;
+    });
+}
+
+let DISPOSABLES: Disposable[] = [];
 export function deactivate(): void {
-  if (DISPOSABLES) {
-    DISPOSABLES.forEach((item) => item.dispose());
-  }
+  DISPOSABLES.forEach((item) => item.dispose());
   DISPOSABLES = [];
 }

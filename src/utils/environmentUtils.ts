@@ -2,9 +2,14 @@ import { window } from "vscode";
 
 import { documentIsBundle } from "./pathUtils";
 
-const NO_ENV = "-- None --" as const;
+const NO_ENV = "-- None --";
 export function getDefaultEnv(): string {
   return NO_ENV;
+}
+
+const INVALID_ENV = "-- N/A --";
+export function getInvalidEnv(): string {
+  return INVALID_ENV;
 }
 
 let SELECTED_ENVS: { [bundlePath: string]: string } = {};

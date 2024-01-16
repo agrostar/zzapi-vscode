@@ -5,7 +5,7 @@ import { RequestPosition } from "zzapi";
 
 import { documentIsBundle } from "./utils/pathUtils";
 
-export class CodeLensProvider implements vscode.CodeLensProvider {
+export default class CodeLensProvider implements vscode.CodeLensProvider {
   private codeLenses: vscode.CodeLens[] = [];
   private _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
   public readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event;
@@ -18,7 +18,7 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
 
   public provideCodeLenses(
     document: vscode.TextDocument,
-    token: vscode.CancellationToken,
+    _: vscode.CancellationToken,
   ): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
     if (!documentIsBundle(document)) return [];
 
