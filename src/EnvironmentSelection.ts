@@ -4,6 +4,7 @@ import {
   BUNDLE_FILE_NAME_ENDINGS,
   documentIsBundle,
   getContentIfBundle,
+  getCurrBundleName,
   getWorkingDir,
 } from "./utils/pathUtils";
 import { getDefaultEnv, getInvalidEnv, setActiveEnv } from "./utils/environmentUtils";
@@ -20,20 +21,24 @@ export function initialiseStatusBar(context: ExtensionContext): void {
   context.subscriptions.push(statusBar);
 }
 
+function getStatusBarBase(): string {
+  return getCurrBundleName() ?? "zzAPI";
+}
+
 function resetActiveEnvInStatusBar(): void {
   setActiveEnv();
 
-  const statusBar = getStatusBar();
-  statusBar.text = "zzAPI: no env";
-  statusBar.backgroundColor = new ThemeColor("statusBarItem.warningBackground");
+  const fileName: string = getStatusBarBase();
+  getStatusBar().text = `${fileName}: no env`;
+  getStatusBar().backgroundColor = new ThemeColor("statusBarItem.warningBackground");
 }
 
 function setCurrentEnvNameInStatusBar(envName: string): void {
   setActiveEnv(envName);
 
-  const statusBar = getStatusBar();
-  statusBar.text = `zzAPI env: ${envName}`;
-  statusBar.backgroundColor = undefined;
+  const fileName: string = getStatusBarBase();
+  getStatusBar().text = `${fileName} env: "${envName}"`;
+  getStatusBar().backgroundColor = undefined;
 }
 
 export function setEnvironment(env: string): void {
@@ -47,10 +52,10 @@ export function setEnvironment(env: string): void {
 
 export function createEnvironmentSelector(context: ExtensionContext): void {
   const statusClick = commands.registerCommand("zzAPI.clickEnvSelector", () => {
+    // if it is not a valid bundle, we do not allow env selection
     if (!(window.activeTextEditor && documentIsBundle(window.activeTextEditor.document))) {
-      // the 'getInvalidEnv()' will be showing in the status bar
       window.showInformationMessage(
-        `Make a bundle (extensions: ${BUNDLE_FILE_NAME_ENDINGS}) the active editor to see the corresponding envs`,
+        `Make a bundle (extensions: ${BUNDLE_FILE_NAME_ENDINGS}) the active editor to select a corresponding env`,
       );
       return;
     }

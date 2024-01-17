@@ -9,6 +9,16 @@ export function documentIsBundle(document: TextDocument): boolean {
   return BUNDLE_FILE_NAME_ENDINGS.some((ENDING) => docFsPath.endsWith(ENDING));
 }
 
+export function getCurrBundleName(): string | undefined {
+  if (!window.activeTextEditor) return undefined; // no active editor
+
+  const baseName = path.basename(window.activeTextEditor.document.uri.fsPath);
+  for (const e of BUNDLE_FILE_NAME_ENDINGS)
+    if (baseName.endsWith(e)) return baseName.substring(0, baseName.length - e.length);
+
+  return undefined; // not a bundle
+}
+
 export function getContentIfBundle(): string | undefined {
   const activeEditor = window.activeTextEditor;
   if (activeEditor && documentIsBundle(activeEditor.document)) {

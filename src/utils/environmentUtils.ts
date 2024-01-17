@@ -18,7 +18,7 @@ export function setActiveEnv(envName?: string): void {
   if (!(activeEditor && documentIsBundle(activeEditor.document))) return;
 
   const envPath = activeEditor.document.uri.fsPath;
-  SELECTED_ENVS[envPath] = envName ? envName : NO_ENV;
+  SELECTED_ENVS[envPath] = envName ?? NO_ENV;
 }
 export function getActiveEnv(): string {
   const activeEditor = window.activeTextEditor;
