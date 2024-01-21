@@ -55,7 +55,7 @@ export function createEnvironmentSelector(context: ExtensionContext): void {
     // if it is not a valid bundle, we do not allow env selection
     if (!(window.activeTextEditor && documentIsBundle(window.activeTextEditor.document))) {
       window.showInformationMessage(
-        `Make a bundle (extensions: ${BUNDLE_FILE_NAME_ENDINGS}) the active editor to select a corresponding env`,
+        `Activate/open a zzAPI bundle (${BUNDLE_FILE_NAME_ENDINGS}) to select a corresponding env`,
       );
       return;
     }

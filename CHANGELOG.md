@@ -1,5 +1,9 @@
 # Change Log
 
+## [2.0.3]
+- Made status bar less confusing when the active document is not a bundle
+- Added lots more instructions to README.md - not comprehensive but enough for most users
+
 ## [2.0.2]
 - Renamed commands from extenstion.* to zzapi.* (namespace)
 - Fixed bug: show cURL to honour file contents as body 
