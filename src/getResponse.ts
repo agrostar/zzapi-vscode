@@ -133,7 +133,7 @@ export async function allRequestsWithProgress(
           continue;
         }
 
-        const results = runAllTests(requestData.tests, response);
+        const results = runAllTests(requestData.tests, response, requestData.options.stopOnFailure);
         const passed = results.filter((r) => r.pass).length;
         const all = results.length;
 
