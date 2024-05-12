@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.1.0]
+- Using v1.2.0 of zzapi, which adds the following
+  - Support for `$sw`, `$ew`, `$co` (startsWith, endsWith, contains) comparisons
+  - Support for non-equal comparisons for array/string `$size`
+  - Option for stopping further tests when status test fails
+
 ## [2.0.3]
 - Made status bar less confusing when the active document is not a bundle
 - Added lots more instructions to README.md - not comprehensive but enough for most users
