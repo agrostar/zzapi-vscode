@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.1.1]
+- Using v1.2.1 of zzapi, fixes stopOnFailure bug
+
 ## [2.1.0]
 - Using v1.2.0 of zzapi, which adds the following
   - Support for `$sw`, `$ew`, `$co` (startsWith, endsWith, contains) comparisons

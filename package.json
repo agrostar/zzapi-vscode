@@ -4,7 +4,7 @@
   "publisher": "AgroStar",
   "description": "Tool for testing and documenting REST APIs",
   "repository": "https://github.com/agrostar/zzapi-vscode",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -352,6 +352,6 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "zzapi": "^1.2.0"
+    "zzapi": "^1.2.1"
   }
 }
