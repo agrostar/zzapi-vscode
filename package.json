@@ -352,6 +352,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "zzapi": "^1.2.1"
+    "yaml": "^2.4.3",
+    "zzapi": "^1.4.0"
   }
 }
