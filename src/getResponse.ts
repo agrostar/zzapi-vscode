@@ -34,7 +34,6 @@ function getFormattedResult(
   size: number,
   execTime: string | number,
 ): string {
-  getOutputChannel().appendLine("ok");
   function getResultData(res: SpecResult): [number, number] {
     const rootResults = res.results;
     // console.log(typeof rootResults);
