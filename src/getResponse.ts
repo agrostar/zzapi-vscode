@@ -79,7 +79,7 @@ function getFormattedResult(
 
   const specResult = getResult(specRes);
   if (specResult) message += "\n" + specResult;
-  
+
   return message;
 }
 
