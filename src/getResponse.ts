@@ -1,6 +1,6 @@
 import { window, ProgressLocation } from "vscode";
 
-import { ResponseData, RequestSpec, GotRequest, TestResult } from "zzapi";
+import { ResponseData, RequestSpec, GotRequest, TestResult, SpecResult } from "zzapi";
 import { executeGotRequest } from "zzapi";
 import { runAllTests } from "zzapi";
 import { captureVariables } from "zzapi";
@@ -10,21 +10,77 @@ import { displayUndefs, getOutputChannel } from "./utils/outputChannel";
 import { getVarStore } from "./variables";
 import { getGotRequest } from "./reformatRequest";
 
-function formatTestResults(results: TestResult[]): string {
+function formatTestResults(results: TestResult[], spec: string): string[] {
   const resultLines: string[] = [];
   for (const r of results) {
     let line: string;
     if (r.pass) {
-      line = `\t[INFO] test ${r.spec}: expected ${r.op}: ${r.expected} OK`;
+      line = `\t[INFO] test ${spec}: expected ${r.op}: ${r.expected} OK`;
     } else {
-      line = `\t[FAIL] test ${r.spec}: expected ${r.op}: ${r.expected} | got ${r.received}`;
+      line = `\t[FAIL] test ${spec}: expected ${r.op}: ${r.expected} | got ${r.received}`;
     }
-    if (r.message) {
-      line = `${line} [${r.message}]`;
-    }
+    if (r.message) line += `[${r.message}]`;
+
     resultLines.push(line);
   }
-  return resultLines.join("\n");
+  return resultLines;
+}
+
+function getFormattedResult(
+  specRes: SpecResult,
+  method: string,
+  name: string,
+  status: number | undefined,
+  size: number,
+  execTime: string | number,
+): string {
+  getOutputChannel().appendLine("ok");
+  function getResultData(res: SpecResult): [number, number] {
+    const rootResults = res.results;
+    // console.log(typeof rootResults);
+    let passed = rootResults.filter((r) => r.pass).length,
+      all = rootResults.length;
+
+    for (const s of res.subResults) {
+      const [subPassed, subAll] = getResultData(s);
+      passed += subPassed;
+      all += subAll;
+    }
+
+    return [passed, all];
+  }
+
+  const [passed, all] = getResultData(specRes);
+
+  let message = `${new Date().toLocaleString()} `;
+  message += all === passed ? "[INFO] " : "[ERROR] ";
+
+  const testString = all == 0 ? "" : `tests: ${passed}/${all} passed`;
+  message += `${method} ${name} status: ${status} size: ${size} B time: ${execTime} ${testString}`;
+
+  function getResult(res: SpecResult, preSpec?: string): string {
+    if (passed === all) return "";
+
+    const getFullSpec = (): string => {
+      if (!res.spec) return "";
+      return (preSpec ? preSpec + " / " : "") + res.spec;
+    };
+
+    const spec = getFullSpec();
+    const resultLines = formatTestResults(res.results, spec);
+    const subResultLines = [];
+    for (const s of res.subResults) {
+      const subRes = getResult(s, spec);
+      if (subRes) subResultLines.push(subRes);
+    }
+
+    return [...resultLines, ...subResultLines].join("\n");
+  }
+
+  const specResult = getResult(specRes);
+  if (specResult) message += "\n" + specResult;
+  
+  return message;
 }
 
 export async function allRequestsWithProgress(
@@ -134,19 +190,8 @@ export async function allRequestsWithProgress(
         }
 
         const results = runAllTests(requestData.tests, response, requestData.options.stopOnFailure);
-        const passed = results.filter((r) => r.pass).length;
-        const all = results.length;
-
-        if (all == passed) {
-          out.append(`${new Date().toLocaleString()} [INFO]  `);
-        } else {
-          out.append(`${new Date().toLocaleString()} [ERROR] `);
-        }
-        const testString = all == 0 ? "" : `tests: ${passed}/${all} passed`;
-        out.appendLine(`${method} ${name} status: ${status} size: ${size} B time: ${et} ${testString}`);
-        if (all != passed) {
-          out.appendLine(formatTestResults(results));
-        }
+        const message = getFormattedResult(results, method, name, status, size, et);
+        out.appendLine(message);
 
         const captureOutput = captureVariables(requestData, response);
         const capturedVariables = captureOutput.capturedVars;
