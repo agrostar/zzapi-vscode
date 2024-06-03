@@ -1,5 +1,5 @@
 {
-  "name": "zzapi-vscode",
+  "name": "zzapi",
   "displayName": "zzAPI",
   "publisher": "AgroStar",
   "description": "Tool for testing and documenting REST APIs",
