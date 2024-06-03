@@ -1,5 +1,9 @@
 # Change Log
 
+## [2.2.0]
+- Using v1.4.0 of zzapi, supports `$tests` assertion op to run tests against a sub-object
+- Output format changes to cater to the above
+
 ## [2.1.1]
 - Using v1.2.1 of zzapi, fixes stopOnFailure bug
 
