@@ -39,21 +39,23 @@ function getFormattedResult(
   size: number,
   execTime: string | number,
 ): string {
-  function getResultData(res: SpecResult): [number, number] {
+  function getResultData(res: SpecResult): [number, number, boolean] {
     const rootResults = res.results;
     let passed = !res.skipped ? rootResults.filter((r) => r.pass).length : 0,
       all = !res.skipped ? rootResults.length : 0;
 
+    let hasSkip: boolean = res.skipped ?? false;
     for (const s of res.subResults) {
-      const [subPassed, subAll] = getResultData(s);
+      const [subPassed, subAll, subSkip] = getResultData(s);
       passed += subPassed;
       all += subAll;
+      hasSkip = hasSkip || subSkip;
     }
 
-    return [passed, all];
+    return [passed, all, hasSkip];
   }
 
-  const [passed, all] = getResultData(specRes);
+  const [passed, all, hasSkip] = getResultData(specRes);
 
   let message = `${new Date().toLocaleString()} `;
   message += all === passed ? "[INFO] " : "[ERROR] ";
@@ -62,7 +64,7 @@ function getFormattedResult(
   message += `${method} ${name} status: ${status} size: ${size} B time: ${execTime} ${testString}`;
 
   function getResult(res: SpecResult, preSpec?: string): string {
-    if (passed === all) return "";
+    if (passed === all && !hasSkip) return "";
 
     const getFullSpec = (): string => {
       if (!res.spec) return "";
