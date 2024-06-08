@@ -10,16 +10,21 @@ import { displayUndefs, getOutputChannel } from "./utils/outputChannel";
 import { getVarStore } from "./variables";
 import { getGotRequest } from "./reformatRequest";
 
-function formatTestResults(results: TestResult[], spec: string): string[] {
+function formatTestResults(results: TestResult[], spec: string, skip?: boolean): string[] {
   const resultLines: string[] = [];
   for (const r of results) {
+    const testContent = `test ${spec}: expected ${r.op}: ${r.expected}`;
     let line: string;
-    if (r.pass) {
-      line = `\t[INFO] test ${spec}: expected ${r.op}: ${r.expected} OK`;
+    if (skip) {
+      line = `\t[SKIP] ${testContent}`;
     } else {
-      line = `\t[FAIL] test ${spec}: expected ${r.op}: ${r.expected} | got ${r.received}`;
+      if (r.pass) {
+        line = `\t[INFO] ${testContent} OK`;
+      } else {
+        line = `\t[FAIL] ${testContent} | got ${r.received}`;
+      }
+      if (r.message) line += `[${r.message}]`;
     }
-    if (r.message) line += `[${r.message}]`;
 
     resultLines.push(line);
   }
@@ -34,22 +39,23 @@ function getFormattedResult(
   size: number,
   execTime: string | number,
 ): string {
-  function getResultData(res: SpecResult): [number, number] {
+  function getResultData(res: SpecResult): [number, number, boolean] {
     const rootResults = res.results;
-    // console.log(typeof rootResults);
-    let passed = rootResults.filter((r) => r.pass).length,
-      all = rootResults.length;
+    let passed = !res.skipped ? rootResults.filter((r) => r.pass).length : 0,
+      all = !res.skipped ? rootResults.length : 0;
 
+    let hasSkip: boolean = res.skipped ?? false;
     for (const s of res.subResults) {
-      const [subPassed, subAll] = getResultData(s);
+      const [subPassed, subAll, subSkip] = getResultData(s);
       passed += subPassed;
       all += subAll;
+      hasSkip = hasSkip || subSkip;
     }
 
-    return [passed, all];
+    return [passed, all, hasSkip];
   }
 
-  const [passed, all] = getResultData(specRes);
+  const [passed, all, hasSkip] = getResultData(specRes);
 
   let message = `${new Date().toLocaleString()} `;
   message += all === passed ? "[INFO] " : "[ERROR] ";
@@ -58,7 +64,7 @@ function getFormattedResult(
   message += `${method} ${name} status: ${status} size: ${size} B time: ${execTime} ${testString}`;
 
   function getResult(res: SpecResult, preSpec?: string): string {
-    if (passed === all) return "";
+    if (passed === all && !hasSkip) return "";
 
     const getFullSpec = (): string => {
       if (!res.spec) return "";
@@ -66,7 +72,7 @@ function getFormattedResult(
     };
 
     const spec = getFullSpec();
-    const resultLines = formatTestResults(res.results, spec);
+    const resultLines = formatTestResults(res.results, spec, res.skipped);
     const subResultLines = [];
     for (const s of res.subResults) {
       const subRes = getResult(s, spec);
