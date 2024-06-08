@@ -19,7 +19,7 @@ This extension makes it easy to create, document and test API requests from with
 * Code Lenses appear above requests when a `.zzb` file (essentially a YAML with a schema) is opened. Click these to run the request. Responses are shown in a new editor window, you can save these as sample responses.
 * Define variables and group them into environments and switch between environments while running requests. Variables can be shared among bundles using separate `.zzv` files (global), or they can be local to the bundle in the `variables` section. Thus, you can share variables also with your team.
 * If you have passwords and secrets, create a separate `.zzv` file and do not commit it to the repository.
-* Run all requests in a bundle in one shot, capture variables from a response and use them in subsequnt requests (eg, get the auth token from a login and use it in subsequent requests).
+* Run all requests in a bundle in one shot, capture variables from a response and use them in subsequent requests (eg, get the auth token from a login and use it in subsequent requests).
 * Write tests in simple yet powerful [JSON Path](https://www.npmjs.com/package/jsonpath) specification against the response (needs no coding).
 * Document your APIs using special `doc-` nodes, or just use simple YAML comments using `# comment` syntax.
 
@@ -80,7 +80,7 @@ requests:
 * Tests starting with `$.` are [JSON Path](https://www.npmjs.com/package/jsonpath) specs into the response body, if it is JSON, and the RHS is the expected value.
 * The HTTP status (`status`), the entire body as a string (`body`) and headers (spec starts with `$h.`) can also be tested.
 * Operators like `$.value: {$gt: 43}` are also supported (similar to MongoDB filter syntax).
-* Test results are shown in the output window (consise if all tests pass, detailed if any test fails).
+* Test results are shown in the output window (concise if all tests pass, detailed if any test fails or is skipped).
 
 ## Variables
 
@@ -162,7 +162,7 @@ requests:
 
 * By default parameters are URL encoded
 * Following redirect response is disabled by default
-* Other options are verifySSL and showHeaders (both fals by default)
+* Other options are verifySSL and showHeaders (both false by default)
 
 ## Share common things across requests
 ```
@@ -230,6 +230,8 @@ You can best learn about the `.zzb` file format by just browsing the bundle used
 * Create one bundle for each test case or flow. _Use Run All Requests_ to run all of them together and see their pass/fail status in the output window. Create a separate bundle with lots of comments for documenting your API set and for others to try out.
 
 * Use [JSON Path Online Evaluator](https://jsonpath.com/) to play with JSON path before using them in tests and setting variables from the response body.
+
+* For CI/CD and test automation, check out the command-line version: https://www.npmjs.com/package/zzapi-cli and https://github.com/agrostar/zzapi-cli
 
 ## Feedback, bugs and feature requests
 
