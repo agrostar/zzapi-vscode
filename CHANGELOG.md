@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.3.0]
+- Using v1.5.0 of zzapi, supports `$skip` assertion op to skip a test
+- Output format changes to cater to the above
+
+## [2.2.1]
+- stopOnFailure bug fix
+
 ## [2.2.0]
 - Using v1.4.0 of zzapi, supports `$tests` assertion op to run tests against a sub-object
 - Output format changes to cater to the above
