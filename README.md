@@ -235,7 +235,7 @@ You can best learn about the `.zzb` file format by just browsing the bundle used
 
 ## Feedback, bugs and feature requests
 
-To appreaciate, give us a star in the GitHub repo: https://github.com/agrostar/zzapi-vscode
+To appreaciate, give us a star in the GitHub repo: https://github.com/agrostar/zzapi-vscode and/or in the VS Code marketplace: https://marketplace.visualstudio.com/items?itemName=AgroStar.zzapi
 
 For bugs, improvements and feature requests, create a new issue here:
 
