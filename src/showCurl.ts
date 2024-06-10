@@ -9,7 +9,12 @@ import { getVarFileContents, getVarStore } from "./variables";
 import { getCurlOfReq } from "./reformatRequest";
 
 export function showCurl(text: string, name: string, extensionVersion: string): void {
-  const loadedVariables = loadVariables(getActiveEnv(), text, getVarFileContents(getWorkingDir()));
+  const { vars: loadedVariables, undefinedVars: loadUndefs } = loadVariables(
+    getActiveEnv(),
+    text,
+    getVarFileContents(getWorkingDir()),
+  );
+  displayUndefs(loadUndefs, "");
   getVarStore().setLoadedVariables(loadedVariables);
 
   const request = getRequestSpec(text, name);

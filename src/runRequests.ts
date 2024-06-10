@@ -8,6 +8,7 @@ import { getActiveEnv } from "./utils/environmentUtils";
 import { openEditorForIndividualReq, openEditorForAllRequests } from "./showInEditor";
 import { allRequestsWithProgress } from "./getResponse";
 import { getVarFileContents, getVarStore } from "./variables";
+import { displayUndefs } from "./utils/outputChannel";
 
 async function runRequestSpecs(
   requests: { [name: string]: RequestSpec },
@@ -35,7 +36,12 @@ async function runRequestSpecs(
 }
 
 export async function runRequests(text: string, extensionVersion: string, name?: string): Promise<void> {
-  const loadedVariables = loadVariables(getActiveEnv(), text, getVarFileContents(getWorkingDir()));
+  const { vars: loadedVariables, undefinedVars: undefs } = loadVariables(
+    getActiveEnv(),
+    text,
+    getVarFileContents(getWorkingDir()),
+  );
+  displayUndefs(undefs, "");
   getVarStore().setLoadedVariables(loadedVariables);
 
   const requests: { [req: string]: RequestSpec } = name

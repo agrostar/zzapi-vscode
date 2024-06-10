@@ -7,9 +7,10 @@ export function getOutputChannel(): OutputChannel {
   return OUTPUT_CHANNEL;
 }
 
-export function displayUndefs(undefs: string[]): void {
+export function displayUndefs(undefs: string[], warning: string = "Did you choose an env?"): void {
   if (undefs.length < 1) return;
+
   getOutputChannel().appendLine(
-    `\t[warn]  Undefined variable(s): ${undefs.join(",")}. Did you choose the correct env?`,
+    `\t[warn]  Undefined variable(s): ${undefs.join(",")}. ${warning ?? ""}`,
   );
 }

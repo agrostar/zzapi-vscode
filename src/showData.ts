@@ -10,7 +10,7 @@ import { getRecentHeadersData } from "./showInEditor";
 import { getVarFileContents, getVarStore } from "./variables";
 
 export async function showVariables(): Promise<void> {
-  const loadedVariables = loadVariables(
+  const { vars: loadedVariables } = loadVariables(
     getActiveEnv(),
     getContentIfBundle(),
     getVarFileContents(getWorkingDir()),
