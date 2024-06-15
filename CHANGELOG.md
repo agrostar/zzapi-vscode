@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.3.1]
+- Using v1.5.1 of zzapi, fixes regression: status checks not reported
+
 ## [2.3.0]
 - Using v1.5.0 of zzapi, supports `$skip` assertion op to skip a test
 - Output format changes to cater to the above

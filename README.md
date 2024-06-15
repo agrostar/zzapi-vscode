@@ -202,11 +202,11 @@ requests:
 
 ## Detailed Usage
 
-The extension works with `.zzb` files, which are YAML request bundles as [described here](https://github.com/agrostar/zzapi/blob/v1.1.0/docs/zzapi-bundle-description.md).
+The extension works with `.zzb` files, which are YAML request bundles as [described here](https://github.com/agrostar/zzapi/blob/main/docs/zzapi-bundle-description.md).
 
-You can use variables within the bundle, and also common variable set files and environments as [described here](https://github.com/agrostar/zzapi/blob/v1.1.0/docs/zzapi-varset-description.md).
+You can use variables within the bundle, and also common variable set files and environments as [described here](https://github.com/agrostar/zzapi/blob/main/docs/zzapi-varset-description.md).
 
-You can best learn about the `.zzb` file format by just browsing the bundle used for comprehensively testing zzAPI itself: [tests-bundle.zzb](https://github.com/agrostar/zzapi/blob/v1.1.0/examples/tests-bundle.zzb).
+You can best learn about the `.zzb` file format by just browsing the bundle used for comprehensively testing zzAPI itself: [tests-bundle.zzb](https://github.com/agrostar/zzapi/blob/main/examples/tests-bundle.zzb).
 
 ## Tips and Tricks
 
