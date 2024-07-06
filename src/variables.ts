@@ -8,7 +8,7 @@ const VARFILE_EXTENSION = ".zzv";
 
 export function getVarFilePaths(dirPath: string): string[] {
   const dirContents = fs.readdirSync(dirPath, { recursive: false, encoding: "utf-8" });
-  const varFiles = dirContents.filter((file) => path.extname(file) == VARFILE_EXTENSION);
+  const varFiles = dirContents.filter((file) => path.extname(file) === VARFILE_EXTENSION).sort();
   const varFilePaths = varFiles.map((file) => path.join(dirPath, file));
 
   return varFilePaths;
