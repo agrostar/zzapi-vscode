@@ -157,7 +157,7 @@ export async function allRequestsWithProgress(
         const out = getOutputChannel();
         if (error) {
           out.append(`${new Date().toLocaleString()} [ERROR] `);
-          out.appendLine(`${method} ${name} Error executing request: ${error})`);
+          out.appendLine(`${method} ${name} Error executing request: ${error}`);
           displayUndefs(undefs);
           out.show(true);
           continue;

@@ -1,5 +1,8 @@
 # Change Log
 
+## 2.4.1
+- zzAPI bumped up to 2.0.1 (Bug fix: proper error message on network errors on Mac)
+
 ## 2.4.0
 - Remove zzAPI user-agent from show cURL output
 - Sort variable files for predictable overrides
