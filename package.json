@@ -159,6 +159,10 @@
       {
         "command": "zzAPI.scaffolding",
         "title": "zzAPI: Scaffold (create sample directory)"
+      },
+      {
+        "command": "zzAPI.importCurl",
+        "title": "zzAPI: Import Curl"
       }
     ],
     "submenus": [

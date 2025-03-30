@@ -8,6 +8,7 @@ import { getActiveEnv, getInvalidEnv } from "./utils/environmentUtils";
 import _TreeView from "./treeView";
 import CodeLensProvider from "./CodeLensProviders";
 import scaffold from "./scaffolding";
+import importCurl from "./runImportCurl";
 import { runRequestCommand, runAllRequestsCommand, showCurlCommand } from "./callRequests";
 import { importPostmanCommand, importPostmanEnvironment } from "./runImportPostman";
 import { createEnvironmentSelector, initialiseStatusBar, setEnvironment } from "./EnvironmentSelection";
@@ -62,6 +63,10 @@ export function activate(context: ExtensionContext): void {
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("zzAPI.importEnvironment", async () => {
     await importPostmanEnvironment();
+  });
+  context.subscriptions.push(disposable);
+  disposable = commands.registerCommand("zzAPI.importCurl", async () => {
+    await importCurl();
   });
   context.subscriptions.push(disposable);
   disposable = commands.registerCommand("zzAPI.showVariables", async () => {
