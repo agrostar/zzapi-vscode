@@ -162,7 +162,7 @@
       },
       {
         "command": "zzAPI.importCurl",
-        "title": "zzAPI: Import Curl"
+        "title": "zzAPI: Paste cURL as zzAPI request"
       }
     ],
     "submenus": [
@@ -285,6 +285,9 @@
         },
         {
           "command": "zzAPI.importEnvironment"
+        },
+        {
+          "command": "zzAPI.importCurl"
         },
         {
           "command": "zzAPI.showVariables"

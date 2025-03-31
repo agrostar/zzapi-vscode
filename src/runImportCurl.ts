@@ -1,15 +1,20 @@
-import { window } from "vscode";
+import { env, window } from "vscode";
 import { convertCurl } from "zzapi";
 
 import { openDocument } from "./showInEditor";
 
 export default async function importCurl(): Promise<void> {
- const curlString = await window.showInputBox({ title: "Enter cURL" });
-
- if (!curlString || curlString.length < 1) return;
-
  try {
-   const content = convertCurl(curlString);
+   const clipboardText = await env.clipboard.readText()
+
+   if (!clipboardText || clipboardText.length < 1) {
+     throw new Error("cURL not copied.");
+   }
+   if (!clipboardText?.toLowerCase()?.trimStart()?.startsWith("curl ")) {
+     throw new Error("Invalid cURL.");
+   }
+
+   const content = convertCurl(clipboardText);
    await openDocument(content, "yaml");
  } catch (e: any) {
    console.log(e);
