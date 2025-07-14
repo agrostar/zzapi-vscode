@@ -159,6 +159,10 @@
       {
         "command": "zzAPI.scaffolding",
         "title": "zzAPI: Scaffold (create sample directory)"
+      },
+      {
+        "command": "zzAPI.importCurl",
+        "title": "zzAPI: Paste cURL as zzAPI request"
       }
     ],
     "submenus": [
@@ -281,6 +285,9 @@
         },
         {
           "command": "zzAPI.importEnvironment"
+        },
+        {
+          "command": "zzAPI.importCurl"
         },
         {
           "command": "zzAPI.showVariables"
