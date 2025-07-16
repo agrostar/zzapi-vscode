@@ -74,10 +74,10 @@ function parseCurl(curlCommand: string): any {
 }
 
 export default function convertCurl(curlCommand: string): string {
-  const { method, url, pathname, headers, params, data } = parseCurl(curlCommand);
+  const { method, url, headers, params, data } = parseCurl(curlCommand);
 
   const request = {
-    [pathname]: {
+    [url]: {
       url,
       method: method.toUpperCase(),
       headers: Object.keys(headers).length ? headers : undefined,
@@ -86,5 +86,8 @@ export default function convertCurl(curlCommand: string): string {
     },
   };
 
-  return YAML.stringify(request);
+  const yamlString = YAML.stringify(request);
+  const tabbedYamlString = yamlString.replace(/^/gm, "  "); // add two spaces at the start of each line
+
+  return tabbedYamlString;
 }
