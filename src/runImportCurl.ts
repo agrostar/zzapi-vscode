@@ -1,7 +1,7 @@
 import { env, window } from "vscode";
 
-import { openDocument } from "./showInEditor";
 import convertCurl from "./convertCurl";
+import { insertContent } from "./addSamples";
 
 export default async function importCurl(): Promise<void> {
   try {
@@ -15,7 +15,7 @@ export default async function importCurl(): Promise<void> {
     }
 
     const content = convertCurl(clipboardText);
-    await openDocument(content, "yaml");
+    await insertContent(content);
   } catch (e: any) {
     console.log(e);
     console.log(e.message);
