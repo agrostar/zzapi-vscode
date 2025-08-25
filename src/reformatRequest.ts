@@ -51,7 +51,7 @@ export function getGotRequest(
   extensionVersion: string,
 ): { gotRequest: GotRequest; undefinedVars: string[] } {
   const undefs = formatAndReplaceVars(request, extensionVersion);
-  const currHttpRequest = constructGotRequest(request);
+  const currHttpRequest = constructGotRequest(request,getWorkingDir());
 
   return { gotRequest: currHttpRequest, undefinedVars: undefs };
 }
@@ -61,7 +61,7 @@ export function getCurlOfReq(
   extensionVersion: string,
 ): { curlRequest: string; undefinedVars: string[] } {
   const undefs = formatAndReplaceVars(request, extensionVersion, true);
-  const curlCommand = getCurlRequest(request);
+  const curlCommand = getCurlRequest(request,getWorkingDir());
 
   return { curlRequest: curlCommand, undefinedVars: undefs };
 }
