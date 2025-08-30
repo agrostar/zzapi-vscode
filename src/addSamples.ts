@@ -61,6 +61,4 @@ export async function insertContent(content: string): Promise<void> {
   await activeEditor.edit((e) => {
     e.insert(cursorPosition, "\n" + content);
   });
-
-  window.showInformationMessage("Request inserted");
 }

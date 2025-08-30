@@ -4,7 +4,7 @@
   "publisher": "AgroStar",
   "description": "Tool for testing and documenting REST APIs",
   "repository": "https://github.com/agrostar/zzapi-vscode",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -47,7 +47,8 @@
       "zzapiCustomViewContainer": [
         {
           "id": "zzapiCustomView",
-          "name": "Tree View"
+          "name": "Tree View",
+          "icon": "images/icons/zzapi-view.png"
         }
       ]
     },
@@ -360,6 +361,6 @@
   },
   "dependencies": {
     "yaml": "^2.4.3",
-    "zzapi": "^2.0.1"
+    "zzapi": "^2.1.1"
   }
 }

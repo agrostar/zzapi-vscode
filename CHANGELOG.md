@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.5.0
+- Ability to paste cURL as a request
+- zzAPI bumped up to 2.1.0 to add support for formValues using form-urlencoded or multipart-formdata
+
 ## 2.4.1
 - zzAPI bumped up to 2.0.1 (Bug fix: proper error message on network errors on Mac)
 
